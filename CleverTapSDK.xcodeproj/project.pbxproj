@@ -479,6 +479,7 @@
 		6AA1357A2A2E467800EFF2C1 /* NSDictionary+Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AA135772A2E467800EFF2C1 /* NSDictionary+Extensions.h */; };
 		6AA1357B2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
 		6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
+		6ADABD3ADBC8139E29C2BD14 /* CTNdStore.h in Headers */ = {isa = PBXBuildFile; fileRef = AE049345C738565EAE79E72F /* CTNdStore.h */; };
 		6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B12F7652C94312D0045D743 /* CTJsonTemplateProducer.m */; };
@@ -586,6 +587,8 @@
 		8FE6339D575F3B6002B7B9CB /* CleverTapConfigValueTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C01EA2F0707085512F68B1F /* CleverTapConfigValueTest.m */; };
 		928FFF7FA70F331B2ACA1C1D /* CTSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1B39E266CE9BE9998587B /* CTSessionManager.swift */; };
 		996618D659D00AAE332278DF /* CTNestedJsonBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */; };
+		9EA8C1BE96A9F74371227D1E /* CTNdStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D0FDD42559F6ABFD090FC99 /* CTNdStore.m */; };
+		A1512A4533C1406134ABBF52 /* CTNdFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A11B6EAF1C428CF233A1614 /* CTNdFCManager.h */; };
 		A26852306058A41BBC48790F /* CleverTapEventDetailTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C332A38933BEF47388B4D45B /* CleverTapEventDetailTest.m */; };
 		A285EABE7A8451278CD042FC /* CTUIUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C2217F6427008F0FAB /* CTUIUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A4925E33DA9C9699138F319E /* CTQueueType.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BA3B2DA2B03E926004E834B /* CTQueueType.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -716,6 +719,7 @@
 		E14A629D3739AC99C63C9463 /* CTBatchSentDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		E1A2B3C4D5E6F7A8B9C0D1E3 /* InAppDataExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */; };
 		E33D75E69DE4AA9168254305 /* CTValidationConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 57CDEE132F13D1B5001161F5 /* CTValidationConfig.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		E8E419392FE6E6B9B8272533 /* CTNdFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC3467A1F6A27E4B434797B /* CTNdFCManager.m */; };
 		EA12196A266AB201761B9196 /* CTOpenUrlSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4829D979A1725EB6A183B1B9 /* CTOpenUrlSystemAppFunctionTest.m */; };
 		EA62172D8D6613CEF688ACCB /* CTInActionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3FA4F6F385C317399E8262A /* CTInActionResult.swift */; };
 		EAB2F832C6A9C83BA87D1D00 /* CTRequestTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5189FED230150188EAC2A45D /* CTRequestTest.m */; };
@@ -1008,6 +1012,7 @@
 		4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImageInAppViewController.m; sourceTree = "<group>"; };
 		4987C667251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewControllerPrivate.h; sourceTree = "<group>"; };
 		49E2B18124178E7400AD704B /* CleverTapConfigValue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapConfigValue.m; sourceTree = "<group>"; };
+		4A11B6EAF1C428CF233A1614 /* CTNdFCManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = CTNdFCManager.h; sourceTree = "<group>"; };
 		4E07214D2D09738F000DE9C6 /* CTLocalDataStore+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTLocalDataStore+Tests.h"; sourceTree = "<group>"; };
 		4E0721502D0974B6000DE9C6 /* CTLocalDataStore+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTLocalDataStore+Tests.m"; sourceTree = "<group>"; };
 		4E150CDB2DC61F4300A4CE68 /* CleverTapSDKTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTapSDKTests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -1122,6 +1127,7 @@
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
 		58E6C9F7C391AC2F28D91FA6 /* CTPropertyKeyValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidatorTest.m; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CC3467A1F6A27E4B434797B /* CTNdFCManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNdFCManager.m; sourceTree = "<group>"; };
 		612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunctionTest.m; sourceTree = "<group>"; };
 		6197020C8A776A8C08F7F832 /* CleverTapDisplayUnitTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapDisplayUnitTest.m; sourceTree = "<group>"; };
 		66EFE13AB9558473A73BC740 /* CleverTapProductConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapProductConfigTest.m; sourceTree = "<group>"; };
@@ -1278,6 +1284,7 @@
 		76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultTest.m; sourceTree = "<group>"; };
 		792DF5CE4919F6210CB0FC85 /* CleverTapJSInterfaceTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapJSInterfaceTest.m; sourceTree = "<group>"; };
 		7ABEB37D9ED903F97B1383C2 /* CTProductConfigControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTProductConfigControllerTest.m; sourceTree = "<group>"; };
+		7D0FDD42559F6ABFD090FC99 /* CTNdStore.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNdStore.m; sourceTree = "<group>"; };
 		7FF294AF34ACB6DFF4DEB35C /* CTDisplayUnitControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTDisplayUnitControllerTest.m; sourceTree = "<group>"; };
 		8151DB170479BCCFE1871E36 /* CTFeatureFlagsControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFeatureFlagsControllerTest.m; sourceTree = "<group>"; };
 		83B02535120793C05F208D08 /* InactionInAppStorageStrategyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InactionInAppStorageStrategyTests.swift; sourceTree = "<group>"; };
@@ -1297,6 +1304,7 @@
 		A5858A0E994EC529904E271C /* CTMultiDelegateManagerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManagerTest.m; sourceTree = "<group>"; };
 		A707C7242FCD743740402E63 /* CleverTapInboxMessageTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxMessageTest.m; sourceTree = "<group>"; };
 		AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "CTValidationResult+Tests.h"; path = "CleverTapSDKTests/CTValidationResult+Tests.h"; sourceTree = "<group>"; };
+		AE049345C738565EAE79E72F /* CTNdStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = CTNdStore.h; sourceTree = "<group>"; };
 		BA302D038C45C5590835082F /* CTInAppNotificationTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotificationTest.m; sourceTree = "<group>"; };
 		C0A8EB982691084E65068439 /* Pods-shared-CleverTapSDKTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.debug.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTSwizzleTest.m; sourceTree = "<group>"; };
@@ -1447,6 +1455,7 @@
 				0701E9802372C2000034AAC2 /* CleverTapDisplayUnitCache.h */,
 				0701E95F2372C0970034AAC2 /* models */,
 				0701E95E2372BC550034AAC2 /* controllers */,
+				0966F6A9228ECE9E0E6F5A32 /* FrequencyCaps */,
 			);
 			path = DisplayUnit;
 			sourceTree = "<group>";
@@ -1627,6 +1636,18 @@
 				5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0966F6A9228ECE9E0E6F5A32 /* FrequencyCaps */ = {
+			isa = PBXGroup;
+			children = (
+				AE049345C738565EAE79E72F /* CTNdStore.h */,
+				7D0FDD42559F6ABFD090FC99 /* CTNdStore.m */,
+				5CC3467A1F6A27E4B434797B /* CTNdFCManager.m */,
+				4A11B6EAF1C428CF233A1614 /* CTNdFCManager.h */,
+			);
+			name = FrequencyCaps;
+			path = FrequencyCaps;
 			sourceTree = "<group>";
 		};
 		4847D16B2CCB9018008DC327 /* EventDatabase */ = {
@@ -2731,6 +2752,8 @@
 				6EA5BC49872C7EC709B7BFA7 /* CTMultiDelegateManager.h in Headers */,
 				FF7F7648937809E48DA2194A /* CTImpressionManager.h in Headers */,
 				2073438E646D2A21DA4FD4F9 /* CTSwitchUserDelegate.h in Headers */,
+				6ADABD3ADBC8139E29C2BD14 /* CTNdStore.h in Headers */,
+				A1512A4533C1406134ABBF52 /* CTNdFCManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3460,6 +3483,8 @@
 				928FFF7FA70F331B2ACA1C1D /* CTSessionManager.swift in Sources */,
 				DD1D2513A41EFEBE863EE386 /* CTTimerResult.swift in Sources */,
 				EA62172D8D6613CEF688ACCB /* CTInActionResult.swift in Sources */,
+				9EA8C1BE96A9F74371227D1E /* CTNdStore.m in Sources */,
+				E8E419392FE6E6B9B8272533 /* CTNdFCManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

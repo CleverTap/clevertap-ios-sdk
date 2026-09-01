@@ -241,6 +241,42 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
 #define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
 
+// Storage namespaces for CTImpressionManager and CTInAppTriggerManager. These sit inside the
+// preference key, so changing a value orphans every impression and trigger count already saved on a
+// device. They exist as constants to make that obvious - treat the values as frozen.
+#define CLTAP_PREFS_INAPP_IMPRESSIONS_NAMESPACE @"impressions"
+#define CLTAP_PREFS_INAPP_TRIGGERS_NAMESPACE @"triggers"
+
+#pragma mark Native Display frequency caps
+
+// Response, server to SDK. CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY carries the content and is
+// already handled; these carry the caps.
+#define CLTAP_ND_SS_JSON_RESPONSE_KEY @"adUnit_notifs_ss"
+#define CLTAP_ND_STALE_JSON_RESPONSE_KEY @"adUnit_stale"
+// Note the direction: on a response ndmc and ndmp are ceilings, on a request ndmp is a count.
+// In-app overloads imp the same way.
+#define CLTAP_ND_SESSION_MAX_META_KEY @"ndmc"
+#define CLTAP_ND_DAILY_MAX_META_KEY @"ndmp"
+
+// Request, SDK to server.
+#define CLTAP_ND_SHOWN_TODAY_META_KEY @"ndmp"
+#define CLTAP_ND_COUNTS_META_KEY @"ndtlc"
+#define CLTAP_ND_SS_EVAL_META_KEY @"adUnit_eval"
+#define CLTAP_ND_SUPPRESSED_META_KEY @"adUnit_suppressed"
+
+// At rest. Every name here is new, so no key already saved on a device is read or written by
+// Native Display code.
+#define CLTAP_PREFS_ND_KEY_SS @"adUnit_notifs_ss"
+#define CLTAP_ND_SS_EVAL_STORAGE_KEY @"adUnit_eval"
+#define CLTAP_ND_SUPPRESSED_STORAGE_KEY @"adUnit_suppressed"
+#define CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY @"nd_counts_per_target"
+#define CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY @"ndstc"
+#define CLTAP_PREFS_ND_MAX_PER_DAY_KEY @"ndstmcd"
+#define CLTAP_PREFS_ND_SESSION_MAX_KEY @"ndmc_max"
+#define CLTAP_PREFS_ND_LAST_DATE_KEY @"nd_ict_date"
+#define CLTAP_PREFS_ND_IMPRESSIONS_NAMESPACE @"nd_impressions"
+#define CLTAP_PREFS_ND_TRIGGERS_NAMESPACE @"nd_triggers"
+
 #define CLTAP_PREFS_PREFIX @"WizRocket"
 
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"

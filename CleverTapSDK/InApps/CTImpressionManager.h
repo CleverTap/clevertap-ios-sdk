@@ -15,7 +15,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTImpressionManager : NSObject <CTSwitchUserDelegate>
 
+/**
+ The word that identifies this store inside its preference keys, for example @c impressions.
+ Two managers with the same value share storage, so each channel needs its own.
+
+ Called @c storageNamespace rather than @c namespace because @c namespace is a reserved word in
+ Objective-C++ and would break any consumer compiling this header from a @c .mm file.
+ */
+@property (nonatomic, copy, readonly) NSString *storageNamespace;
+
 - (instancetype)init NS_UNAVAILABLE;
+
+/// Uses the in-app namespace. Kept so existing call sites and stored keys are unaffected.
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager;
@@ -23,8 +34,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager
+                 storageNamespace:(NSString *)storageNamespace;
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
                             clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale;
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                 storageNamespace:(NSString *)storageNamespace
+                            clock:(id <CTClock>)clock
+                           locale:(NSLocale *)locale NS_DESIGNATED_INITIALIZER;
 
 - (void)recordImpression:(NSString *)campaignId;
 
