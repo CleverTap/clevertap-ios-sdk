@@ -77,8 +77,8 @@
 
 #pragma mark Storage Key
 
-// Same key order as CTInAppStore, which is accountId:deviceId:suffix. CTInAppFCManager uses a
-// different order, so each class copies the one it is based on.
+// Same key order as CTInAppStore. That order is accountId:deviceId:suffix. CTInAppFCManager uses a
+// different order. Each class copies the one it is based on.
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }

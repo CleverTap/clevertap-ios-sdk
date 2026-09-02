@@ -23,8 +23,8 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        // A new account id for each test. Preferences are one flat list of keys, and every key below
-        // starts with the account id, so this is what keeps one test's counts out of the next one's.
+        // A new account id for each test. Preferences are one flat list of keys. Every key below
+        // starts with the account id. That keeps one test's counts out of the next test's.
         _accountId = [NSString stringWithFormat:@"ndTestAccount_%@", [[NSUUID UUID] UUIDString]];
         _deviceId = @"ndTestDeviceId";
 
@@ -72,8 +72,8 @@
 
 - (void)tearDown {
     // We search by account id instead of listing the keys. The managers write about a dozen keys
-    // between them, and a list would go out of date the next time someone adds one. The account id
-    // has a UUID in it, so nothing else can match.
+    // between them. A list would go out of date the next time someone adds a key. The account id
+    // has a UUID in it. Nothing else can match it.
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSArray *keys = [[defaults dictionaryRepresentation] allKeys];
     for (NSString *key in keys) {

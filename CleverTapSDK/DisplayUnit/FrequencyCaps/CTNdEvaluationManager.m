@@ -56,8 +56,8 @@
         self.triggerManager = triggerManager;
         self.ndStore = ndStore;
 
-        // Both matchers hold no state and take the managers on each call, so in-app's could have
-        // been shared. Making our own is cheap and keeps the two channels apart.
+        // Both matchers hold no state. They take the managers on each call. In-app's could have
+        // been shared. Making our own is cheap. It also keeps the two channels apart.
         self.triggersMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStore];
         self.limitsMatcher = [CTLimitsMatcher new];
 
@@ -88,7 +88,7 @@
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
     if ([eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-        // App Launched is not evaluated for Native Display. We keep its properties because profile
+        // App Launched is not evaluated for Native Display. We keep its properties anyway. Profile
         // change events are matched against them too.
         self.appLaunchedProperties = properties ? properties : @{};
         return;
@@ -153,16 +153,16 @@
         for (NSDictionary *nativeDisplay in nativeDisplays) {
             if (![nativeDisplay isKindOfClass:[NSDictionary class]]) continue;
 
-            // Same helper the cap manager uses. Triggers and impressions are written under one of
-            // these ids and read back under the other, so they have to come from the same place.
+            // Same helper the cap manager uses. Triggers and impressions must use one id. Two
+            // helpers could drift apart. Then one would write the id and the other would read it.
             NSString *campaignId = [CTNdFCManager campaignIdFrom:nativeDisplay];
             if (campaignId.length == 0) continue;
 
             NSArray *whenTriggers = nativeDisplay[CLTAP_INAPP_TRIGGERS];
             if (![self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event]) continue;
 
-            // The campaign matched the trigger, so its trigger count goes up whether the limits
-            // pass or not. occurrenceLimits are counted in triggers, so they need this.
+            // The campaign matched the trigger. Its trigger count goes up whether the limits pass
+            // or not. occurrenceLimits are counted in triggers. They need this.
             [self.triggerManager incrementTrigger:campaignId];
 
             NSMutableArray *whenLimits = [NSMutableArray new];
@@ -177,9 +177,9 @@
             NSNumber *ti = [CTUtils numberFromString:campaignId];
             if (!ti) continue;
 
-            // Added even if the same id is already in the list. A campaign can qualify again while
-            // an earlier send is still going out, and sending only removes what it sent, so
-            // dropping the repeat here would lose it. The server ignores repeats.
+            // Added even if the same id is already in the list. A campaign can qualify again
+            // during a send. A send removes only what it sent. A dropped repeat would be lost.
+            // The server ignores repeats.
             @synchronized (self) {
                 [self.evaluatedServerSideNativeDisplayIds addObject:ti];
             }
@@ -200,8 +200,8 @@
 
     NSString *wzrkId = suppressedUnit[CLTAP_NOTIFICATION_ID_TAG];
     if (![wzrkId isKindOfClass:[NSString class]] || wzrkId.length == 0) {
-        // The server always sends wzrk_id on these stubs, so this should not happen. Without one
-        // there is nothing to reply about, so log it instead of dropping it silently.
+        // The server always sends wzrk_id on these stubs. This should not happen. Without one
+        // there is nothing to reply about. Log it instead of dropping it silently.
         CleverTapLogStaticDebug(@"Dropping Native Display control group reply, no wzrk_id on %@", suppressedUnit);
         return;
     }
@@ -226,7 +226,7 @@
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     // Both lists go out on the events batch, even entries that came from a profile change. In-app
-    // sends its versions there too, and the server reads them from the same place.
+    // sends its versions there too. The server reads them from the same place.
     if (queueType != CTQueueTypeEvents) return header;
 
     @synchronized (self) {
@@ -257,8 +257,8 @@
              didSave:^{ [self saveSuppressedNativeDisplays]; }];
 }
 
-/// Removes as many entries from the front of the list as the batch carried, and no more. Anything
-/// added while the batch was being sent sits behind them and goes out next time.
+/// Removes as many entries from the front of the list as the batch carried, and no more. New
+/// entries arriving during the send sit behind them. Those go out next time.
 - (void)removeSent:(NSArray *)sent fromList:(NSMutableArray *)list didSave:(void (^)(void))save {
     if (![sent isKindOfClass:[NSArray class]] || sent.count == 0) return;
 
@@ -286,7 +286,7 @@
     }
 }
 
-// Same key order as CTInAppEvaluationManager, which is accountId:suffix:deviceId.
+// Same key order as CTInAppEvaluationManager. That order is accountId:suffix:deviceId.
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, suffix, self.deviceId];
 }
@@ -296,8 +296,8 @@
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     @synchronized (self) {
         self.deviceId = newDeviceId;
-        // Anything still waiting belongs to the old user, so we leave it under their key instead of
-        // sending it under the new one.
+        // Anything still waiting belongs to the old user. We leave it under their key. It must not
+        // be sent under the new user's key.
         [self loadPendingLists];
     }
 }

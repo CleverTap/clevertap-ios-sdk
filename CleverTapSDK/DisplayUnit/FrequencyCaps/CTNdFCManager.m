@@ -20,7 +20,7 @@
 static const int kCTNdUncapped = -1;
 
 // Used when a campaign sets no mdc of its own. Same value as in-app. High enough that it never
-// blocks anything in practice, but still a number we can compare against.
+// blocks anything in practice. Still a number we can compare against.
 static const int kCTNdSessionCapDefault = 1000;
 
 @interface CTNdFCManager ()
@@ -67,8 +67,8 @@ static const int kCTNdSessionCapDefault = 1000;
     }
 }
 
-// Same key order as CTInAppFCManager, which is accountId:suffix:deviceId. CTInAppStore uses a
-// different order, so each class copies the one it is based on.
+// Same key order as CTInAppFCManager. That order is accountId:suffix:deviceId. CTInAppStore uses a
+// different order. Each class copies the one it is based on.
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, self.deviceId];
 }
@@ -129,8 +129,8 @@ static const int kCTNdSessionCapDefault = 1000;
         return YES;
     }
 
-    // 2. Has the account hit its session cap? This one is account-wide, so excludeGlobalFCaps
-    // skips it.
+    // 2. Has the account hit its session cap? This one is account-wide. excludeGlobalFCaps skips
+    // it.
     if (excludeGlobalCaps) return NO;
     int globalSessionMax = [self globalSessionMax];
     if (globalSessionMax == kCTNdUncapped) return NO;
@@ -145,7 +145,7 @@ static const int kCTNdSessionCapDefault = 1000;
 - (BOOL)hasDailyCapacityMaxedOut:(NSString *)campaignId
                  totalDailyCount:(int)totalDailyCount
                excludeGlobalCaps:(BOOL)excludeGlobalCaps {
-    // 1. Has the account hit its daily cap? Account-wide, so excludeGlobalFCaps skips it.
+    // 1. Has the account hit its daily cap? This one is account-wide. excludeGlobalFCaps skips it.
     if (!excludeGlobalCaps) {
         int maxPerDayCount = [self maxPerDayCount];
         if (maxPerDayCount != kCTNdUncapped && [self shownTodayCount] >= maxPerDayCount) {
@@ -168,9 +168,9 @@ static const int kCTNdSessionCapDefault = 1000;
         return YES;
     }
 
-    // efc skips every cap, so we can answer here. excludeGlobalFCaps cannot, because it skips only
-    // the two account caps and the campaign still has to obey its own tlc, tdc and mdc. That is why
-    // it is passed down to each check instead.
+    // efc skips every cap. We can answer here. excludeGlobalFCaps cannot be answered here. It skips
+    // only the two account caps. The campaign still has to obey its own tlc, tdc and mdc. That is
+    // why it is passed down to each check instead.
     if (excludeFromCaps) return YES;
 
     return ![self hasSessionCapacityMaxedOut:campaignId
@@ -185,8 +185,8 @@ static const int kCTNdSessionCapDefault = 1000;
 - (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
     if (![campaignId isKindOfClass:[NSString class]] || campaignId.length == 0) return;
 
-    // Record the impression. Session counts always go up. The time is saved only when asked for,
-    // and only frequencyLimits and occurrenceLimits ever read it.
+    // Record the impression. Session counts always go up. The time is saved only when asked for.
+    // Only frequencyLimits and occurrenceLimits ever read it.
     [self.impressionManager recordImpression:campaignId storeTimestamp:storeTimestamp];
 
     // Add to the total shown today.
@@ -219,8 +219,8 @@ static const int kCTNdSessionCapDefault = 1000;
         @synchronized (self.campaignCounts) {
             for (id stale in staleCampaigns) {
                 NSString *campaignId = [NSString stringWithFormat:@"%@", stale];
-                // Counts, impressions and triggers are all stored under the campaign id, so all
-                // three go. Removing only the counts would leave the other two on disk forever.
+                // Counts, impressions and triggers are all stored under the campaign id. All three
+                // go. Removing only the counts would leave the other two on disk forever.
                 [self.campaignCounts removeObjectForKey:campaignId];
                 [self.impressionManager removeImpressions:campaignId];
                 [self.triggerManager removeTriggers:campaignId];
@@ -300,9 +300,9 @@ static const int kCTNdSessionCapDefault = 1000;
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
-        // Roll the day over first. A batch can go out after midnight with no unit having been
-        // gated or counted since, and the server reads these numbers to apply the caps on its
-        // side, so sending yesterday's totals would hide units the user is owed today.
+        // Check the date first. The day may have changed since the last count. The server applies
+        // the caps from these numbers. Yesterday's totals would hide units the user should see
+        // today.
         [self checkUpdateDailyLimits];
 
         header[CLTAP_ND_SHOWN_TODAY_META_KEY] = @([self shownTodayCount]);

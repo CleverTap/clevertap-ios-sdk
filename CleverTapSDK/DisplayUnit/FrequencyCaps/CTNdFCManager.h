@@ -23,12 +23,12 @@ NS_ASSUME_NONNULL_BEGIN
  lifetime cap (@c tlc), a daily cap (@c tdc) and a session cap (@c mdc). The account has two more,
  @c ndmp for the day and @c ndmc for the session.
 
- Two flags can skip caps, and they skip different amounts. @c efc skips every cap.
- @c excludeGlobalFCaps skips only the two account caps, so the campaign still has to obey @c tlc,
+ Two flags can skip caps. They skip different amounts. @c efc skips every cap.
+ @c excludeGlobalFCaps skips only the two account caps. The campaign still has to obey @c tlc,
  @c tdc and @c mdc. In-app treats both flags the same. Native Display does not.
 
- @c frequencyLimits and @c occurrenceLimits are not checked here. The SDK checks them earlier and
- sends the campaigns that pass in @c adUnit_eval. The server then sends content only for those.
+ @c frequencyLimits and @c occurrenceLimits are not checked here. The SDK checks them earlier. It
+ then sends the campaigns that pass in @c adUnit_eval. The server sends content only for those.
  @c CTInAppFCManager does check them a second time. This is the one place the two differ on purpose.
  */
 @interface CTNdFCManager : NSObject <CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
@@ -47,23 +47,23 @@ NS_ASSUME_NONNULL_BEGIN
  Whether the server sent any frequency cap settings with this unit.
 
  The settings are @c efc, @c excludeGlobalFCaps, @c tlc, @c tdc and @c mdc. Any one of them is
- enough. This does not look at @c frequencyLimits or @c occurrenceLimits, which are a different
- thing and are checked before the unit is even asked for.
+ enough. This does not look at @c frequencyLimits or @c occurrenceLimits. Those are a different
+ thing. They are checked before the unit is even asked for.
 
- Only these units are capped and counted. A unit without them is left alone, so display units that
- already exist keep working and never add to the account's daily and session totals.
+ Only these units are capped and counted. A unit without them is left alone. Display units that
+ already exist keep working. They never add to the account's daily and session totals.
  */
 + (BOOL)hasFrequencyCaps:(nullable NSDictionary *)unit;
 
 /**
  The campaign id this unit's counts are stored under. Empty string if the unit has none.
 
- Always @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id is the @c ti plus a suffix that
- changes on every send, so a campaign that runs again gets a new one and its counts start from zero.
- The suffix is not always a date either, so nothing here tries to read it.
+ Always @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id is the @c ti plus a suffix. The
+ suffix changes on every send. A campaign that runs again gets a new @c wzrk_id. Its counts would
+ start from zero. The suffix is not always a date either. Nothing here tries to read it.
 
  It lives here, next to the caps, and not at the call site. Every store uses what this returns as its
- key, and they only match as long as they all ask the same place.
+ key. They match only as long as they all ask the same place.
  */
 + (NSString *)campaignIdFrom:(nullable NSDictionary *)unit;
 
@@ -75,12 +75,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether this campaign can be shown right now, under all the counting caps.
 
- @param campaignId the @c ti, which is the campaign. Never @c wzrk_id, which changes on every send and
-        would restart the counts.
+ @param campaignId the @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id changes on every
+        send. It would restart the counts.
  @param excludeFromCaps @c efc. Skips every cap.
  @param excludeGlobalCaps @c excludeGlobalFCaps. Skips only the two account caps, @c ndmp for the day
-        and @c ndmc for the session. The campaign's own @c tlc, @c tdc and @c mdc still apply, so this
-        flag skips less than @c efc and the two are not the same.
+        and @c ndmc for the session. The campaign's own @c tlc, @c tdc and @c mdc still apply. This
+        flag skips less than @c efc. The two are not the same.
  @param totalLifetimeCount @c tlc, or -1 for no limit.
  @param totalDailyCount @c tdc, or -1 for no limit.
  @param maxPerSession @c mdc, or negative to use the default.
@@ -96,9 +96,9 @@ NS_ASSUME_NONNULL_BEGIN
  Records one display: the impression, the campaign's daily and lifetime counts, and the day total.
 
  @param storeTimestamp whether to save the impression time on disk. Pass @c YES only for a campaign
-        that has @c frequencyLimits or @c occurrenceLimits, because matching those is the only thing
-        that ever reads saved times. Native Display impressions come from the app and there is no
-        limit on how many arrive, so saving a time for each one would grow a list nobody reads. See
+        that has @c frequencyLimits or @c occurrenceLimits. Matching those is the only thing that
+        ever reads saved times. Native Display impressions come from the app. There is no limit on
+        how many arrive. A time saved for each one would grow a list nobody reads. See
         @c CTImpressionManager @c recordImpression:storeTimestamp:.
  */
 - (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp;
