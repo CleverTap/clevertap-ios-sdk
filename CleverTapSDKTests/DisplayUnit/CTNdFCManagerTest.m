@@ -319,7 +319,8 @@ static NSString *const kOtherCampaignId = @"70002";
 
 - (void)testTheBatchHeaderCarriesTheDayTotalAndThePerCampaignCounts {
     [self show:kCampaignId times:2];
-    [self.fcManager resetDailyCounters:@"20990101"];
+    // Stamp today, so the header does not treat these counts as yesterday's and zero them.
+    [self.fcManager resetDailyCounters:[self.fcManager todaysFormattedDate]];
     [self show:kCampaignId times:1];
 
     NSDictionary *header = [self.fcManager onBatchHeaderCreationForQueue:CTQueueTypeEvents];
@@ -331,6 +332,24 @@ static NSString *const kOtherCampaignId = @"70002";
     NSArray *counts = header[CLTAP_ND_COUNTS_META_KEY];
     XCTAssertEqual(1, counts.count);
     NSArray *expected = @[kCampaignId, @1, @3];
+    XCTAssertEqualObjects(expected, counts[0]);
+}
+
+- (void)testTheBatchHeaderReportsZeroTodayWhenTheDayChangedSinceTheLastCount {
+    // Stamp an old day, then count under it. This is a batch going out just after midnight with
+    // no unit having been gated or counted since, which is the only way to reach the header with
+    // the day not yet rolled over.
+    [self.fcManager resetDailyCounters:@"20250101"];
+    [self show:kCampaignId times:2];
+
+    NSDictionary *header = [self.fcManager onBatchHeaderCreationForQueue:CTQueueTypeEvents];
+
+    // The server applies the caps from these numbers, so yesterday's total must not go out.
+    XCTAssertEqualObjects(@0, header[CLTAP_ND_SHOWN_TODAY_META_KEY]);
+
+    NSArray *counts = header[CLTAP_ND_COUNTS_META_KEY];
+    XCTAssertEqual(1, counts.count);
+    NSArray *expected = @[kCampaignId, @0, @2];
     XCTAssertEqualObjects(expected, counts[0]);
 }
 

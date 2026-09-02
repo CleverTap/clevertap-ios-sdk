@@ -300,6 +300,11 @@ static const int kCTNdSessionCapDefault = 1000;
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
+        // Roll the day over first. A batch can go out after midnight with no unit having been
+        // gated or counted since, and the server reads these numbers to apply the caps on its
+        // side, so sending yesterday's totals would hide units the user is owed today.
+        [self checkUpdateDailyLimits];
+
         header[CLTAP_ND_SHOWN_TODAY_META_KEY] = @([self shownTodayCount]);
 
         NSMutableArray *arr = [NSMutableArray new];
