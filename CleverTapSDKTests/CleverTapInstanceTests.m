@@ -77,6 +77,10 @@
 - (void)fetchInactionInApps:(NSString *)inAppId;
 // Display Unit — getter not in CleverTap+DisplayUnit.h
 - (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate;
+// Discarded-events ARP processing — private methods in CleverTap.m, no header declaration
+- (void)processDiscardedEventsRequest:(NSDictionary *)arp;
+- (void)updateARP:(NSDictionary *)arp;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
 @end
 
 @interface CleverTapInstanceTests : BaseTestCase
@@ -2669,9 +2673,9 @@
     [mockInstance stopMocking];
 }
 
-// `recordEvent:` with no properties builds an event without an `evtData` key. That
-// must still produce an (empty) property set rather than no-data, so the event stays
-// evaluable against the app fields.
+// Some events carry no `evtData` key at all - the ping event is queued as `@{}`, and
+// page events carry only their extras. That must still produce an (empty) property set
+// rather than no-data, so the event stays evaluable against the app fields.
 - (void)test_queueEvent_withoutEventData_suppliesEmptyProperties {
     id mockInstance = OCMPartialMock(self.cleverTapInstance);
 
@@ -2696,24 +2700,151 @@
     CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
     XCTAssertNotNil(evaluationManager);
     id mockEvaluationManager = OCMPartialMock(evaluationManager);
-
+    
     NSString *eventName = @"SuppliedFlattenedEvent";
     NSDictionary *event = @{
         CLTAP_EVENT_NAME: eventName,
         CLTAP_EVENT_DATA: @{ @"Prop1": @"raw" }
     };
     CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:@{ @"Prop1": @"flattened" }];
-
+    
     OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *props) {
         return [props[@"Prop1"] isEqual:@"flattened"];
     }]]);
-
+    
     [self.cleverTapInstance evaluateOnEvent:event
                                    withType:CleverTapEventTypeRaised
                          flattenedEventData:flattened];
-
+    
     OCMVerifyAll(mockEvaluationManager);
     [mockEvaluationManager stopMocking];
+}
+    
+#pragma mark - Discarded events (d_e ARP handling)
+
+// processDiscardedEventsRequest: stores string event names verbatim into the
+// in-memory validation config.
+- (void)test_processDiscardedEventsRequest_stringNames_stored {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Discarded_A", @"CT_Discarded_B"]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertTrue([names containsObject:@"CT_Discarded_A"]);
+    XCTAssertTrue([names containsObject:@"CT_Discarded_B"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// Numeric event names are coerced to their string form (Android parity), so a
+// discarded id of 42 is stored as @"42".
+- (void)test_processDiscardedEventsRequest_numberNames_coercedToStrings {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@42, @7]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertTrue([names containsObject:@"42"]);
+    XCTAssertTrue([names containsObject:@"7"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// A mix of strings and numbers is fully accepted, with the numbers stringified.
+- (void)test_processDiscardedEventsRequest_mixedStringsAndNumbers_stored {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Named", @101]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertEqual(names.count, 2U);
+    XCTAssertTrue([names containsObject:@"CT_Named"]);
+    XCTAssertTrue([names containsObject:@"101"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// An entry that is neither a string nor a number aborts parsing without
+// touching the previously stored set.
+- (void)test_processDiscardedEventsRequest_invalidEntryType_leavesExistingNamesUntouched {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    // Seed a known-good set first.
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Sentinel"]}];
+    NSSet *seeded = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    // A dictionary entry is an invalid type, so the whole update is discarded.
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_ShouldNotApply", @{@"bad": @"entry"}]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertEqualObjects(names, seeded);
+    XCTAssertFalse([names containsObject:@"CT_ShouldNotApply"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// A non-array value under the d_e key fails the isKindOfClass guard, so nothing
+// is parsed or stored.
+- (void)test_processDiscardedEventsRequest_nonArrayValue_leavesExistingNamesUntouched {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Sentinel"]}];
+    NSSet *seeded = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @"not-an-array"}];
+
+    XCTAssertEqualObjects(self.cleverTapInstance.validationConfig.discardedEventNames, seeded);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// updateARP: keeps discarded events in memory for the session but strips the
+// d_e key before persisting, so it is never cached to storage / sent back to
+// the server on the next request.
+- (void)test_updateARP_keepsDiscardedEventsInMemoryButDoesNotPersistThem {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{
+        CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_MemoryOnly"],
+        @"ct_test_arp_key": @"ct_test_arp_val"
+    };
+    [self.cleverTapInstance updateARP:arp];
+
+    // In memory: the discarded name is retained on the validation config.
+    XCTAssertTrue([self.cleverTapInstance.validationConfig.discardedEventNames containsObject:@"CT_MemoryOnly"]);
+
+    // Persisted ARP: the ordinary key survives, but d_e is stripped out.
+    NSDictionary *savedARP = [self.cleverTapInstance getARP];
+    XCTAssertEqualObjects(savedARP[@"ct_test_arp_key"], @"ct_test_arp_val");
+    XCTAssertNil(savedARP[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// Installs upgrading from an older SDK may have d_e cached in the stored ARP.
+// getARP strips it and rewrites storage, so it is never attached to a request.
+- (void)test_getARP_stripsLegacyCachedDiscardedEvents {
+    [self.cleverTapInstance saveARP:@{
+        CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Legacy"],
+        @"ct_test_arp_key": @"ct_test_arp_val"
+    }];
+
+    NSDictionary *arp = [self.cleverTapInstance getARP];
+    XCTAssertNil(arp[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(arp[@"ct_test_arp_key"], @"ct_test_arp_val");
+
+    // Read storage directly to prove the purge was written, not just filtered
+    // out on the way past.
+    NSString *arpKey = [NSString stringWithFormat:@"arp:%@:%@",
+                        self.cleverTapInstance.config.accountId,
+                        [self.cleverTapInstance profileGetCleverTapID]];
+    NSDictionary *stored = [CTPreferences getObjectForKey:arpKey];
+    XCTAssertNil(stored[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(stored[@"ct_test_arp_key"], @"ct_test_arp_val");
 }
 
 @end
