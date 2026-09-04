@@ -156,6 +156,7 @@
 		0B82CD102DC2407200756998 /* CTAESGCMCryptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B82CD0F2DC2407200756998 /* CTAESGCMCryptTests.swift */; };
 		0B836117E159C83D50F7571F /* InAppDurationPartitionerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C16E1FBDB18DC1C7AA2479 /* InAppDurationPartitionerTests.swift */; };
 		0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */; };
+		CT01MUTAB111100000000002 /* CTProfileDeleteOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CT01MUTAB111100000000001 /* CTProfileDeleteOperationTests.m */; };
 		0C546401FA049D50AAE04697 /* CTConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = D0213D53207D93C300FE5740 /* CTConstants.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0D4CEABE7531E4DE87CF23A9 /* CTIdentityRepoFactoryTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FA88FE3C12519A1823AF5285 /* CTIdentityRepoFactoryTest.m */; };
 		10147FD40479E958BC4F769A /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -920,6 +921,7 @@
 		0B660AC62D8999A200683869 /* SDWebImage.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = SDWebImage.xcframework; path = Vendors/SDWebImage.xcframework; sourceTree = "<group>"; };
 		0B82CD0F2DC2407200756998 /* CTAESGCMCryptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAESGCMCryptTests.swift; sourceTree = "<group>"; };
 		0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStoreTests.m; sourceTree = "<group>"; };
+		CT01MUTAB111100000000001 /* CTProfileDeleteOperationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileDeleteOperationTests.m; sourceTree = "<group>"; };
 		10405BF7AEB9D1E6730686C3 /* CTInAppUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppUtilsTest.m; sourceTree = "<group>"; };
 		14A6E5036771123B9E893C2D /* CTFlattenedEventDataTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFlattenedEventDataTest.m; sourceTree = "<group>"; };
 		1D79C2B6FCEBDB269140A380 /* CTFlexibleIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFlexibleIdentityRepoTest.m; sourceTree = "<group>"; };
@@ -2142,6 +2144,7 @@
 				6BD851C82B45CD1800FA5298 /* CTMultiDelegateManager+Tests.h */,
 				0B5564552C25946C00B87284 /* CTUserInfoMigratorTest.m */,
 				0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */,
+				CT01MUTAB111100000000001 /* CTProfileDeleteOperationTests.m */,
 				4E07214D2D09738F000DE9C6 /* CTLocalDataStore+Tests.h */,
 				4E0721502D0974B6000DE9C6 /* CTLocalDataStore+Tests.m */,
 				4E8739772C921D9000FDFDFD /* CTDomainFactoryTests.m */,
@@ -3206,6 +3209,7 @@
 				32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */,
 				48FA82C52DAD3D9100AB8651 /* CTPushPrimerManagerTests.m in Sources */,
 				0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */,
+				CT01MUTAB111100000000002 /* CTProfileDeleteOperationTests.m in Sources */,
 				6A4427C52AA6515A0098866F /* CTTriggersMatcherTest.m in Sources */,
 				6B32A0B02B9DC374009ADC57 /* CTTemplateArgumentTest.m in Sources */,
 				4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */,
