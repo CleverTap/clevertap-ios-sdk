@@ -607,6 +607,7 @@ static BOOL sharedInstanceErrorLogged;
     self.inAppEvaluationManager = evaluationManager;
     self.inAppEvaluationManager.location = self.userSetLocation;
     self.inAppDisplayManager = displayManager;
+    [self.delegateManager addSwitchUserDelegate:displayManager];
     
     self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore validationConfig:self.validationConfig];
     
@@ -1926,7 +1927,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
-    [self queueEvent:event withType:type flattenedEventData:CTFlattenedEventData.noData];
+    [self queueEvent:event withType:type flattenedEventData:[self getFlattenedEventProperties:event[CLTAP_EVENT_DATA]]];
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData {

@@ -30,6 +30,7 @@
 - (NSDictionary *)getBatchHeader;
 - (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results;
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
+- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
 - (void)setUserSetLocation:(CLLocationCoordinate2D)location;
 + (BOOL)isPersonalizationEnabled;

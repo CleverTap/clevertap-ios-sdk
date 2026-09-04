@@ -17,6 +17,14 @@
 #import "CTConstants.h"
 #import "CTFlattenedEventData.h"
 #import "CTInAppEvaluationManager.h"
+#import "CTInAppDisplayManager.h"
+#import "CleverTapInternal.h"
+#import "CTMultiDelegateManager.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTValidationConfig.h"
 #import "CleverTapUTMDetail.h"
 #import <CleverTapSDK/CleverTapSyncDelegate.h>
@@ -2504,6 +2512,36 @@
     [mockEvaluationManager stopMocking];
 }
 
+#pragma mark - Switch User In-App Scheduler Cancellation
+
+// A delayed or inaction in-app scheduled for one user must not fire for the
+// next. On a user switch the display manager, registered as a switch-user
+// delegate, cancels both schedulers before the device id changes.
+- (void)test_deviceIdWillChange_cancels_delayed_and_inaction_schedulers {
+    CTInAppDisplayManager *displayManager = self.cleverTapInstance.inAppDisplayManager;
+    XCTAssertNotNil(displayManager);
+
+    id delayScheduler = [displayManager valueForKey:@"inAppDelayManager"];
+    id inActionScheduler = [displayManager valueForKey:@"inAppInActionManager"];
+    XCTAssertNotNil(delayScheduler);
+    XCTAssertNotNil(inActionScheduler);
+
+    id mockDelay = OCMPartialMock(delayScheduler);
+    id mockInAction = OCMPartialMock(inActionScheduler);
+    OCMExpect([mockDelay cancelAllSchedulingWithCompletion:[OCMArg any]]);
+    OCMExpect([mockInAction cancelAllSchedulingWithCompletion:[OCMArg any]]);
+
+    // Broadcasting through the real delegate manager also proves the display
+    // manager is registered as a switch-user delegate.
+    CTMultiDelegateManager *delegateManager = [self.cleverTapInstance valueForKey:@"delegateManager"];
+    [delegateManager notifyDelegatesDeviceIdWillChange];
+
+    OCMVerifyAll(mockDelay);
+    OCMVerifyAll(mockInAction);
+    [mockDelay stopMocking];
+    [mockInAction stopMocking];
+}
+
 #pragma mark - Profile Evaluation Input Shape
 
 // Profile attribute changes must use only flattened profile changes.
@@ -2569,6 +2607,110 @@
     [self.cleverTapInstance evaluateOnEvent:event
                                    withType:CleverTapEventTypeRaised
                          flattenedEventData:[CTFlattenedEventData noData]];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+
+#pragma mark - Event Evaluation Property Plumbing
+
+// Push and in-app Notification Clicked/Viewed, inbox, display unit and geofence
+// events are queued through the 2-arg `queueEvent:withType:`. That convenience must
+// flatten the event's own data rather than passing `noData`, otherwise wzrk_id /
+// wzrk_pivot never reach the trigger matcher and campaign-id and variant targeting
+// cannot match. These first three tests pin that guarantee at the producer.
+
+- (void)test_queueEvent_suppliesFlattenedEventData_notNoData {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: CLTAP_NOTIFICATION_CLICKED_EVENT_NAME,
+        CLTAP_EVENT_DATA: @{
+            @"wzrk_id": @"1699999999_20240101",
+            @"wzrk_pivot": @"variant_a"
+        }
+    };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        NSDictionary *props = data.eventProperties;
+        return props != nil
+            && [props[@"wzrk_id"] isEqual:@"1699999999_20240101"]
+            && [props[@"wzrk_pivot"] isEqual:@"variant_a"];
+    }]]);
+
+    [self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised];
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// Nested event properties are flattened to dot-notation on the way in, so nested
+// targeting works and the shape matches `recordEvent:withProps:` and Android.
+- (void)test_queueEvent_flattensNestedEventProps {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: @"NestedPropsEvent",
+        CLTAP_EVENT_DATA: @{ @"details": @{ @"traits": @{ @"items": @{ @"x": @1 } } } }
+    };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        return [data.eventProperties[@"details.traits.items.x"] isEqual:@1];
+    }]]);
+
+    [self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised];
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// `recordEvent:` with no properties builds an event without an `evtData` key. That
+// must still produce an (empty) property set rather than no-data, so the event stays
+// evaluable against the app fields.
+- (void)test_queueEvent_withoutEventData_suppliesEmptyProperties {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{ CLTAP_EVENT_NAME: @"NoPropsEvent" };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        return data.eventProperties != nil && data.eventProperties.count == 0;
+    }]]);
+
+    XCTAssertNoThrow([self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised]);
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// The supplied flattened properties are the source of truth - the raw event data is
+// never re-read on top of them. The existing app-field tests above use the same value
+// in both places, so this is the only case that can tell the two apart.
+- (void)test_suppliedFlattenedProps_are_not_overridden_by_raw_event_data {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSString *eventName = @"SuppliedFlattenedEvent";
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: @{ @"Prop1": @"raw" }
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:@{ @"Prop1": @"flattened" }];
+
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *props) {
+        return [props[@"Prop1"] isEqual:@"flattened"];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
 
     OCMVerifyAll(mockEvaluationManager);
     [mockEvaluationManager stopMocking];
