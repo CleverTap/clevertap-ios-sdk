@@ -150,9 +150,19 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
+    [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:[self.class pendingNotificationKey:self.config.accountId]
                                                   object:nil];
+}
+
+#pragma mark CTSwitchUserDelegate
+
+- (void)deviceIdWillChange {
+    // We're switching users. Cancel any pending delayed or inaction in-app
+    // timers so an in-app meant for the previous user can't fire for the next
+    // one, and clear their stored data.
+    [self.inAppDelayManager cancelAllSchedulingWithCompletion:nil];
+    [self.inAppInActionManager cancelAllSchedulingWithCompletion:nil];
 }
 
 - (void)setPushPrimerManager:(CTPushPrimerManager *)pushPrimerManagerObj {

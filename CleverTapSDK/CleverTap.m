@@ -607,6 +607,7 @@ static BOOL sharedInstanceErrorLogged;
     self.inAppEvaluationManager = evaluationManager;
     self.inAppEvaluationManager.location = self.userSetLocation;
     self.inAppDisplayManager = displayManager;
+    [self.delegateManager addSwitchUserDelegate:displayManager];
     
     self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore validationConfig:self.validationConfig];
     
@@ -1948,7 +1949,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
-    [self queueEvent:event withType:type flattenedEventData:CTFlattenedEventData.noData];
+    [self queueEvent:event withType:type flattenedEventData:[self getFlattenedEventProperties:event[CLTAP_EVENT_DATA]]];
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
@@ -2121,8 +2122,8 @@ static BOOL sharedInstanceErrorLogged;
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
-    [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+        [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
@@ -2130,7 +2131,8 @@ static BOOL sharedInstanceErrorLogged;
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
     } else if (eventName) {
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
-        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
+        [eventData addEntriesFromDictionary:flattenedEventChanges];
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
 #endif
 }

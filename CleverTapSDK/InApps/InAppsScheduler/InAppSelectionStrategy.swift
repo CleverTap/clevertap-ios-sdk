@@ -81,29 +81,29 @@ public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
     }
     
     public func selectInApps(_ sortedInApps: [NSDictionary], suppressionHandler: @escaping SuppressionHandler) -> [NSDictionary] {
-        var delayedInApps: [NSNumber: [NSDictionary]] = [:]
+        var delayedInApps: [Int: [NSDictionary]] = [:]
         for inApp in sortedInApps {
-            guard let inAppId = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] as? NSNumber else {
+            guard let inAppId = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD], !"\(inAppId)".isEmpty else {
                 continue
             }
-            if delayedInApps[inAppId] == nil {
-                delayedInApps[inAppId] = []
-            }
-            delayedInApps[inAppId]?.append(inApp)
+            let delay = (inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? NSNumber)?.intValue ?? 0
+            delayedInApps[delay, default: []].append(inApp)
         }
         var selectedInApps: [NSDictionary] = []
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Processing \(delayedInApps.count) delayed in-apps")
         // For each delay group, select first non-suppressed in-app
-        for (inAppId, inAppsWithSameDelay) in delayedInApps {
-            // Find first non-suppressed in-app
+        for (delay, inAppsWithSameDelay) in delayedInApps {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Processing \(inAppsWithSameDelay.count) in-apps with delay: \(delay)s")
+            // Find first non-suppressed in-app. suppressionHandler records the
+            // suppression as a side effect, so invoke it exactly once per in-app.
             let selectedInApp = inAppsWithSameDelay.first { inApp in
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Delayed inApp suppressed: \(suppressionHandler(inApp))")
-                return !suppressionHandler(inApp)
+                let isSuppressed = suppressionHandler(inApp)
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Delayed inApp suppressed: \(isSuppressed)")
+                return !isSuppressed
             }
             if let inApp = selectedInApp {
                 selectedInApps.append(inApp)
-                let inAppDelay = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] ?? 0
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Selected in-app for delay \(inAppDelay)s: \(inAppId)")
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Selected in-app for delay \(delay)s: \(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")")
             }
         }
         return selectedInApps

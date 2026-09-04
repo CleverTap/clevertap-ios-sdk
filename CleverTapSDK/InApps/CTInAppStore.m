@@ -303,10 +303,12 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             [self removeserverSideInActionMetaData];
         } else if ([mode isEqualToString:kSERVER_SIDE_MODE]) {
             [self removeClientSideInApps];
+            [self removeDelayedClientSideInApps];
         } else {
             [self removeserverSideInActionMetaData];
             [self removeServerSideInApps];
             [self removeClientSideInApps];
+            [self removeDelayedClientSideInApps];
         }
     }
 }
