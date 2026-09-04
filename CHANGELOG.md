@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.8.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.2) (September 4, 2026)
+#### Fixed
+- Fixes a bug where In-App campaigns triggered by custom events could not match device and app properties.
+- Fixes a bug where discarded event names were stored in preferences and sent back to the server on every request.
+- Fixes a bug where stored Client-Side and Server-Side In-Apps were cleared when the delivery mode was missing.
+
 ### [Version 7.8.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.1) (August 7, 2026)
 #### Added
 - **Spin-the-Wheel and Scratch Card Templates:** Adds Spin-the-Wheel and Scratch Card gamified template support to Advanced InApp Builder in-app notifications.
