@@ -1927,7 +1927,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
-    [self queueEvent:event withType:type flattenedEventData:CTFlattenedEventData.noData];
+    [self queueEvent:event withType:type flattenedEventData:[self getFlattenedEventProperties:event[CLTAP_EVENT_DATA]]];
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
