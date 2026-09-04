@@ -6,6 +6,7 @@
 //
 
 #import "CTEventNameValidator.h"
+#import "CTUtils.h"
 
 @interface CTEventNameValidator ()
 @property (nonatomic, strong) NSMutableArray<CTValidationResult *> *warnings;
@@ -95,16 +96,14 @@
 
 /**
  * Checks if the event name is in the restricted list.
- * Uses case-insensitive comparison.
+ * Uses CT name normalization, so spaces and casing are ignored.
  */
 - (BOOL)isNameRestricted:(NSString *)name {
     if (!self.config.restrictedEventNames) {
         return NO;
     }
-    NSString *normalizedName = [name lowercaseString];
     for (NSString *restricted in self.config.restrictedEventNames) {
-        NSString *normalizedRestricted = [restricted lowercaseString];
-        if ([normalizedName isEqualToString:normalizedRestricted]) {
+        if ([CTUtils areEqualNormalizedName:name andName:restricted]) {
             return YES;
         }
     }
@@ -113,16 +112,14 @@
 
 /**
  * Checks if the event name is in the discarded list.
- * Uses case-insensitive comparison.
+ * Uses CT name normalization, so spaces and casing are ignored.
  */
 - (BOOL)isNameDiscarded:(NSString *)name {
     if (!self.config.discardedEventNames) {
         return NO;
     }
-    NSString *normalizedName = [name lowercaseString];
     for (NSString *discarded in self.config.discardedEventNames) {
-        NSString *normalizedDiscarded = [discarded lowercaseString];
-        if ([normalizedName isEqualToString:normalizedDiscarded]) {
+        if ([CTUtils areEqualNormalizedName:name andName:discarded]) {
             return YES;
         }
     }

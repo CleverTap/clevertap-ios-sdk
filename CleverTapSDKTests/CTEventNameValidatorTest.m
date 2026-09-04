@@ -74,6 +74,14 @@
     XCTAssertTrue([result shouldDrop]);
 }
 
+// Spaces are ignored when matching, so the un-spaced form of a restricted name
+// is dropped too.
+- (void)test_validateEventName_restrictedName_spacesIgnored_returnsDrop {
+    CTValidationResult *result = [self.validator validateEventName:@"NotificationClicked"];
+    XCTAssertTrue([result shouldDrop]);
+    XCTAssertEqual(result.dropReason, CTDropReasonRestrictedEventName);
+}
+
 #pragma mark - discarded names
 
 - (void)test_validateEventName_discardedName_returnsDrop {
@@ -87,6 +95,22 @@
     self.config.discardedEventNames = [NSSet setWithObject:@"spam_event"];
     CTValidationResult *result = [self.validator validateEventName:@"SPAM_EVENT"];
     XCTAssertTrue([result shouldDrop]);
+}
+
+// A dashboard entry without spaces still matches an event name that has them,
+// and vice versa.
+- (void)test_validateEventName_discardedName_spacesIgnored_returnsDrop {
+    self.config.discardedEventNames = [NSSet setWithObject:@"addtocart"];
+    CTValidationResult *result = [self.validator validateEventName:@"Add To Cart"];
+    XCTAssertTrue([result shouldDrop]);
+    XCTAssertEqual(result.dropReason, CTDropReasonDiscardedEventName);
+}
+
+- (void)test_validateEventName_discardedNameWithSpaces_matchesUnspacedEvent_returnsDrop {
+    self.config.discardedEventNames = [NSSet setWithObject:@"Add To Cart"];
+    CTValidationResult *result = [self.validator validateEventName:@"addtocart"];
+    XCTAssertTrue([result shouldDrop]);
+    XCTAssertEqual(result.dropReason, CTDropReasonDiscardedEventName);
 }
 
 - (void)test_validateEventName_noDiscardedNames_customEventNotDropped {
