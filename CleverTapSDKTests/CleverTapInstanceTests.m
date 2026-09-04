@@ -15,6 +15,16 @@
 #import "CleverTap+Tests.h"
 #import <OCMock/OCMock.h>
 #import "CTConstants.h"
+#import "CTFlattenedEventData.h"
+#import "CTInAppEvaluationManager.h"
+#import "CTInAppDisplayManager.h"
+#import "CleverTapInternal.h"
+#import "CTMultiDelegateManager.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTValidationConfig.h"
 #import "CleverTapUTMDetail.h"
 #import <CleverTapSDK/CleverTapSyncDelegate.h>
@@ -67,6 +77,10 @@
 - (void)fetchInactionInApps:(NSString *)inAppId;
 // Display Unit — getter not in CleverTap+DisplayUnit.h
 - (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate;
+// Discarded-events ARP processing — private methods in CleverTap.m, no header declaration
+- (void)processDiscardedEventsRequest:(NSDictionary *)arp;
+- (void)updateARP:(NSDictionary *)arp;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
 @end
 
 @interface CleverTapInstanceTests : BaseTestCase
@@ -2439,6 +2453,398 @@
     NSString *ctid = [self.cleverTapInstance profileGetCleverTapID];
     XCTAssertGreaterThan(ctid.length, 0U,
                          @"profileGetCleverTapID should return a non-empty string");
+}
+
+#pragma mark - App Fields In Event Evaluation
+
+// A custom event must be evaluated against app fields merged with the event's
+// own properties, not the event properties alone.
+- (void)test_customEvent_evaluation_includes_app_fields {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSString *eventName = @"AppFieldsMergeEvent";
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: @{@"Prop1": @"Value1"}
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:@{@"Prop1": @"Value1"}];
+
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *props) {
+        // SDK Version is always populated by generateAppFields.
+        return props[CLTAP_SDK_VERSION] != nil && [props[@"Prop1"] isEqual:@"Value1"];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+// When a custom event property has the same name as an app field, the event
+// property wins. The fix adds event properties after app fields, honouring the
+// "event properties last, so custom properties are not overriden" contract.
+- (void)test_customEvent_evaluation_customProperty_overrides_app_field {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSString *eventName = @"AppFieldSameNameEvent";
+    // SDK Version is always set by generateAppFields (as a number). Send an
+    // event property with the same key but a distinct sentinel value.
+    NSString *sentinel = @"custom-sdk-version-sentinel";
+    NSDictionary *props = @{ CLTAP_SDK_VERSION: sentinel, @"Prop1": @"Value1" };
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: props
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:props];
+
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *evaluatedProps) {
+        // When the names are the same, the custom value wins over the app field.
+        return [evaluatedProps[CLTAP_SDK_VERSION] isEqual:sentinel] && [evaluatedProps[@"Prop1"] isEqual:@"Value1"];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+#pragma mark - Switch User In-App Scheduler Cancellation
+
+// A delayed or inaction in-app scheduled for one user must not fire for the
+// next. On a user switch the display manager, registered as a switch-user
+// delegate, cancels both schedulers before the device id changes.
+- (void)test_deviceIdWillChange_cancels_delayed_and_inaction_schedulers {
+    CTInAppDisplayManager *displayManager = self.cleverTapInstance.inAppDisplayManager;
+    XCTAssertNotNil(displayManager);
+
+    id delayScheduler = [displayManager valueForKey:@"inAppDelayManager"];
+    id inActionScheduler = [displayManager valueForKey:@"inAppInActionManager"];
+    XCTAssertNotNil(delayScheduler);
+    XCTAssertNotNil(inActionScheduler);
+
+    id mockDelay = OCMPartialMock(delayScheduler);
+    id mockInAction = OCMPartialMock(inActionScheduler);
+    OCMExpect([mockDelay cancelAllSchedulingWithCompletion:[OCMArg any]]);
+    OCMExpect([mockInAction cancelAllSchedulingWithCompletion:[OCMArg any]]);
+
+    // Broadcasting through the real delegate manager also proves the display
+    // manager is registered as a switch-user delegate.
+    CTMultiDelegateManager *delegateManager = [self.cleverTapInstance valueForKey:@"delegateManager"];
+    [delegateManager notifyDelegatesDeviceIdWillChange];
+
+    OCMVerifyAll(mockDelay);
+    OCMVerifyAll(mockInAction);
+    [mockDelay stopMocking];
+    [mockInAction stopMocking];
+}
+
+#pragma mark - Profile Evaluation Input Shape
+
+// Profile attribute changes must use only flattened profile changes.
+// Merging app fields introduces bare values where {oldValue, newValue}
+// dictionaries are expected, causing toNestedMap: to subscript a string.
+- (void)test_profileEvent_evaluation_passes_flattened_profile_changes_only {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSDictionary *profileChanges = @{
+        @"Customer Type": @{@"oldValue": @"Premium", @"newValue": @"Gold"}
+    };
+    NSDictionary *event = @{@"profile": @{@"Customer Type": @"Gold"}};
+    CTFlattenedEventData *flattened = [CTFlattenedEventData profileChanges:profileChanges];
+
+    OCMExpect([mockEvaluationManager evaluateOnUserAttributeChange:[OCMArg checkWithBlock:^BOOL(NSDictionary *changes) {
+        // No app field may leak into the outer map.
+        if (changes[CLTAP_SDK_VERSION] != nil || changes[CLTAP_APP_VERSION] != nil) {
+            return NO;
+        }
+        // Every value must still be a change dictionary.
+        for (id value in [changes allValues]) {
+            if (![value isKindOfClass:[NSDictionary class]]) {
+                return NO;
+            }
+        }
+        return [changes isEqualToDictionary:profileChanges];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeProfile
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+#pragma mark - Charged Event Evaluation Contract
+
+// Locks down the current contract: app fields + charge details form the
+// details map, while items are passed separately.
+- (void)test_chargedEvent_evaluation_includes_app_fields_and_charge_details {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSArray *items = @[@{@"Category": @"Books"}];
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: CLTAP_CHARGED_EVENT,
+        CLTAP_EVENT_DATA: @{
+            @"Amount": @50,
+            CLTAP_CHARGED_EVENT_ITEMS: items
+        }
+    };
+
+    OCMExpect([mockEvaluationManager evaluateOnChargedEvent:[OCMArg checkWithBlock:^BOOL(NSDictionary *details) {
+        return details[CLTAP_SDK_VERSION] != nil && [details[@"Amount"] isEqual:@50];
+    }] andItems:[OCMArg checkWithBlock:^BOOL(NSArray *actualItems) {
+        return [actualItems isEqualToArray:items];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:[CTFlattenedEventData noData]];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+
+#pragma mark - Event Evaluation Property Plumbing
+
+// Push and in-app Notification Clicked/Viewed, inbox, display unit and geofence
+// events are queued through the 2-arg `queueEvent:withType:`. That convenience must
+// flatten the event's own data rather than passing `noData`, otherwise wzrk_id /
+// wzrk_pivot never reach the trigger matcher and campaign-id and variant targeting
+// cannot match. These first three tests pin that guarantee at the producer.
+
+- (void)test_queueEvent_suppliesFlattenedEventData_notNoData {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: CLTAP_NOTIFICATION_CLICKED_EVENT_NAME,
+        CLTAP_EVENT_DATA: @{
+            @"wzrk_id": @"1699999999_20240101",
+            @"wzrk_pivot": @"variant_a"
+        }
+    };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        NSDictionary *props = data.eventProperties;
+        return props != nil
+            && [props[@"wzrk_id"] isEqual:@"1699999999_20240101"]
+            && [props[@"wzrk_pivot"] isEqual:@"variant_a"];
+    }]]);
+
+    [self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised];
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// Nested event properties are flattened to dot-notation on the way in, so nested
+// targeting works and the shape matches `recordEvent:withProps:` and Android.
+- (void)test_queueEvent_flattensNestedEventProps {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: @"NestedPropsEvent",
+        CLTAP_EVENT_DATA: @{ @"details": @{ @"traits": @{ @"items": @{ @"x": @1 } } } }
+    };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        return [data.eventProperties[@"details.traits.items.x"] isEqual:@1];
+    }]]);
+
+    [self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised];
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// Some events carry no `evtData` key at all - the ping event is queued as `@{}`, and
+// page events carry only their extras. That must still produce an (empty) property set
+// rather than no-data, so the event stays evaluable against the app fields.
+- (void)test_queueEvent_withoutEventData_suppliesEmptyProperties {
+    id mockInstance = OCMPartialMock(self.cleverTapInstance);
+
+    NSDictionary *event = @{ CLTAP_EVENT_NAME: @"NoPropsEvent" };
+
+    OCMExpect([mockInstance queueEvent:event
+                              withType:CleverTapEventTypeRaised
+                    flattenedEventData:[OCMArg checkWithBlock:^BOOL(CTFlattenedEventData *data) {
+        return data.eventProperties != nil && data.eventProperties.count == 0;
+    }]]);
+
+    XCTAssertNoThrow([self.cleverTapInstance queueEvent:event withType:CleverTapEventTypeRaised]);
+
+    OCMVerifyAll(mockInstance);
+    [mockInstance stopMocking];
+}
+
+// The supplied flattened properties are the source of truth - the raw event data is
+// never re-read on top of them. The existing app-field tests above use the same value
+// in both places, so this is the only case that can tell the two apart.
+- (void)test_suppliedFlattenedProps_are_not_overridden_by_raw_event_data {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+    
+    NSString *eventName = @"SuppliedFlattenedEvent";
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: @{ @"Prop1": @"raw" }
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:@{ @"Prop1": @"flattened" }];
+    
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *props) {
+        return [props[@"Prop1"] isEqual:@"flattened"];
+    }]]);
+    
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
+    
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+    
+#pragma mark - Discarded events (d_e ARP handling)
+
+// processDiscardedEventsRequest: stores string event names verbatim into the
+// in-memory validation config.
+- (void)test_processDiscardedEventsRequest_stringNames_stored {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Discarded_A", @"CT_Discarded_B"]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertTrue([names containsObject:@"CT_Discarded_A"]);
+    XCTAssertTrue([names containsObject:@"CT_Discarded_B"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// Numeric event names are coerced to their string form (Android parity), so a
+// discarded id of 42 is stored as @"42".
+- (void)test_processDiscardedEventsRequest_numberNames_coercedToStrings {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@42, @7]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertTrue([names containsObject:@"42"]);
+    XCTAssertTrue([names containsObject:@"7"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// A mix of strings and numbers is fully accepted, with the numbers stringified.
+- (void)test_processDiscardedEventsRequest_mixedStringsAndNumbers_stored {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Named", @101]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertEqual(names.count, 2U);
+    XCTAssertTrue([names containsObject:@"CT_Named"]);
+    XCTAssertTrue([names containsObject:@"101"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// An entry that is neither a string nor a number aborts parsing without
+// touching the previously stored set.
+- (void)test_processDiscardedEventsRequest_invalidEntryType_leavesExistingNamesUntouched {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    // Seed a known-good set first.
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Sentinel"]}];
+    NSSet *seeded = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    // A dictionary entry is an invalid type, so the whole update is discarded.
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_ShouldNotApply", @{@"bad": @"entry"}]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertEqualObjects(names, seeded);
+    XCTAssertFalse([names containsObject:@"CT_ShouldNotApply"]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// A non-array value under the d_e key fails the isKindOfClass guard, so nothing
+// is parsed or stored.
+- (void)test_processDiscardedEventsRequest_nonArrayValue_leavesExistingNamesUntouched {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Sentinel"]}];
+    NSSet *seeded = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    [self.cleverTapInstance processDiscardedEventsRequest:@{CLTAP_DISCARDED_EVENT_JSON_KEY: @"not-an-array"}];
+
+    XCTAssertEqualObjects(self.cleverTapInstance.validationConfig.discardedEventNames, seeded);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// updateARP: keeps discarded events in memory for the session but strips the
+// d_e key before persisting, so it is never cached to storage / sent back to
+// the server on the next request.
+- (void)test_updateARP_keepsDiscardedEventsInMemoryButDoesNotPersistThem {
+    NSSet *original = self.cleverTapInstance.validationConfig.discardedEventNames;
+
+    NSDictionary *arp = @{
+        CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_MemoryOnly"],
+        @"ct_test_arp_key": @"ct_test_arp_val"
+    };
+    [self.cleverTapInstance updateARP:arp];
+
+    // In memory: the discarded name is retained on the validation config.
+    XCTAssertTrue([self.cleverTapInstance.validationConfig.discardedEventNames containsObject:@"CT_MemoryOnly"]);
+
+    // Persisted ARP: the ordinary key survives, but d_e is stripped out.
+    NSDictionary *savedARP = [self.cleverTapInstance getARP];
+    XCTAssertEqualObjects(savedARP[@"ct_test_arp_key"], @"ct_test_arp_val");
+    XCTAssertNil(savedARP[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+
+    self.cleverTapInstance.validationConfig.discardedEventNames = original;
+}
+
+// Installs upgrading from an older SDK may have d_e cached in the stored ARP.
+// getARP strips it and rewrites storage, so it is never attached to a request.
+- (void)test_getARP_stripsLegacyCachedDiscardedEvents {
+    [self.cleverTapInstance saveARP:@{
+        CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Legacy"],
+        @"ct_test_arp_key": @"ct_test_arp_val"
+    }];
+
+    NSDictionary *arp = [self.cleverTapInstance getARP];
+    XCTAssertNil(arp[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(arp[@"ct_test_arp_key"], @"ct_test_arp_val");
+
+    // Read storage directly to prove the purge was written, not just filtered
+    // out on the way past.
+    NSString *arpKey = [NSString stringWithFormat:@"arp:%@:%@",
+                        self.cleverTapInstance.config.accountId,
+                        [self.cleverTapInstance profileGetCleverTapID]];
+    NSDictionary *stored = [CTPreferences getObjectForKey:arpKey];
+    XCTAssertNil(stored[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(stored[@"ct_test_arp_key"], @"ct_test_arp_val");
 }
 
 @end

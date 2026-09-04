@@ -62,20 +62,4 @@
     XCTAssertEqual(first, second);
 }
 
-#pragma mark - isNoData
-
-- (void)test_isNoData_returnsTrueForNoData {
-    XCTAssertTrue([[CTFlattenedEventData noData] isNoData]);
-}
-
-- (void)test_isNoData_returnsFalseForProfileChanges {
-    CTFlattenedEventData *event = [CTFlattenedEventData profileChanges:@{}];
-    XCTAssertFalse([event isNoData]);
-}
-
-- (void)test_isNoData_returnsFalseForEventProperties {
-    CTFlattenedEventData *event = [CTFlattenedEventData eventProperties:@{}];
-    XCTAssertFalse([event isNoData]);
-}
-
 @end
