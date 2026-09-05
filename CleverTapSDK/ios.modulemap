@@ -35,6 +35,7 @@ framework module CleverTapSDK {
     header "CTJsonTemplateProducer.h"
     header "CTDelayedInAppResult.h"
     header "CTInAppStore.h"
+    private header "CTLiveActivityDataQueue.h"
 
     // Internal headers required by CTSessionManager.swift.
     // Grouped as an explicit submodule so they are NOT auto-imported when a

@@ -1336,6 +1336,50 @@ static BOOL sharedInstanceErrorLogged;
     }
     return deviceToken;
 }
+// MARK: - Live Activities (iOS only; excluded from tvOS)
+#if !TARGET_OS_TV
+- (void)pushLiveActivityData:(NSDictionary *)data {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (!data || data.count == 0) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[@"data"] = data;
+    [self queueEvent:event withType:CleverTapEventTypeData];
+}
+
+- (void)pushLiveActivityEventNamed:(NSString *)eventName data:(NSDictionary *)data {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (eventName.length == 0) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = eventName;
+    event[CLTAP_EVENT_DATA] = data ?: @{};
+    [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
+}
+
+// Live Activity impression — identical shape/queue to a push "Notification Viewed" event.
+- (void)pushLiveActivityViewedEventWithData:(NSDictionary *)wzrk {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+    event[CLTAP_EVENT_DATA] = wzrk ?: @{};
+    [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
+}
+
+// Live Activity click — identical shape/queue to a push "Notification Clicked" event.
+- (void)pushLiveActivityClickedEventWithData:(NSDictionary *)wzrk {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_CLICKED_EVENT_NAME;
+    event[CLTAP_EVENT_DATA] = wzrk ?: @{};
+    self.wzrkParams = [wzrk copy];
+    [self queueEvent:event withType:CleverTapEventTypeRaised];
+}
+
+- (void)addLiveActivitySwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
+    if (!delegate) return;
+    [self.delegateManager addSwitchUserDelegate:delegate];
+}
+#endif // !TARGET_OS_TV — Live Activities
+
 - (void)_handlePushNotification:(id)object {
     [self _handlePushNotification:object openDeepLinksInForeground:NO];
 }
@@ -1376,6 +1420,12 @@ static BOOL sharedInstanceErrorLogged;
     
     // check to see whether the push includes a test in-app notification, test inbox message or test display unit, if so don't process further
     if ([self _checkAndHandleTestPushPayload:notification]) return;
+
+    // check for CT Live Activity push (update or end) and track delivery
+    if (notification[CLTAP_LIVE_ACTIVITY_PUSH_MARKER]) {
+        [self _handleLiveActivityPush:notification];
+        return;
+    }
     
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
@@ -1445,6 +1495,22 @@ static BOOL sharedInstanceErrorLogged;
     return NO;
 }
 #endif
+
+- (void)_handleLiveActivityPush:(NSDictionary *)notification {
+    // Live Activity update/end pushes are processed by iOS directly (the system updates
+    // the activity UI without app involvement). The SDK intercepts them here only to
+    // prevent them from being treated as regular CT push notifications and to log receipt.
+    NSDictionary *aps = notification[@"aps"];
+    NSString *pushEvent = aps[CLTAP_LIVE_ACTIVITY_PUSH_EVENT_KEY];
+    NSString *activityID = notification[CLTAP_LIVE_ACTIVITY_PUSH_ACTIVITY_ID];
+
+    CleverTapLogDebug(self.config.logLevel,
+        @"%@: received CT Live Activity push — event: %@, cleverTapActivityId: %@",
+        self, pushEvent ?: @"(unknown)", activityID ?: @"(none)");
+
+    // No further processing needed here; token lifecycle analytics are raised
+    // automatically by CTLiveActivityManager via Swift concurrency observation.
+}
 
 - (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
     if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
