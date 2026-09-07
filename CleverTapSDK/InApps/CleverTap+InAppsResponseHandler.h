@@ -11,7 +11,18 @@
 
 @interface CleverTap(InAppsResponseHandler)
 
+/// Equivalent to `handleInAppResponse:source:` with `CTResponseSourceApp`.
 - (void)handleInAppResponse:(NSDictionary *)jsonResp;
+
+/*!
+ Handle the in-app keys of a response.
+
+ @param jsonResp The JSON response dictionary
+ @param source Which endpoint the response came from. The `/content` response passes through
+ this same handler, and some keys must be treated differently depending on the origin.
+ */
+- (void)handleInAppResponse:(NSDictionary *)jsonResp source:(CTResponseSource)source;
+
 - (void)triggerFetchInApps:(BOOL)success;
 
 @end

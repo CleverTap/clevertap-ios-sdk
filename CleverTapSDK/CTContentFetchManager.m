@@ -42,7 +42,63 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 
 @end
 
+@implementation CTContentFetchItem
+
+- (instancetype)initWithJSON:(NSDictionary *)json {
+    if (![json isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    self = [super init];
+    if (self) {
+        _rawItem = [json copy];
+
+        id eventName = json[CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME];
+        if ([eventName isKindOfClass:[NSString class]]) {
+            _eventName = [eventName copy];
+        }
+
+        id responseKey = json[CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY];
+        if ([responseKey isKindOfClass:[NSString class]]) {
+            _responseKey = [responseKey copy];
+        }
+
+        // `tgtId` arrives as a number, but the `ti` it will be compared against may be either a
+        // number or a string. Normalize the same way CTInAppNotification does, so the two match.
+        id targetId = json[CLTAP_CONTENT_FETCH_ITEM_TGT_ID];
+        if ([targetId isKindOfClass:[NSNumber class]] || [targetId isKindOfClass:[NSString class]]) {
+            NSString *normalized = [NSString stringWithFormat:@"%@", targetId];
+            if (normalized.length > 0) {
+                _targetId = normalized;
+            }
+        }
+    }
+    return self;
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<CTContentFetchItem: event=%@ responseKey=%@ tgtId=%@>",
+            self.eventName, self.responseKey, self.targetId];
+}
+
+@end
+
 @implementation CTContentFetchManager
+
++ (NSArray<CTContentFetchItem *> *)contentFetchItemsFromResponse:(NSDictionary *)jsonResp {
+    NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
+    if (![contentFetch isKindOfClass:[NSArray class]] || contentFetch.count == 0) {
+        return @[];
+    }
+
+    NSMutableArray<CTContentFetchItem *> *items = [[NSMutableArray alloc] initWithCapacity:contentFetch.count];
+    for (id item in contentFetch) {
+        CTContentFetchItem *parsed = [[CTContentFetchItem alloc] initWithJSON:item];
+        if (parsed) {
+            [items addObject:parsed];
+        }
+    }
+    return items;
+}
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  requestSender:(CTRequestSender *)requestSender
@@ -75,16 +131,17 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 }
 
 - (void)handleContentFetch:(NSDictionary *)jsonResp {
-    NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
-    if (!contentFetch || ![contentFetch isKindOfClass:[NSArray class]] || contentFetch.count == 0) {
+    NSArray<CTContentFetchItem *> *contentFetch = [[self class] contentFetchItemsFromResponse:jsonResp];
+    if (contentFetch.count == 0) {
         return;
     }
     
     NSMutableArray *events = [[NSMutableArray alloc] init];
-    for (NSDictionary *contentFetchItem in contentFetch) {
+    for (CTContentFetchItem *contentFetchItem in contentFetch) {
+        // Send the item back verbatim — the outbound wire format must not change.
         NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
             CLTAP_EVENT_NAME: CLTAP_CONTENT_FETCH_EVENT,
-            CLTAP_EVENT_DATA: contentFetchItem
+            CLTAP_EVENT_DATA: contentFetchItem.rawItem
         }];
         
         // Call delegate to add event metadata

@@ -2615,6 +2615,12 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 
 - (void)parseResponse:(NSData *)responseData responseEncrypted:(BOOL)responseEncrypted {
+    [self parseResponse:responseData responseEncrypted:responseEncrypted source:CTResponseSourceApp];
+}
+
+- (void)parseResponse:(NSData *)responseData
+    responseEncrypted:(BOOL)responseEncrypted
+               source:(CTResponseSource)source {
     if (responseData) {
         @try {
             if (responseEncrypted) {
@@ -2641,11 +2647,18 @@ static BOOL sharedInstanceErrorLogged;
                 }
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-                [self handleInAppResponse:jsonResp];
+                [self handleInAppResponse:jsonResp source:source];
 #endif
                 
 #if !defined(CLEVERTAP_TVOS)
-                if (!self.isUserSwitching) {
+                if (source == CTResponseSourceContentFetch) {
+                    // A content fetch response must not trigger another content fetch. There is no
+                    // depth bound anywhere in the chain, so a response echoing the key back would
+                    // loop indefinitely.
+                    if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Ignoring %@ in a content fetch response", self, CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY);
+                    }
+                } else if (!self.isUserSwitching) {
                     [self.contentFetchManager handleContentFetch:jsonResp];
                 } else if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response will not be handled due to user switch", self);
@@ -5769,7 +5782,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager didReceiveResponse:(NSData *)data {
-    [self parseResponse:data responseEncrypted:NO];
+    [self parseResponse:data responseEncrypted:NO source:CTResponseSourceContentFetch];
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager addMetadataToEvent:(NSMutableDictionary *)event ofType:(CleverTapEventType)eventType {

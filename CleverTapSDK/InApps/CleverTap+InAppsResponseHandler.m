@@ -24,6 +24,10 @@
 @implementation CleverTap(InAppsResponseHandler)
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp {
+    [self handleInAppResponse:jsonResp source:CTResponseSourceApp];
+}
+
+- (void)handleInAppResponse:(NSDictionary *)jsonResp source:(CTResponseSource)source {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (self.config.analyticsOnly || [CTUIUtils runningInsideAppExtension]) {
         return;
@@ -93,7 +97,13 @@
     // CS in-apps (inapp_notifs_cs)
     // Only process when the key is present in the response. When present (even as an
     // empty array), always store so that stopped campaigns are cleared from preferences.
-    if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]) {
+    if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY] && source == CTResponseSourceContentFetch) {
+        // storeClientSideInApps: replaces the whole store, and the clear-on-empty behaviour above
+        // means an empty array would wipe every client-side campaign — persisted, so it would
+        // survive until the next /a1. A content fetch response is not expected to carry this key;
+        // ignore it rather than clobber the store from a partial response.
+        CleverTapLogDebug(self.config.logLevel, @"%@: Ignoring %@ in a content fetch response", self, CLTAP_INAPP_CS_JSON_RESPONSE_KEY);
+    } else if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]) {
         ImmediateAndDelayed *partitionedClientSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]];
 
         NSArray *immediateInApps = partitionedClientSideInApps.immediateInApps;

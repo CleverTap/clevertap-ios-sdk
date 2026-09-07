@@ -128,6 +128,10 @@ extern NSString *const kSessionId;
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
+// Keys within a single `content_fetch` array item
+#define CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME @"eventName"
+#define CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY @"responseKey"
+#define CLTAP_CONTENT_FETCH_ITEM_TGT_ID @"tgtId"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
 #define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
