@@ -10,7 +10,7 @@
 
 @interface CTLimitAdapter()
 
-@property (nonatomic, assign) NSDictionary *limitJSON;
+@property (nonatomic, strong) NSDictionary *limitJSON;
 
 @end
 
