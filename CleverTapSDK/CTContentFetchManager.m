@@ -40,6 +40,9 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
 @property (nonatomic, assign) NSUInteger completedBatches;
 
+/// Per-batch completion blocks keyed by queue index. Guarded by `queueLock`.
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, dispatch_block_t> *batchCompletions;
+
 @end
 
 @implementation CTContentFetchItem
@@ -125,14 +128,21 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         
         self.allRequestsGroup = dispatch_group_create();
         self.inFlightRequestIndices = [[NSMutableSet alloc] init];
+        self.batchCompletions = [[NSMutableDictionary alloc] init];
     }
     
     return self;
 }
 
 - (void)handleContentFetch:(NSDictionary *)jsonResp {
+    [self handleContentFetch:jsonResp completion:nil];
+}
+
+- (void)handleContentFetch:(NSDictionary *)jsonResp completion:(dispatch_block_t)completion {
     NSArray<CTContentFetchItem *> *contentFetch = [[self class] contentFetchItemsFromResponse:jsonResp];
     if (contentFetch.count == 0) {
+        // Nothing to fetch, but the contract is that completion always runs exactly once.
+        if (completion) completion();
         return;
     }
     
@@ -153,6 +163,9 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     [self.contentFetchQueue addObject:events];
     CleverTapLogDebug(self.config.logLevel, @"%@: Added content fetch with %ld events", self, [events count]);
     NSUInteger batchIndex = self.contentFetchQueue.count - 1;
+    if (completion) {
+        self.batchCompletions[@(batchIndex)] = completion;
+    }
     [self.queueLock unlock];
     
     [self fetchContentAtIndex:batchIndex];
@@ -167,10 +180,21 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         self.contentFetchQueue[i] = [NSNull null];
         self.completedBatches++;
     }
-    
+
+    // Take the completion before cleanup, which resets the queue and therefore the indices.
+    dispatch_block_t completion = self.batchCompletions[@(i)];
+    if (completion) {
+        [self.batchCompletions removeObjectForKey:@(i)];
+    }
+
     [self cleanupIfAllCompleted];
     
     [self.queueLock unlock];
+
+    // Invoke outside the lock — the block is caller-supplied and may re-enter.
+    if (completion) {
+        completion();
+    }
 }
 
 - (void)cleanupIfAllCompleted {
@@ -201,8 +225,20 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         NSArray *batch;
         [self.queueLock lock];
         if (i >= self.contentFetchQueue.count || self.contentFetchQueue[i] == [NSNull null]) {
-            [self.queueLock unlock];
+            // The batch is gone — already completed, or the queue was cleared by a user switch.
+            // Release its bookkeeping and run any registered completion, so a caller waiting on
+            // this batch is not left hanging. Deliberately not markCompletedAtIndex:, which would
+            // re-run cleanup and signal an "all batches completed" transition that did not happen.
             [self.inFlightRequestIndices removeObject:@(i)];
+            dispatch_block_t completion = self.batchCompletions[@(i)];
+            if (completion) {
+                [self.batchCompletions removeObjectForKey:@(i)];
+            }
+            [self.queueLock unlock];
+
+            if (completion) {
+                completion();
+            }
             dispatch_group_leave(self.allRequestsGroup);
             return;
         }
@@ -356,7 +392,15 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         [self.contentFetchQueue removeAllObjects];
         [self.inFlightRequestIndices removeAllObjects];
         self.completedBatches = 0;
+        // Anything still registered here timed out above and its batch is being abandoned. Run
+        // the blocks anyway — a caller waiting on one must not be left hanging by a user switch.
+        NSArray<dispatch_block_t> *abandoned = [self.batchCompletions.allValues copy];
+        [self.batchCompletions removeAllObjects];
         [self.queueLock unlock];
+
+        for (dispatch_block_t completion in abandoned) {
+            completion();
+        }
     }];
 }
 

@@ -24,6 +24,37 @@
 #import "CleverTapSDK-Swift.h"
 #endif
 
+/*!
+ Deferred app-launch state for one `/a1` response and the content fetch it spawned.
+
+ File-private: the window is an implementation detail of how this manager defers an evaluation,
+ not a collaborator anything else needs to see.
+ */
+@interface CTInAppArbitrationCycle : NSObject
+
+/// Winners buffered so far — one per response handled while the window was open.
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *candidates;
+
+/// Campaign ids the content fetch said it would return. Diagnostics only.
+@property (nonatomic, copy) NSArray<NSString *> *expectedTargetIds;
+
+/// Set on close, so a late completion and the timeout cannot both arbitrate.
+@property (nonatomic, assign) BOOL closed;
+
+@end
+
+@implementation CTInAppArbitrationCycle
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _candidates = [NSMutableArray array];
+    }
+    return self;
+}
+
+@end
+
 @interface CTInAppEvaluationManager()
 
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
@@ -47,6 +78,13 @@
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
+/// Guards `appLaunchedArbitrationCycle`. Mutated from the network thread, the content fetch
+/// queue and the timeout, so every access is synchronized on this.
+@property (nonatomic, strong) NSObject *arbitrationLock;
+
+/// The open arbitration window, or nil when in-apps display immediately as before.
+@property (nonatomic, strong) CTInAppArbitrationCycle *appLaunchedArbitrationCycle;
+
 @end
 
 @implementation CTInAppEvaluationManager
@@ -64,7 +102,10 @@
         self.deviceId = deviceId;
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
-        
+
+        self.arbitrationLock = [NSObject new];
+        self.appLaunchedArbitrationTimeout = CLTAP_INAPP_ARBITRATION_TIMEOUT_SECONDS;
+
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         NSArray *savedEvaluatedServerSideInAppIds = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
         if (savedEvaluatedServerSideInAppIds) {
@@ -169,7 +210,130 @@
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     // Server-side evaluations do **NOT** update TTL
     NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[ImmediateInAppSelectionStrategy shared] withTTL: false];
+    // While a window is open this winner competes against the content fetch result instead of
+    // displaying now. See openAppLaunchedArbitrationWithTargetIds:.
+    if ([self bufferAppLaunchedCandidatesIfArbitrating:ssInApps]) {
+        return;
+    }
     [self.inAppDisplayManager _addInAppNotificationsToQueue:ssInApps];
+}
+
+#pragma mark - App Launched arbitration
+
+- (void)openAppLaunchedArbitrationWithTargetIds:(NSArray<NSString *> *)targetIds {
+    CTInAppArbitrationCycle *cycle = [[CTInAppArbitrationCycle alloc] init];
+    cycle.expectedTargetIds = [targetIds copy];
+
+    @synchronized (self.arbitrationLock) {
+        if (self.appLaunchedArbitrationCycle && !self.appLaunchedArbitrationCycle.closed) {
+            // A window is already open for a previous response. Leave it in place — closing it
+            // here would display its winner and then immediately open a second window, which is
+            // the multi-response behaviour we are trying to remove.
+            CleverTapLogStaticDebug(@"App Launched arbitration already open, not opening another");
+            return;
+        }
+        self.appLaunchedArbitrationCycle = cycle;
+    }
+
+    CleverTapLogStaticDebug(@"Opened App Launched arbitration, expecting %lu content target(s): %@",
+                            (unsigned long)targetIds.count, targetIds);
+
+    // Backstop only. The content fetch completion normally closes the window well before this.
+    __weak typeof(self) weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.appLaunchedArbitrationTimeout * NSEC_PER_SEC)),
+                   dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+
+        // Only time out the window this timer was scheduled for — a later one must not be cut short.
+        BOOL isStillCurrent = NO;
+        @synchronized (strongSelf.arbitrationLock) {
+            isStillCurrent = (strongSelf.appLaunchedArbitrationCycle == cycle && !cycle.closed);
+        }
+        if (isStillCurrent) {
+            CleverTapLogStaticDebug(@"App Launched arbitration timed out after %.1fs, showing best candidate so far",
+                                    strongSelf.appLaunchedArbitrationTimeout);
+            [strongSelf closeAppLaunchedArbitration];
+        }
+    });
+}
+
+- (void)appLaunchedArbitrationContentFetchDidComplete {
+    // Show the merged winner unless the timeout already did.
+    [self closeAppLaunchedArbitration];
+
+    // Nothing further can arrive for this launch, so stop suppressing and return to normal.
+    @synchronized (self.arbitrationLock) {
+        self.appLaunchedArbitrationCycle = nil;
+    }
+}
+
+- (void)closeAppLaunchedArbitration {
+    NSArray<NSDictionary *> *candidates = nil;
+
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle || cycle.closed) {
+            // No window, or the completion and the timeout raced and the other one won.
+            return;
+        }
+        cycle.closed = YES;
+        candidates = [cycle.candidates copy];
+        // Deliberately not cleared here. The cycle stays in place, closed, so that a content
+        // response arriving after a timeout is suppressed rather than displayed as a second
+        // in-app. It is cleared by appLaunchedArbitrationContentFetchDidComplete.
+    }
+
+    if (candidates.count == 0) {
+        CleverTapLogStaticDebug(@"Closed App Launched arbitration with no eligible candidates");
+        return;
+    }
+
+    // One merged selection across every buffered winner, so exactly one in-app is shown for the
+    // launch. Reuses the normal path so the sort, suppression and reporting stay identical.
+    NSMutableArray *merged = [candidates mutableCopy];
+    NSArray<NSDictionary *> *winner = [self selectAndProcessEligibleInApps:merged
+                                                              withStrategy:[ImmediateInAppSelectionStrategy shared]
+                                                                   withTTL:false];
+    CleverTapLogStaticDebug(@"Closed App Launched arbitration, %lu candidate(s) merged, showing %@",
+                            (unsigned long)candidates.count,
+                            winner.firstObject ? [CTInAppNotification inAppId:winner.firstObject] : @"none");
+
+    [self.inAppDisplayManager _addInAppNotificationsToQueue:winner];
+}
+
+/*!
+ Buffer a response's winner if a window is open, or drop it if the launch's slot is already spent.
+
+ @return YES when the caller must not queue the in-apps for display.
+ */
+- (BOOL)bufferAppLaunchedCandidatesIfArbitrating:(NSArray<NSDictionary *> *)inApps {
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle) {
+            return NO;
+        }
+
+        if (cycle.closed) {
+            // The window timed out and an in-app has already been shown for this launch. This
+            // response lost the race — display it now and the user sees two in-apps, which is
+            // the bug the window exists to prevent. Drop it.
+            if (inApps.count > 0) {
+                CleverTapLogStaticDebug(@"Dropping %lu late App Launched candidate(s), arbitration already closed",
+                                        (unsigned long)inApps.count);
+            }
+            return YES;
+        }
+
+        // An empty selection still counts as handled — nothing was eligible in this response, and
+        // falling through would call the display queue with an empty array.
+        if (inApps.count > 0) {
+            [cycle.candidates addObjectsFromArray:inApps];
+            CleverTapLogStaticDebug(@"Buffered %lu App Launched candidate(s) for arbitration, %lu total",
+                                    (unsigned long)inApps.count, (unsigned long)cycle.candidates.count);
+        }
+        return YES;
+    }
 }
 
 - (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray<NSDictionary *> *)appLaunchedNotifs {

@@ -76,6 +76,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)handleContentFetch:(NSDictionary *)jsonResp;
 
 /**
+ * Process content fetch information from response, notifying when this batch has finished.
+ *
+ * @param jsonResp The JSON response dictionary
+ * @param completion Invoked exactly once, when every request of this batch has settled —
+ * success, HTTP error, concurrency timeout, or abandonment during a user switch. It is never
+ * skipped and never invoked twice, so a caller that waits on it cannot hang. Invoked on an
+ * arbitrary queue, after the response has been handed to the delegate; serialize if needed.
+ */
+- (void)handleContentFetch:(NSDictionary *)jsonResp
+                completion:(nullable dispatch_block_t)completion;
+
+/**
  * Parse the `content_fetch` array of a response into typed items.
  *
  * Read-only — nothing is enqueued or sent. Use `handleContentFetch:` to actually fetch.

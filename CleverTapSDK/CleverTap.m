@@ -2659,7 +2659,16 @@ static BOOL sharedInstanceErrorLogged;
                         CleverTapLogDebug(self.config.logLevel, @"%@: Ignoring %@ in a content fetch response", self, CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY);
                     }
                 } else if (!self.isUserSwitching) {
-                    [self.contentFetchManager handleContentFetch:jsonResp];
+                    // An app-launch arbitration window needs to know when this batch has settled.
+                    // The completion runs exactly once — including on HTTP failure and on user
+                    // switch — so a window can never be left open, which would otherwise suppress
+                    // app-launch in-apps for the rest of the session.
+                    __weak typeof(self) weakSelf = self;
+                    [self.contentFetchManager handleContentFetch:jsonResp completion:^{
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+                        [weakSelf.inAppEvaluationManager appLaunchedArbitrationContentFetchDidComplete];
+#endif
+                    }];
                 } else if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response will not be handled due to user switch", self);
                 }

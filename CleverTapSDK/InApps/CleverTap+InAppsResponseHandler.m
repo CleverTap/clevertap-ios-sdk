@@ -15,6 +15,9 @@
 #import "CleverTapInternal.h"
 #import "CTUtils.h"
 #import "CTCustomTemplatesManager-Internal.h"
+#if !defined(CLEVERTAP_TVOS)
+#import "CTContentFetchManager.h"
+#endif
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
 #else
@@ -25,6 +28,42 @@
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp {
     [self handleInAppResponse:jsonResp source:CTResponseSourceApp];
+}
+
+/*!
+ Open an app-launch arbitration window if this response's `content_fetch` will bring back more
+ app-launch in-apps.
+
+ Two conditions must hold, and both come from fields already present in the payload:
+
+ - `responseKey` names an in-app key. A content fetch for inbox or display units must not delay
+   an in-app.
+ - `eventName` is `App Launched`. Other events are out of scope: for them the server-side path
+   uses `inapp_notifs`, which has no selection step at all, so there is no "show exactly one"
+   guarantee to protect.
+ */
+- (void)openAppLaunchedArbitrationIfNeeded:(NSDictionary *)jsonResp {
+#if !defined(CLEVERTAP_TVOS)
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:jsonResp];
+    if (items.count == 0) {
+        return;
+    }
+
+    NSMutableArray<NSString *> *targetIds = [NSMutableArray array];
+    for (CTContentFetchItem *item in items) {
+        BOOL isAppLaunched = [item.eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT];
+        BOOL isInAppKey = [item.responseKey isEqualToString:CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
+        if (isAppLaunched && isInAppKey && item.targetId) {
+            [targetIds addObject:item.targetId];
+        }
+    }
+
+    if (targetIds.count == 0) {
+        return;
+    }
+
+    [self.inAppEvaluationManager openAppLaunchedArbitrationWithTargetIds:targetIds];
+#endif
 }
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp source:(CTResponseSource)source {
@@ -58,6 +97,13 @@
     if ([partitionedLegacyMetaInApps hasInActionInApps]) {
         // Schedule in-action timers
         [self.inAppDisplayManager scheduleInActionInApps:partitionedLegacyMetaInApps.inActionInApps];
+    }
+
+    // Defer app-launch display if this response also asked for a content fetch that will return
+    // more app-launch in-apps. Must happen before the evaluation below so the winner is buffered
+    // rather than shown. No-op unless such a fetch is actually pending.
+    if (source == CTResponseSourceApp) {
+        [self openAppLaunchedArbitrationIfNeeded:jsonResp];
     }
 
     // App launch SS in-apps (inapp_notifs_applaunched -> NORMAL/DELAYED in-app campaigns WITH/WITHOUT advance display rules on app launched event)
