@@ -55,6 +55,39 @@
 
 @end
 
+/*!
+ A trigger counter that reports a fixed number above the live one, without writing anything.
+
+ Needed because the real evaluation increments a campaign's trigger count *before* limits are
+ checked, so `onEvery` / `onExactly` compare against N+1. A dry run must not persist that
+ increment, but reading the raw N would flip those limits' result — silently mispredicting
+ exactly the campaigns that use trigger-based limits. Offsetting the read reproduces what the
+ real path would see while leaving storage untouched.
+ */
+@interface CTOffsetTriggerCounter : NSObject <CTTriggerCounting>
+- (instancetype)initWithCounter:(id<CTTriggerCounting>)counter offset:(NSUInteger)offset;
+@end
+
+@implementation CTOffsetTriggerCounter {
+    id<CTTriggerCounting> _counter;
+    NSUInteger _offset;
+}
+
+- (instancetype)initWithCounter:(id<CTTriggerCounting>)counter offset:(NSUInteger)offset {
+    self = [super init];
+    if (self) {
+        _counter = counter;
+        _offset = offset;
+    }
+    return self;
+}
+
+- (NSUInteger)getTriggers:(NSString *)campaignId {
+    return [_counter getTriggers:campaignId] + _offset;
+}
+
+@end
+
 @interface CTInAppEvaluationManager()
 
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
@@ -291,7 +324,7 @@
 
     // One merged selection across every buffered winner, so exactly one in-app is shown for the
     // launch. Reuses the normal path so the sort, suppression and reporting stay identical.
-    NSMutableArray *merged = [candidates mutableCopy];
+    NSMutableArray *merged = [[self class] withoutSyntheticCandidates:candidates];
     NSArray<NSDictionary *> *winner = [self selectAndProcessEligibleInApps:merged
                                                               withStrategy:[ImmediateInAppSelectionStrategy shared]
                                                                    withTTL:false];
@@ -327,13 +360,34 @@
 
         // An empty selection still counts as handled — nothing was eligible in this response, and
         // falling through would call the display queue with an empty array.
-        if (inApps.count > 0) {
-            [cycle.candidates addObjectsFromArray:inApps];
+        NSArray<NSDictionary *> *displayable = [[self class] withoutSyntheticCandidates:inApps];
+        if (displayable.count > 0) {
+            [cycle.candidates addObjectsFromArray:displayable];
             CleverTapLogStaticDebug(@"Buffered %lu App Launched candidate(s) for arbitration, %lu total",
-                                    (unsigned long)inApps.count, (unsigned long)cycle.candidates.count);
+                                    (unsigned long)displayable.count, (unsigned long)cycle.candidates.count);
         }
         return YES;
     }
+}
+
+/*!
+ Strip payloads built for speculative evaluation only.
+
+ A synthetic candidate carries selection rules but no content, so displaying one would render an
+ empty in-app. They should never reach here — this is a boundary check on the display path, not
+ flow control, so anything filtered out is logged as a programming error.
+ */
++ (NSMutableArray<NSDictionary *> *)withoutSyntheticCandidates:(NSArray<NSDictionary *> *)inApps {
+    NSMutableArray<NSDictionary *> *displayable = [NSMutableArray arrayWithCapacity:inApps.count];
+    for (NSDictionary *inApp in inApps) {
+        if ([inApp[CLTAP_INAPP_SYNTHETIC_CANDIDATE] boolValue]) {
+            CleverTapLogStaticDebug(@"Refusing to display synthetic candidate %@ — it has no content",
+                                    [CTInAppNotification inAppId:inApp]);
+            continue;
+        }
+        [displayable addObject:inApp];
+    }
+    return displayable;
 }
 
 - (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray<NSDictionary *> *)appLaunchedNotifs {
@@ -476,7 +530,28 @@
 }
 
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
+    return [self evaluate:event withInApps:inApps recordTriggers:YES];
+}
+
+/*!
+ Evaluate in-apps against an event, optionally without recording trigger counts.
+
+ @param recordTriggers `YES` for a real evaluation. `NO` for a dry run — used to predict whether
+ a candidate would qualify without mutating persisted state, so the same campaign can be
+ evaluated for real later without its trigger count being counted twice.
+
+ A dry run is not simply "skip the increment". The real path increments *before* checking limits,
+ so `onEvery` / `onExactly` compare against N+1; reading the raw N would flip their result. The
+ offsetting counter reproduces that view without writing it.
+ */
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event
+                  withInApps:(NSArray *)inApps
+              recordTriggers:(BOOL)recordTriggers {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
+    id<CTTriggerCounting> triggerCounter = recordTriggers
+        ? self.triggerManager
+        : [[CTOffsetTriggerCounter alloc] initWithCounter:self.triggerManager offset:1];
+
     for (NSDictionary *inApp in inApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (!campaignId) {
@@ -493,8 +568,10 @@
         CleverTapLogStaticDebug(@"Triggers matched for event %@ against inApp %@",[event eventName], campaignId);
         
         // In-app matches the trigger, increment trigger count
-        [self.triggerManager incrementTrigger:campaignId];
-        
+        if (recordTriggers) {
+            [self.triggerManager incrementTrigger:campaignId];
+        }
+
         // Match limits
         NSArray *frequencyLimits = inApp[CLTAP_INAPP_FC_LIMITS];
         NSArray *occurrenceLimits = inApp[CLTAP_INAPP_OCCURRENCE_LIMITS];
@@ -502,7 +579,7 @@
         [whenLimits addObjectsFromArray:frequencyLimits];
         [whenLimits addObjectsFromArray:occurrenceLimits];
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
-                                           withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
+                                           withImpressionManager:self.impressionManager andTriggerManager:triggerCounter];
         if (matchesLimits) {
             CleverTapLogStaticDebug(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
             [eligibleInApps addObject:inApp];

@@ -47,6 +47,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, copy, readonly) NSDictionary *rawItem;
 
+/*!
+ The item rendered as an in-app payload for speculative evaluation, or nil if it cannot be.
+
+ Carries only the *selection* rules — the keys that decide which of several candidates wins —
+ plus `ti` derived from `tgtId`. Deliberately never the content, so this can be evaluated and
+ sorted but not displayed. It is tagged `CLTAP_INAPP_SYNTHETIC_CANDIDATE` and rejected at the
+ boundaries of the display path.
+
+ @note Returns nil unless the item carries a `priority`. Without it `sortByPriority:` would
+ silently default to 1 and mispredict any campaign that actually sets a priority — a wrong answer
+ that looks like a right one. Better to have no prediction than a confidently wrong one.
+
+ @note Today's payload carries none of these rules, so this returns nil and speculative
+ evaluation is inert until the backend sends them.
+ */
+@property (nonatomic, copy, readonly, nullable) NSDictionary *syntheticInAppPayload;
+
 - (instancetype)init NS_UNAVAILABLE;
 - (nullable instancetype)initWithJSON:(NSDictionary *)json;
 

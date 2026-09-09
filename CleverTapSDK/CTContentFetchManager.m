@@ -78,6 +78,38 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     return self;
 }
 
+- (NSDictionary *)syntheticInAppPayload {
+    // `priority` is the primary discriminator. Without it there is nothing to predict with — see
+    // the note on the property.
+    if (!self.targetId || self.rawItem[CLTAP_INAPP_PRIORITY] == nil) {
+        return nil;
+    }
+
+    NSMutableDictionary *payload = [NSMutableDictionary dictionary];
+    payload[CLTAP_INAPP_ID] = self.targetId;
+    payload[CLTAP_INAPP_SYNTHETIC_CANDIDATE] = @YES;
+
+    // Copy across only the rules that decide a winner, and only those actually present. Keys the
+    // backend has not sent yet are simply absent, which keeps this forward-compatible.
+    NSArray<NSString *> *selectionKeys = @[
+        CLTAP_INAPP_PRIORITY,
+        CLTAP_INAPP_IS_SUPPRESSED,
+        CLTAP_DELAY_AFTER_TRIGGER,
+        CLTAP_INAPP_TRIGGERS,
+        CLTAP_INAPP_FC_LIMITS,
+        CLTAP_INAPP_OCCURRENCE_LIMITS,
+        CLTAP_INAPP_TEMPLATE_NAME
+    ];
+    for (NSString *key in selectionKeys) {
+        id value = self.rawItem[key];
+        if (value) {
+            payload[key] = value;
+        }
+    }
+
+    return payload;
+}
+
 - (NSString *)description {
     return [NSString stringWithFormat:@"<CTContentFetchItem: event=%@ responseKey=%@ tgtId=%@>",
             self.eventName, self.responseKey, self.targetId];

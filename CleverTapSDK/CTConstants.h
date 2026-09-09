@@ -132,6 +132,10 @@ extern NSString *const kSessionId;
 #define CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME @"eventName"
 #define CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY @"responseKey"
 #define CLTAP_CONTENT_FETCH_ITEM_TGT_ID @"tgtId"
+// SDK-internal marker, never sent or received. Tags a payload built from a content_fetch item's
+// selection rules, which can be evaluated and sorted but must never be displayed — it carries
+// only the rules that decide a winner, no content.
+#define CLTAP_INAPP_SYNTHETIC_CANDIDATE @"__ct_synthetic_candidate"
 // How long an app-launch in-app is held waiting for the content fetch to return a competing
 // candidate. A UX bound, not a correctness one — deliberately far below the content fetch's own
 // limits (CLTAP_REQUEST_TIME_OUT_INTERVAL, plus 5s if it waits for a concurrency slot), since
