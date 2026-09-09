@@ -821,4 +821,223 @@
     XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 0);
 }
 
+#pragma mark - CTContentFetchItem Parsing Tests
+
+- (NSDictionary *)responseWithItems:(NSArray *)items {
+    return @{ CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: items };
+}
+
+- (void)testContentFetchItemsParsesFields {
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[@{
+            CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME: CLTAP_APP_LAUNCHED_EVENT,
+            CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY: CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY,
+            CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @1787567474
+        }]]];
+
+    XCTAssertEqual(items.count, 1);
+    XCTAssertEqualObjects(items.firstObject.eventName, CLTAP_APP_LAUNCHED_EVENT);
+    XCTAssertEqualObjects(items.firstObject.responseKey, CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY);
+}
+
+/*!
+ `tgtId` arrives as a number but is compared against an in-app's `ti`, which may be a number or
+ a string. If normalization broke, the arbitration window would never match its expected
+ targets and would silently rely on the timeout instead.
+ */
+- (void)testContentFetchItemsNormalizesTargetIdToString {
+    NSArray<CTContentFetchItem *> *fromNumber = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[@{ CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @1787567474 }]]];
+    NSArray<CTContentFetchItem *> *fromString = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[@{ CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @"1787567474" }]]];
+
+    XCTAssertEqualObjects(fromNumber.firstObject.targetId, @"1787567474");
+    XCTAssertEqualObjects(fromString.firstObject.targetId, @"1787567474");
+}
+
+- (void)testContentFetchItemsWithMissingFieldsYieldsNils {
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[@{ @"unrelated": @"value" }]]];
+
+    XCTAssertEqual(items.count, 1);
+    XCTAssertNil(items.firstObject.eventName);
+    XCTAssertNil(items.firstObject.responseKey);
+    XCTAssertNil(items.firstObject.targetId);
+}
+
+- (void)testContentFetchItemsSkipsMalformedEntries {
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[
+            @"not a dictionary",
+            @[@"neither is this"],
+            @{ CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @1 }
+        ]]];
+
+    XCTAssertEqual(items.count, 1, @"non-dictionary entries must be skipped, not crash");
+    XCTAssertEqualObjects(items.firstObject.targetId, @"1");
+}
+
+- (void)testContentFetchItemsWithAbsentOrEmptyKeyIsEmpty {
+    XCTAssertEqual([CTContentFetchManager contentFetchItemsFromResponse:@{}].count, 0);
+    XCTAssertEqual([CTContentFetchManager contentFetchItemsFromResponse:[self responseWithItems:@[]]].count, 0);
+    XCTAssertEqual([CTContentFetchManager contentFetchItemsFromResponse:
+        @{ CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @"not an array" }].count, 0);
+}
+
+- (void)testContentFetchItemPreservesRawItemVerbatim {
+    NSDictionary *raw = @{
+        CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @1,
+        @"extraServerField": @"must survive"
+    };
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[raw]]];
+
+    // The outbound request echoes rawItem back, so the wire format must not be altered.
+    XCTAssertEqualObjects(items.firstObject.rawItem, raw);
+}
+
+#pragma mark - Synthetic Payload Tests
+
+- (CTContentFetchItem *)itemWithJSON:(NSDictionary *)json {
+    return [CTContentFetchManager contentFetchItemsFromResponse:
+        [self responseWithItems:@[json]]].firstObject;
+}
+
+/*!
+ Without a priority, `sortByPriority:` would silently default to 1 and mispredict any campaign
+ that sets one — a wrong answer that looks like a right one. No prediction is preferable.
+ */
+- (void)testSyntheticPayloadIsNilWithoutPriority {
+    CTContentFetchItem *item = [self itemWithJSON:@{
+        CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @300,
+        CLTAP_INAPP_TRIGGERS: @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }]
+    }];
+
+    XCTAssertNil(item.syntheticInAppPayload);
+}
+
+- (void)testSyntheticPayloadIsNilWithoutTargetId {
+    CTContentFetchItem *item = [self itemWithJSON:@{ CLTAP_INAPP_PRIORITY: @50 }];
+
+    XCTAssertNil(item.syntheticInAppPayload);
+}
+
+- (void)testSyntheticPayloadCarriesSelectionRulesOnly {
+    CTContentFetchItem *item = [self itemWithJSON:@{
+        CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @300,
+        CLTAP_INAPP_PRIORITY: @50,
+        CLTAP_INAPP_IS_SUPPRESSED: @NO,
+        CLTAP_DELAY_AFTER_TRIGGER: @0,
+        CLTAP_INAPP_TRIGGERS: @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }],
+        CLTAP_INAPP_FC_LIMITS: @[],
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[],
+        // Content, which must not be copied across — a synthetic payload is never displayed.
+        @"message": @{ @"text": @"should not be copied" },
+        @"media": @{ @"url": @"http://example.com/x.png" }
+    }];
+
+    NSDictionary *payload = item.syntheticInAppPayload;
+    XCTAssertNotNil(payload);
+    XCTAssertEqualObjects(payload[CLTAP_INAPP_ID], @"300", @"ti must come from tgtId");
+    XCTAssertEqualObjects(payload[CLTAP_INAPP_PRIORITY], @50);
+    XCTAssertEqualObjects(payload[CLTAP_INAPP_TRIGGERS], @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }]);
+    XCTAssertTrue([payload[CLTAP_INAPP_SYNTHETIC_CANDIDATE] boolValue],
+                  @"must be tagged so the display path can reject it");
+    XCTAssertNil(payload[@"message"]);
+    XCTAssertNil(payload[@"media"]);
+}
+
+- (void)testSyntheticPayloadOmitsAbsentSelectionKeys {
+    CTContentFetchItem *item = [self itemWithJSON:@{
+        CLTAP_CONTENT_FETCH_ITEM_TGT_ID: @300,
+        CLTAP_INAPP_PRIORITY: @50
+    }];
+
+    NSDictionary *payload = item.syntheticInAppPayload;
+    XCTAssertNotNil(payload);
+    // Keys the backend has not sent are simply absent, keeping this forward-compatible.
+    XCTAssertNil(payload[CLTAP_INAPP_TRIGGERS]);
+    XCTAssertNil(payload[CLTAP_INAPP_TEMPLATE_NAME]);
+}
+
+#pragma mark - Batch Completion Contract Tests
+
+/*!
+ An arbitration window suppresses app-launch in-apps until the fetch reports completion, so a
+ missed signal would suppress them for the rest of the session. These cover the paths that
+ previously dropped a batch with no signal at all.
+ */
+- (void)testCompletionRunsOnSuccessfulResponse {
+    [self stubRequestsSuccess];
+
+    XCTestExpectation *completed = [self expectationWithDescription:@"completion runs"];
+    [self.contentFetchManager handleContentFetch:[self responseWithItems:@[@{ @"test": @"data" }]]
+                                     completion:^{ [completed fulfill]; }];
+
+    [self waitForExpectations:@[completed] timeout:5.0];
+}
+
+- (void)testCompletionRunsOnHTTPError {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [HTTPStubsResponse responseWithJSONObject:@{} statusCode:500 headers:nil];
+    }];
+
+    XCTestExpectation *completed = [self expectationWithDescription:@"completion runs on failure"];
+    [self.contentFetchManager handleContentFetch:[self responseWithItems:@[@{ @"test": @"data" }]]
+                                     completion:^{ [completed fulfill]; }];
+
+    [self waitForExpectations:@[completed] timeout:5.0];
+}
+
+- (void)testCompletionRunsWhenContentFetchKeyAbsent {
+    XCTestExpectation *completed = [self expectationWithDescription:@"completion runs with nothing to fetch"];
+    [self.contentFetchManager handleContentFetch:@{} completion:^{ [completed fulfill]; }];
+
+    [self waitForExpectations:@[completed] timeout:1.0];
+}
+
+- (void)testCompletionRunsExactlyOnce {
+    [self stubRequestsSuccess];
+
+    __block NSInteger completionCount = 0;
+    XCTestExpectation *completed = [self expectationWithDescription:@"completion runs"];
+    [self.contentFetchManager handleContentFetch:[self responseWithItems:@[@{ @"test": @"data" }]]
+                                     completion:^{
+        completionCount++;
+        [completed fulfill];
+    }];
+    [self waitForExpectations:@[completed] timeout:5.0];
+
+    // Re-driving an already-completed batch must not fire the completion a second time.
+    [self.contentFetchManager fetchContentAtIndex:0];
+
+    XCTestExpectation *drained = [self expectationWithDescription:@"queue drained"];
+    dispatch_barrier_async(self.contentFetchManager.concurrentQueue, ^{ [drained fulfill]; });
+    [self waitForExpectations:@[drained] timeout:5.0];
+
+    XCTAssertEqual(completionCount, 1);
+}
+
+- (void)testCompletionRunsWhenAbandonedByUserSwitch {
+    // Responses slower than the user switch will wait for, so the batch is abandoned mid-flight.
+    self.contentFetchManager.userSwitchTimeout = 1.0;
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        HTTPStubsResponse *response = [HTTPStubsResponse responseWithJSONObject:@{} statusCode:200 headers:nil];
+        response.requestTime = 6.0;
+        return response;
+    }];
+
+    XCTestExpectation *completed = [self expectationWithDescription:@"completion runs on user switch"];
+    [self.contentFetchManager handleContentFetch:[self responseWithItems:@[@{ @"test": @"data" }]]
+                                     completion:^{ [completed fulfill]; }];
+
+    [self.contentFetchManager deviceIdWillChange];
+
+    [self waitForExpectations:@[completed] timeout:15.0];
+}
+
 @end
