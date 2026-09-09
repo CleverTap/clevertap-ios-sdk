@@ -50,11 +50,16 @@
     }
 
     NSMutableArray<NSString *> *targetIds = [NSMutableArray array];
+    NSMutableArray<NSDictionary *> *syntheticCandidates = [NSMutableArray array];
     for (CTContentFetchItem *item in items) {
         BOOL isAppLaunched = [item.eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT];
         BOOL isInAppKey = [item.responseKey isEqualToString:CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
         if (isAppLaunched && isInAppKey && item.targetId) {
             [targetIds addObject:item.targetId];
+            NSDictionary *synthetic = item.syntheticInAppPayload;
+            if (synthetic) {
+                [syntheticCandidates addObject:synthetic];
+            }
         }
     }
 
@@ -62,7 +67,18 @@
         return;
     }
 
-    [self.inAppEvaluationManager openAppLaunchedArbitrationWithTargetIds:targetIds];
+    // All or nothing. Predicting from a partial set could miss the campaign that would actually
+    // have won, so unless every expected in-app came with its selection rules, wait for the real
+    // response instead. Today no payload carries them, so this is always the empty case.
+    BOOL canPredict = (syntheticCandidates.count == targetIds.count);
+    if (!canPredict && syntheticCandidates.count > 0) {
+        CleverTapLogDebug(self.config.logLevel,
+                          @"%@: Only %lu of %lu content fetch items carry selection rules, cannot predict — will wait",
+                          self, (unsigned long)syntheticCandidates.count, (unsigned long)targetIds.count);
+    }
+
+    [self.inAppEvaluationManager openAppLaunchedArbitrationWithTargetIds:targetIds
+                                                    syntheticCandidates:(canPredict ? syntheticCandidates : nil)];
 #endif
 }
 

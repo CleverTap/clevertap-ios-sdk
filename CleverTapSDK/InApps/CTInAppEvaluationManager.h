@@ -71,8 +71,15 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param targetIds Campaign ids the content fetch is expected to return. Recorded for diagnostics
  only — the window closes on the fetch's completion signal, not on these arriving.
+
+ @param syntheticCandidates Selection rules for those in-apps, from
+ `CTContentFetchItem.syntheticInAppPayload`. When supplied, the window can often be skipped
+ entirely: if the app-launch winner already outranks all of them, it displays immediately rather
+ than waiting. Pass nil or an empty array to always wait — required unless rules are available
+ for *every* expected in-app, since predicting from a partial set could miss the actual winner.
  */
-- (void)openAppLaunchedArbitrationWithTargetIds:(NSArray<NSString *> *)targetIds;
+- (void)openAppLaunchedArbitrationWithTargetIds:(NSArray<NSString *> *)targetIds
+                            syntheticCandidates:(nullable NSArray<NSDictionary *> *)syntheticCandidates;
 
 /*!
  Report that the content fetch for this launch has settled.
