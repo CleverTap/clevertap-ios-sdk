@@ -2600,11 +2600,11 @@ static BOOL sharedInstanceErrorLogged;
 
     @try {
         // ndmc is on every response that knows about caps. Seeing it is how we know this response
-        // has caps at all. No ndmp means there is no daily limit. INT_MAX is how that is stored
-        // here.
+        // has caps at all. A missing ndmp means there is no daily limit. -1 is how the server says
+        // no limit, so -1 is what a missing value becomes.
         if (jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] != nil) {
-            int perSession = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] fallback:1];
-            int perDay = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_DAILY_MAX_META_KEY] fallback:INT_MAX];
+            int perSession = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] fallback:-1];
+            int perDay = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_DAILY_MAX_META_KEY] fallback:-1];
             [self.ndFCManager updateGlobalLimitsPerDay:perDay andPerSession:perSession];
         }
 
@@ -2672,10 +2672,12 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Drops the Native Display units that have no room left under the counting caps.
 
- A unit with no cap settings passes through untouched, so display units that came before this feature
- behave exactly as they did. @c frequencyLimits and @c occurrenceLimits are not checked again here.
- The SDK already checked them and sent the ids that passed in @c adUnit_eval, and the server sent
- content only for those. This is the only place @c ndmc and @c mdc are applied.
+ Every unit goes through the check. An account that has no limits set lets them all through, so
+ display units that came before this feature behave exactly as they did.
+
+ @c frequencyLimits and @c occurrenceLimits are not checked again here. The SDK already checked them
+ and sent the ids that passed in @c adUnit_eval, and the server sent content only for those. This is
+ the only place @c ndmc, @c ndmp and @c mdc are applied.
  */
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
     if (!self.ndFCManager) return displayUnits;
@@ -2683,38 +2685,38 @@ static BOOL sharedInstanceErrorLogged;
     // Check the date first. A unit must not be checked against yesterday's daily counts.
     [self.ndFCManager checkUpdateDailyLimits];
 
+    // Read once for the whole response. The value cannot change while this loop runs.
+    BOOL accountHasCaps = [self.ndFCManager hasAccountCaps];
+
     NSUInteger capManagedCount = 0;
     NSMutableArray<CleverTapDisplayUnit *> *withinCaps = [NSMutableArray new];
     for (CleverTapDisplayUnit *unit in displayUnits) {
         NSDictionary *json = unit.json;
-        if (![CTNdFCManager hasFrequencyCaps:json]) {
-            [withinCaps addObject:unit];
-            continue;
-        }
-        capManagedCount++;
-
         NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
         if (campaignId.length == 0) {
             // No id means nothing to store a count under. There is no cap to check. Showing it
             // is the safer mistake. Holding it back would hide a campaign for a reason nobody can
             // see.
-            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has caps but no ti, so its caps cannot be checked", self, unit.unitID);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has no ti, so its caps cannot be checked", self, unit.unitID);
             [withinCaps addObject:unit];
             continue;
+        }
+        if (accountHasCaps) {
+            capManagedCount++;
         }
 
         // The two flags are passed separately on purpose. efc skips every cap. excludeGlobalFCaps
         // skips only the two account caps. It leaves the campaign's own tlc, tdc and mdc in place.
         BOOL canShow = [self.ndFCManager canShowCampaign:campaignId
                                          excludeFromCaps:[json[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue]
-                                       excludeGlobalCaps:[json[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue]
+                                       excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
                                       totalLifetimeCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] fallback:-1]
                                          totalDailyCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_DAILY_COUNT] fallback:-1]
                                            maxPerSession:[self nativeDisplayIntFrom:json[CLTAP_INAPP_MAX_PER_SESSION] fallback:-1]];
         if (canShow) {
             [withinCaps addObject:unit];
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ held back by its frequency caps", self, campaignId);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display campaign %@ held back by its frequency caps", self, campaignId);
         }
     }
 
@@ -5330,18 +5332,17 @@ static BOOL sharedInstanceErrorLogged;
  of those calls away would mean second-guessing our only signal. Android counts every call too, and
  the totals go to the server, so both platforms have to count the same way.
 
- Units with no cap settings are ignored, so a display unit that came before this feature never adds
- to the account's daily and session totals.
+ Every unit is counted. The content the server sends carries no cap settings of its own, so there is
+ nothing on the unit that could tell us to skip it. The server needs these totals for the account
+ limits, and it needs them from every unit the app showed. Counting cannot depend on which limits
+ happen to be set right now either. A limit set tomorrow has to start from a real history.
  */
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit {
     if (!self.ndFCManager) return;
 
-    NSDictionary *json = displayUnit.json;
-    if (![CTNdFCManager hasFrequencyCaps:json]) return;
-
-    NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
+    NSString *campaignId = [CTNdFCManager campaignIdFrom:displayUnit.json];
     if (campaignId.length == 0) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has caps but no ti, so it cannot be counted", self, displayUnit.unitID);
+        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has no ti, so it cannot be counted", self, displayUnit.unitID);
         return;
     }
 
@@ -5368,16 +5369,31 @@ static BOOL sharedInstanceErrorLogged;
  option is saving a time for every view of every campaign in case a rule turns up.
  */
 - (BOOL)nativeDisplayCampaignNeedsTimestamps:(NSString *)campaignId {
+    NSDictionary *rule = [self nativeDisplayRuleFor:campaignId];
+    NSArray *frequencyLimits = rule[CLTAP_INAPP_FC_LIMITS];
+    NSArray *occurrenceLimits = rule[CLTAP_INAPP_OCCURRENCE_LIMITS];
+    return ([frequencyLimits isKindOfClass:[NSArray class]] && frequencyLimits.count > 0)
+        || ([occurrenceLimits isKindOfClass:[NSArray class]] && occurrenceLimits.count > 0);
+}
+
+/// This campaign's entry in @c adUnit_notifs_ss, or nil when the server sent no rule for it.
+- (NSDictionary *)nativeDisplayRuleFor:(NSString *)campaignId {
     for (id rule in [self.ndStore serverSideNativeDisplays]) {
         if (![rule isKindOfClass:[NSDictionary class]]) continue;
-        if (![campaignId isEqualToString:[CTNdFCManager campaignIdFrom:rule]]) continue;
-
-        NSArray *frequencyLimits = rule[CLTAP_INAPP_FC_LIMITS];
-        NSArray *occurrenceLimits = rule[CLTAP_INAPP_OCCURRENCE_LIMITS];
-        return ([frequencyLimits isKindOfClass:[NSArray class]] && frequencyLimits.count > 0)
-            || ([occurrenceLimits isKindOfClass:[NSArray class]] && occurrenceLimits.count > 0);
+        if ([campaignId isEqualToString:[CTNdFCManager campaignIdFrom:rule]]) return rule;
     }
-    return NO;
+    return nil;
+}
+
+/**
+ Whether this campaign is marked as an exception to the two account limits.
+
+ The flag is @c excludeGlobalFCaps. It is read from the campaign's rule, not from the content. The
+ content the server sends for Native Display carries no cap settings at all. The rule is the only
+ place the flag arrives. In-app reads it from the content because in-app content does carry it.
+ */
+- (BOOL)nativeDisplayExcludesGlobalCapsFor:(NSString *)campaignId {
+    return [[self nativeDisplayRuleFor:campaignId][CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
 }
 
 - (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {

@@ -34,9 +34,8 @@ static NSString *const kOtherCampaignId = @"70002";
     self.helper = [NdHelper new];
     self.fcManager = self.helper.ndFCManager;
 
-    // Both account caps start at 1. That would block almost everything. Most tests here are about
-    // the per campaign caps. Turn these off. A test that needs them sets them itself.
-    [self.fcManager updateGlobalLimitsPerDay:-1 andPerSession:-1];
+    // Nothing is set here. Each test gets its own account id, so both account limits start at
+    // their default, which is off. A test that needs a limit sets it itself.
 }
 
 - (void)tearDown {
@@ -62,35 +61,44 @@ static NSString *const kOtherCampaignId = @"70002";
     }
 }
 
-#pragma mark hasFrequencyCaps
+#pragma mark The account limits are off until the server sends them
 
-- (void)testHasFrequencyCapsRecognisesEachMarkerOnItsOwn {
-    NSArray *markers = @[
-        CLTAP_INAPP_EXCLUDE_FROM_CAPS,
-        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS,
-        CLTAP_INAPP_TOTAL_LIFETIME_COUNT,
-        CLTAP_INAPP_TOTAL_DAILY_COUNT,
-        CLTAP_INAPP_MAX_PER_SESSION
-    ];
-    for (NSString *marker in markers) {
-        // Built outside the assert. Inside it, the commas in the literal would be read as extra
-        // arguments to the macro.
-        NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, marker: @1 };
-        XCTAssertTrue([CTNdFCManager hasFrequencyCaps:unit],
-                      @"%@ on its own should be enough to make a unit capped", marker);
-    }
+- (void)testBothAccountLimitsStartOff {
+    // Read straight from storage, before anything has written to it. In-app defaults these to 1.
+    // In-app gets away with it because imc and imp are on every response. ndmc and ndmp are not.
+    XCTAssertEqual(-1, [self.fcManager globalSessionMax]);
+    XCTAssertEqual(-1, [self.fcManager maxPerDayCount]);
 }
 
-- (void)testHasFrequencyCapsIsFalseForAUnitWithNoMarkers {
-    // Display units that already exist have none of these and must keep working untouched. They
-    // must also not add to the account's daily and session totals.
-    NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, @"type": @"banner", @"msg": @{} };
-    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:unit]);
+- (void)testAnAccountWithNoLimitsSentShowsAsManyUnitsAsItLikes {
+    // ndmc and ndmp are new keys. A response may not carry them. Nothing may be capped then.
+    // A default of 1 here would hold every existing Display Units customer to one unit a session.
+    [self show:kCampaignId times:50];
+    [self show:kOtherCampaignId times:50];
+
+    XCTAssertTrue([self canShow:kCampaignId]);
+    XCTAssertTrue([self canShow:kOtherCampaignId]);
+    XCTAssertFalse([self.fcManager hasAccountCaps]);
 }
 
-- (void)testHasFrequencyCapsIsFalseForANonDictionary {
-    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:nil]);
-    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:(NSDictionary *)@"not a dictionary"]);
+- (void)testTheAccountLimitsApplyToAUnitThatCarriesNoCapSettings {
+    // This is the bug the marker check caused. The content the server sends for Native Display
+    // carries no tlc, tdc, mdc or efc. The old code read that as "not capped" and skipped the
+    // account limits too. The account limits belong to the account. The unit says nothing about
+    // them.
+    [self.fcManager updateGlobalLimitsPerDay:-1 andPerSession:2];
+    [self show:kOtherCampaignId times:2];
+
+    XCTAssertFalse([self canShow:kCampaignId]);
+    XCTAssertTrue([self.fcManager hasAccountCaps]);
+}
+
+- (void)testHasAccountCapsIsTrueWhenOnlyOneOfTheTwoIsSet {
+    [self.fcManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    XCTAssertTrue([self.fcManager hasAccountCaps]);
+
+    [self.fcManager updateGlobalLimitsPerDay:-1 andPerSession:5];
+    XCTAssertTrue([self.fcManager hasAccountCaps]);
 }
 
 #pragma mark efc and excludeGlobalFCaps are not the same flag

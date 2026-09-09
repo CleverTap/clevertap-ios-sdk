@@ -44,16 +44,13 @@ NS_ASSUME_NONNULL_BEGIN
                 triggerManager:(CTInAppTriggerManager *)triggerManager NS_DESIGNATED_INITIALIZER;
 
 /**
- Whether the server sent any frequency cap settings with this unit.
+ Whether the server has set either account limit, @c ndmp for the day or @c ndmc for the session.
 
- The settings are @c efc, @c excludeGlobalFCaps, @c tlc, @c tdc and @c mdc. Any one of them is
- enough. This does not look at @c frequencyLimits or @c occurrenceLimits. Those are a different
- thing. They are checked before the unit is even asked for.
-
- Only these units are capped and counted. A unit without them is left alone. Display units that
- already exist keep working. They never add to the account's daily and session totals.
+ Neither is set until a response carries @c ndmc. An account that never receives it has no account
+ limit of any kind. Only the log line that warns about missing view reports reads this. The caps
+ themselves do not need it. @c canShowCampaign: already lets an unset limit through.
  */
-+ (BOOL)hasFrequencyCaps:(nullable NSDictionary *)unit;
+- (BOOL)hasAccountCaps;
 
 /**
  The campaign id this unit's counts are stored under. Empty string if the unit has none.

@@ -77,16 +77,10 @@ static const int kCTNdSessionCapDefault = 1000;
     return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.config.accountId, self.deviceId];
 }
 
-#pragma mark Which units have caps
+#pragma mark Which accounts have caps
 
-+ (BOOL)hasFrequencyCaps:(NSDictionary *)unit {
-    if (![unit isKindOfClass:[NSDictionary class]]) return NO;
-
-    return unit[CLTAP_INAPP_EXCLUDE_FROM_CAPS] != nil
-        || unit[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] != nil
-        || unit[CLTAP_INAPP_TOTAL_DAILY_COUNT] != nil
-        || unit[CLTAP_INAPP_MAX_PER_SESSION] != nil
-        || unit[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil;
+- (BOOL)hasAccountCaps {
+    return [self globalSessionMax] != kCTNdUncapped || [self maxPerDayCount] != kCTNdUncapped;
 }
 
 + (NSString *)campaignIdFrom:(NSDictionary *)unit {
@@ -108,12 +102,15 @@ static const int kCTNdSessionCapDefault = 1000;
     }
 }
 
+// No limit until the server sends one. ndmc and ndmp are new keys. A response may not carry them
+// at all. A default of 1 would then hold every account to one unit per session and one per day.
+// In-app defaults these to 1. In-app can do that because imc and imp are on every response.
 - (int)globalSessionMax {
-    return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_SESSION_MAX_KEY] withResetValue:1];
+    return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_SESSION_MAX_KEY] withResetValue:kCTNdUncapped];
 }
 
 - (int)maxPerDayCount {
-    return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_MAX_PER_DAY_KEY] withResetValue:1];
+    return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_MAX_PER_DAY_KEY] withResetValue:kCTNdUncapped];
 }
 
 - (int)shownTodayCount {
@@ -224,7 +221,7 @@ static const int kCTNdSessionCapDefault = 1000;
                 [self.campaignCounts removeObjectForKey:campaignId];
                 [self.impressionManager removeImpressions:campaignId];
                 [self.triggerManager removeTriggers:campaignId];
-                CleverTapLogInternal(self.config.logLevel, @"%@: Removed Native Display counts, triggers and impressions for campaign %@", self, campaignId);
+                CleverTapLogInternal(self.config.logLevel, @"%@: Removed counts, triggers and impressions for Native Display campaign %@", self, campaignId);
             }
             [CTPreferences putObject:self.campaignCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
         }

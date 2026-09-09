@@ -172,7 +172,15 @@
                                                        forCampaignId:campaignId
                                                withImpressionManager:self.impressionManager
                                                    andTriggerManager:self.triggerManager];
-            if (!matchesLimits) continue;
+            if (!matchesLimits) {
+                // Every limit in the list has to pass. The list is printed whole. The trigger count
+                // is printed next to it. onEvery and onExactly are read from that count. The count
+                // is a lifetime total for this one campaign. It is not a count of views.
+                CleverTapLogStaticDebug(@"Native Display campaign %@ matched event %@, but its limits did not pass. Limits: %@. This campaign has now matched a trigger %lu time(s) in total since install.",
+                                        campaignId, [event eventName], whenLimits,
+                                        (unsigned long)[self.triggerManager getTriggers:campaignId]);
+                continue;
+            }
 
             NSNumber *ti = [CTUtils numberFromString:campaignId];
             if (!ti) continue;

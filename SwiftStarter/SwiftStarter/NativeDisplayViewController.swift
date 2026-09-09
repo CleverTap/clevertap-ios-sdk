@@ -28,9 +28,14 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
         CleverTap.sharedInstance()?.setDisplayUnitDelegate(self)
     }
     
+    // Called after a server response carries display unit content. The array is the whole cache,
+    // not only the units that just arrived. Units held back by their frequency caps never appear here.
     func displayUnitsUpdated(_ displayUnits: [CleverTapDisplayUnit]) {
-        // you will get display units here
-        print("displayUnitsUpdated")
+        print("[Native Display] displayUnitsUpdated, cache now holds \(displayUnits.count) unit(s)")
+        for unit in displayUnits {
+            let ti = unit.json?["ti"] as? String ?? "nil"
+            print("[Native Display] displayUnitsUpdated ti=\(ti) unitID=\(unit.unitID ?? "nil") title=\(unit.contents?.first?.title ?? "nil")")
+        }
         self.displayUnits = displayUnits
         updateAllDisplayUnitsSection()
     }
