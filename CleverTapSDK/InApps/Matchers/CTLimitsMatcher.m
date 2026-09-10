@@ -10,7 +10,7 @@
 
 @implementation CTLimitsMatcher
 
-- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(CTInAppTriggerManager *)triggerManager {
+- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(id<CTTriggerCounting>)triggerManager {
     if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
         return NO;
     }

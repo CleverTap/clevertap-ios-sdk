@@ -40,9 +40,100 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
 @property (nonatomic, assign) NSUInteger completedBatches;
 
+/// Per-batch completion blocks keyed by queue index. Guarded by `queueLock`.
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, dispatch_block_t> *batchCompletions;
+
+@end
+
+@implementation CTContentFetchItem
+
+- (instancetype)initWithJSON:(NSDictionary *)json {
+    if (![json isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    self = [super init];
+    if (self) {
+        _rawItem = [json copy];
+
+        id eventName = json[CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME];
+        if ([eventName isKindOfClass:[NSString class]]) {
+            _eventName = [eventName copy];
+        }
+
+        id responseKey = json[CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY];
+        if ([responseKey isKindOfClass:[NSString class]]) {
+            _responseKey = [responseKey copy];
+        }
+
+        // `tgtId` arrives as a number, but the `ti` it will be compared against may be either a
+        // number or a string. Normalize the same way CTInAppNotification does, so the two match.
+        id targetId = json[CLTAP_CONTENT_FETCH_ITEM_TGT_ID];
+        if ([targetId isKindOfClass:[NSNumber class]] || [targetId isKindOfClass:[NSString class]]) {
+            NSString *normalized = [NSString stringWithFormat:@"%@", targetId];
+            if (normalized.length > 0) {
+                _targetId = normalized;
+            }
+        }
+    }
+    return self;
+}
+
+- (NSDictionary *)syntheticInAppPayload {
+    // `priority` is the primary discriminator. Without it there is nothing to predict with — see
+    // the note on the property.
+    if (!self.targetId || self.rawItem[CLTAP_INAPP_PRIORITY] == nil) {
+        return nil;
+    }
+
+    NSMutableDictionary *payload = [NSMutableDictionary dictionary];
+    payload[CLTAP_INAPP_ID] = self.targetId;
+    payload[CLTAP_INAPP_SYNTHETIC_CANDIDATE] = @YES;
+
+    // Copy across only the rules that decide a winner, and only those actually present. Keys the
+    // backend has not sent yet are simply absent, which keeps this forward-compatible.
+    NSArray<NSString *> *selectionKeys = @[
+        CLTAP_INAPP_PRIORITY,
+        CLTAP_INAPP_IS_SUPPRESSED,
+        CLTAP_DELAY_AFTER_TRIGGER,
+        CLTAP_INAPP_TRIGGERS,
+        CLTAP_INAPP_FC_LIMITS,
+        CLTAP_INAPP_OCCURRENCE_LIMITS,
+        CLTAP_INAPP_TEMPLATE_NAME
+    ];
+    for (NSString *key in selectionKeys) {
+        id value = self.rawItem[key];
+        if (value) {
+            payload[key] = value;
+        }
+    }
+
+    return payload;
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<CTContentFetchItem: event=%@ responseKey=%@ tgtId=%@>",
+            self.eventName, self.responseKey, self.targetId];
+}
+
 @end
 
 @implementation CTContentFetchManager
+
++ (NSArray<CTContentFetchItem *> *)contentFetchItemsFromResponse:(NSDictionary *)jsonResp {
+    NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
+    if (![contentFetch isKindOfClass:[NSArray class]] || contentFetch.count == 0) {
+        return @[];
+    }
+
+    NSMutableArray<CTContentFetchItem *> *items = [[NSMutableArray alloc] initWithCapacity:contentFetch.count];
+    for (id item in contentFetch) {
+        CTContentFetchItem *parsed = [[CTContentFetchItem alloc] initWithJSON:item];
+        if (parsed) {
+            [items addObject:parsed];
+        }
+    }
+    return items;
+}
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  requestSender:(CTRequestSender *)requestSender
@@ -69,22 +160,30 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         
         self.allRequestsGroup = dispatch_group_create();
         self.inFlightRequestIndices = [[NSMutableSet alloc] init];
+        self.batchCompletions = [[NSMutableDictionary alloc] init];
     }
     
     return self;
 }
 
 - (void)handleContentFetch:(NSDictionary *)jsonResp {
-    NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
-    if (!contentFetch || ![contentFetch isKindOfClass:[NSArray class]] || contentFetch.count == 0) {
+    [self handleContentFetch:jsonResp completion:nil];
+}
+
+- (void)handleContentFetch:(NSDictionary *)jsonResp completion:(dispatch_block_t)completion {
+    NSArray<CTContentFetchItem *> *contentFetch = [[self class] contentFetchItemsFromResponse:jsonResp];
+    if (contentFetch.count == 0) {
+        // Nothing to fetch, but the contract is that completion always runs exactly once.
+        if (completion) completion();
         return;
     }
     
     NSMutableArray *events = [[NSMutableArray alloc] init];
-    for (NSDictionary *contentFetchItem in contentFetch) {
+    for (CTContentFetchItem *contentFetchItem in contentFetch) {
+        // Send the item back verbatim — the outbound wire format must not change.
         NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
             CLTAP_EVENT_NAME: CLTAP_CONTENT_FETCH_EVENT,
-            CLTAP_EVENT_DATA: contentFetchItem
+            CLTAP_EVENT_DATA: contentFetchItem.rawItem
         }];
         
         // Call delegate to add event metadata
@@ -96,6 +195,9 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     [self.contentFetchQueue addObject:events];
     CleverTapLogDebug(self.config.logLevel, @"%@: Added content fetch with %ld events", self, [events count]);
     NSUInteger batchIndex = self.contentFetchQueue.count - 1;
+    if (completion) {
+        self.batchCompletions[@(batchIndex)] = completion;
+    }
     [self.queueLock unlock];
     
     [self fetchContentAtIndex:batchIndex];
@@ -110,10 +212,21 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         self.contentFetchQueue[i] = [NSNull null];
         self.completedBatches++;
     }
-    
+
+    // Take the completion before cleanup, which resets the queue and therefore the indices.
+    dispatch_block_t completion = self.batchCompletions[@(i)];
+    if (completion) {
+        [self.batchCompletions removeObjectForKey:@(i)];
+    }
+
     [self cleanupIfAllCompleted];
     
     [self.queueLock unlock];
+
+    // Invoke outside the lock — the block is caller-supplied and may re-enter.
+    if (completion) {
+        completion();
+    }
 }
 
 - (void)cleanupIfAllCompleted {
@@ -144,8 +257,20 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         NSArray *batch;
         [self.queueLock lock];
         if (i >= self.contentFetchQueue.count || self.contentFetchQueue[i] == [NSNull null]) {
-            [self.queueLock unlock];
+            // The batch is gone — already completed, or the queue was cleared by a user switch.
+            // Release its bookkeeping and run any registered completion, so a caller waiting on
+            // this batch is not left hanging. Deliberately not markCompletedAtIndex:, which would
+            // re-run cleanup and signal an "all batches completed" transition that did not happen.
             [self.inFlightRequestIndices removeObject:@(i)];
+            dispatch_block_t completion = self.batchCompletions[@(i)];
+            if (completion) {
+                [self.batchCompletions removeObjectForKey:@(i)];
+            }
+            [self.queueLock unlock];
+
+            if (completion) {
+                completion();
+            }
             dispatch_group_leave(self.allRequestsGroup);
             return;
         }
@@ -299,7 +424,15 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         [self.contentFetchQueue removeAllObjects];
         [self.inFlightRequestIndices removeAllObjects];
         self.completedBatches = 0;
+        // Anything still registered here timed out above and its batch is being abandoned. Run
+        // the blocks anyway — a caller waiting on one must not be left hanging by a user switch.
+        NSArray<dispatch_block_t> *abandoned = [self.batchCompletions.allValues copy];
+        [self.batchCompletions removeAllObjects];
         [self.queueLock unlock];
+
+        for (dispatch_block_t completion in abandoned) {
+            completion();
+        }
     }];
 }
 

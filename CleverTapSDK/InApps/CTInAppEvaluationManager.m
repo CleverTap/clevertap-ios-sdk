@@ -24,6 +24,86 @@
 #import "CleverTapSDK-Swift.h"
 #endif
 
+/*!
+ Deferred app-launch state for one `/a1` response and the content fetch it spawned.
+
+ File-private: the window is an implementation detail of how this manager defers an evaluation,
+ not a collaborator anything else needs to see.
+ */
+@interface CTInAppArbitrationCycle : NSObject
+
+/// Winners buffered so far — one per response handled while the window was open.
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *candidates;
+
+/// Campaign ids the content fetch said it would return. Diagnostics only.
+@property (nonatomic, copy) NSArray<NSString *> *expectedTargetIds;
+
+/*!
+ Selection rules for the in-apps the content fetch will return, as synthetic payloads.
+
+ Empty when the backend has not sent enough to predict with, in which case the window simply
+ waits for the real response instead.
+ */
+@property (nonatomic, copy) NSArray<NSDictionary *> *syntheticCandidates;
+
+/// Set on close, so a late completion and the timeout cannot both arbitrate.
+@property (nonatomic, assign) BOOL closed;
+
+/*!
+ The in-app actually shown for this launch, once one has been.
+
+ Kept only to detect a mispredicted fast path: if a real content candidate later arrives that
+ would have outranked this, the synthetic rules disagreed with the delivered payload.
+ */
+@property (nonatomic, copy) NSDictionary *shownCandidate;
+
+@end
+
+@implementation CTInAppArbitrationCycle
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _candidates = [NSMutableArray array];
+    }
+    return self;
+}
+
+@end
+
+/*!
+ A trigger counter that reports a fixed number above the live one, without writing anything.
+
+ Needed because the real evaluation increments a campaign's trigger count *before* limits are
+ checked, so `onEvery` / `onExactly` compare against N+1. A dry run must not persist that
+ increment, but reading the raw N would flip those limits' result — silently mispredicting
+ exactly the campaigns that use trigger-based limits. Offsetting the read reproduces what the
+ real path would see while leaving storage untouched.
+ */
+@interface CTOffsetTriggerCounter : NSObject <CTTriggerCounting>
+- (instancetype)initWithCounter:(id<CTTriggerCounting>)counter offset:(NSUInteger)offset;
+@end
+
+@implementation CTOffsetTriggerCounter {
+    id<CTTriggerCounting> _counter;
+    NSUInteger _offset;
+}
+
+- (instancetype)initWithCounter:(id<CTTriggerCounting>)counter offset:(NSUInteger)offset {
+    self = [super init];
+    if (self) {
+        _counter = counter;
+        _offset = offset;
+    }
+    return self;
+}
+
+- (NSUInteger)getTriggers:(NSString *)campaignId {
+    return [_counter getTriggers:campaignId] + _offset;
+}
+
+@end
+
 @interface CTInAppEvaluationManager()
 
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
@@ -47,6 +127,13 @@
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
+/// Guards `appLaunchedArbitrationCycle`. Mutated from the network thread, the content fetch
+/// queue and the timeout, so every access is synchronized on this.
+@property (nonatomic, strong) NSObject *arbitrationLock;
+
+/// The open arbitration window, or nil when in-apps display immediately as before.
+@property (nonatomic, strong) CTInAppArbitrationCycle *appLaunchedArbitrationCycle;
+
 @end
 
 @implementation CTInAppEvaluationManager
@@ -64,7 +151,10 @@
         self.deviceId = deviceId;
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
-        
+
+        self.arbitrationLock = [NSObject new];
+        self.appLaunchedArbitrationTimeout = CLTAP_INAPP_ARBITRATION_TIMEOUT_SECONDS;
+
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         NSArray *savedEvaluatedServerSideInAppIds = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
         if (savedEvaluatedServerSideInAppIds) {
@@ -169,7 +259,271 @@
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     // Server-side evaluations do **NOT** update TTL
     NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[ImmediateInAppSelectionStrategy shared] withTTL: false];
+    // If the content fetch cannot outrank this winner, there is nothing to wait for.
+    if ([self appLaunchedFastPathBeatsContentFetch:ssInApps forEvent:event]) {
+        [self.inAppDisplayManager _addInAppNotificationsToQueue:ssInApps];
+        return;
+    }
+
+    // While a window is open this winner competes against the content fetch result instead of
+    // displaying now. See openAppLaunchedArbitrationWithTargetIds:syntheticCandidates:.
+    if ([self bufferAppLaunchedCandidatesIfArbitrating:ssInApps]) {
+        return;
+    }
     [self.inAppDisplayManager _addInAppNotificationsToQueue:ssInApps];
+}
+
+/*!
+ Decide whether the app-launch winner can be shown now instead of waiting for the content fetch.
+
+ Only possible when the content fetch told us the selection rules of everything it will return
+ (see `CTContentFetchItem.syntheticInAppPayload`). Without them this returns NO and the window
+ waits, which is the behaviour when the backend sends no rules at all.
+
+ The synthetic candidates are evaluated as a **dry run** — they must not record trigger counts,
+ because the real payload is evaluated again when `/content` arrives.
+
+ @return YES when the caller should display `appLaunchedWinners` immediately. The window is
+ marked closed in that case, so the content response is dropped rather than shown as a second
+ in-app.
+ */
+- (BOOL)appLaunchedFastPathBeatsContentFetch:(NSArray<NSDictionary *> *)appLaunchedWinners
+                                    forEvent:(CTEventAdapter *)event {
+    NSArray<NSDictionary *> *synthetics = nil;
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle || cycle.closed || cycle.syntheticCandidates.count == 0) {
+            return NO;
+        }
+        synthetics = cycle.syntheticCandidates;
+    }
+
+    // Nothing to show now, so the content result is the only possibility — wait for it.
+    if (appLaunchedWinners.count == 0) {
+        return NO;
+    }
+
+    NSMutableArray *eligibleSynthetics = [self evaluate:event withInApps:synthetics recordTriggers:NO];
+    if (eligibleSynthetics.count == 0) {
+        CleverTapLogStaticDebug(@"No content fetch candidate can qualify, showing App Launched in-app without waiting");
+        [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
+        return YES;
+    }
+
+    // Same comparator as the real selection, but resolve the winner inline rather than through
+    // selectAndProcessEligibleInApps: — that reports suppressions to the server, and these
+    // candidates have not been delivered.
+    NSMutableArray *merged = [appLaunchedWinners mutableCopy];
+    [merged addObjectsFromArray:eligibleSynthetics];
+    [self sortByPriority:merged];
+
+    NSDictionary *predicted = nil;
+    for (NSDictionary *candidate in merged) {
+        if (![self shouldSuppress:candidate]) {
+            predicted = candidate;
+            break;
+        }
+    }
+
+    if (!predicted || [predicted[CLTAP_INAPP_SYNTHETIC_CANDIDATE] boolValue]) {
+        // A content candidate is predicted to win, so waiting for the real payload is worthwhile.
+        CleverTapLogStaticDebug(@"Content fetch candidate %@ predicted to outrank App Launched in-app, waiting",
+                                predicted ? [CTInAppNotification inAppId:predicted] : @"none");
+        return NO;
+    }
+
+    CleverTapLogStaticDebug(@"App Launched in-app %@ outranks every content fetch candidate, showing without waiting",
+                            [CTInAppNotification inAppId:predicted]);
+    [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
+    return YES;
+}
+
+/*!
+ Record that an in-app has been shown for this launch without going through the buffered path.
+
+ Leaves the cycle in place but closed, so a content response arriving afterwards is suppressed
+ rather than displayed as a second in-app.
+ */
+- (void)markAppLaunchedArbitrationShown:(NSDictionary *)shown {
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle || cycle.closed) {
+            return;
+        }
+        cycle.closed = YES;
+        cycle.shownCandidate = shown;
+    }
+}
+
+#pragma mark - App Launched arbitration
+
+- (void)openAppLaunchedArbitrationWithTargetIds:(NSArray<NSString *> *)targetIds
+                            syntheticCandidates:(NSArray<NSDictionary *> *)syntheticCandidates {
+    CTInAppArbitrationCycle *cycle = [[CTInAppArbitrationCycle alloc] init];
+    cycle.expectedTargetIds = [targetIds copy];
+    cycle.syntheticCandidates = [syntheticCandidates copy];
+
+    @synchronized (self.arbitrationLock) {
+        if (self.appLaunchedArbitrationCycle && !self.appLaunchedArbitrationCycle.closed) {
+            // A window is already open for a previous response. Leave it in place — closing it
+            // here would display its winner and then immediately open a second window, which is
+            // the multi-response behaviour we are trying to remove.
+            CleverTapLogStaticDebug(@"App Launched arbitration already open, not opening another");
+            return;
+        }
+        self.appLaunchedArbitrationCycle = cycle;
+    }
+
+    CleverTapLogStaticDebug(@"Opened App Launched arbitration, expecting %lu content target(s): %@",
+                            (unsigned long)targetIds.count, targetIds);
+
+    // Backstop only. The content fetch completion normally closes the window well before this.
+    __weak typeof(self) weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.appLaunchedArbitrationTimeout * NSEC_PER_SEC)),
+                   dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+
+        // Only time out the window this timer was scheduled for — a later one must not be cut short.
+        BOOL isStillCurrent = NO;
+        @synchronized (strongSelf.arbitrationLock) {
+            isStillCurrent = (strongSelf.appLaunchedArbitrationCycle == cycle && !cycle.closed);
+        }
+        if (isStillCurrent) {
+            CleverTapLogStaticDebug(@"App Launched arbitration timed out after %.1fs, showing best candidate so far",
+                                    strongSelf.appLaunchedArbitrationTimeout);
+            [strongSelf closeAppLaunchedArbitration];
+        }
+    });
+}
+
+- (void)appLaunchedArbitrationContentFetchDidComplete {
+    // Show the merged winner unless the timeout already did.
+    [self closeAppLaunchedArbitration];
+
+    // Nothing further can arrive for this launch, so stop suppressing and return to normal.
+    @synchronized (self.arbitrationLock) {
+        self.appLaunchedArbitrationCycle = nil;
+    }
+}
+
+- (void)closeAppLaunchedArbitration {
+    NSArray<NSDictionary *> *candidates = nil;
+
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle || cycle.closed) {
+            // No window, or the completion and the timeout raced and the other one won.
+            return;
+        }
+        cycle.closed = YES;
+        candidates = [cycle.candidates copy];
+        // Deliberately not cleared here. The cycle stays in place, closed, so that a content
+        // response arriving after a timeout is suppressed rather than displayed as a second
+        // in-app. It is cleared by appLaunchedArbitrationContentFetchDidComplete.
+    }
+
+    if (candidates.count == 0) {
+        CleverTapLogStaticDebug(@"Closed App Launched arbitration with no eligible candidates");
+        return;
+    }
+
+    // One merged selection across every buffered winner, so exactly one in-app is shown for the
+    // launch. Reuses the normal path so the sort, suppression and reporting stay identical.
+    NSMutableArray *merged = [[self class] withoutSyntheticCandidates:candidates];
+    NSArray<NSDictionary *> *winner = [self selectAndProcessEligibleInApps:merged
+                                                              withStrategy:[ImmediateInAppSelectionStrategy shared]
+                                                                   withTTL:false];
+    CleverTapLogStaticDebug(@"Closed App Launched arbitration, %lu candidate(s) merged, showing %@",
+                            (unsigned long)candidates.count,
+                            winner.firstObject ? [CTInAppNotification inAppId:winner.firstObject] : @"none");
+
+    // Recorded so a candidate arriving after this close can be compared against what was shown.
+    @synchronized (self.arbitrationLock) {
+        if (self.appLaunchedArbitrationCycle) {
+            self.appLaunchedArbitrationCycle.shownCandidate = winner.firstObject;
+        }
+    }
+
+    [self.inAppDisplayManager _addInAppNotificationsToQueue:winner];
+}
+
+/*!
+ Buffer a response's winner if a window is open, or drop it if the launch's slot is already spent.
+
+ @return YES when the caller must not queue the in-apps for display.
+ */
+- (BOOL)bufferAppLaunchedCandidatesIfArbitrating:(NSArray<NSDictionary *> *)inApps {
+    @synchronized (self.arbitrationLock) {
+        CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
+        if (!cycle) {
+            return NO;
+        }
+
+        if (cycle.closed) {
+            // An in-app has already been shown for this launch — either the fast path showed one
+            // without waiting, or the window timed out. This response lost: displaying it now
+            // would give the user two in-apps, the bug the window exists to prevent. Drop it.
+            if (inApps.count > 0) {
+                CleverTapLogStaticDebug(@"Dropping %lu late App Launched candidate(s), arbitration already closed",
+                                        (unsigned long)inApps.count);
+                [self logIfMispredicted:inApps.firstObject against:cycle.shownCandidate];
+            }
+            return YES;
+        }
+
+        // An empty selection still counts as handled — nothing was eligible in this response, and
+        // falling through would call the display queue with an empty array.
+        NSArray<NSDictionary *> *displayable = [[self class] withoutSyntheticCandidates:inApps];
+        if (displayable.count > 0) {
+            [cycle.candidates addObjectsFromArray:displayable];
+            CleverTapLogStaticDebug(@"Buffered %lu App Launched candidate(s) for arbitration, %lu total",
+                                    (unsigned long)displayable.count, (unsigned long)cycle.candidates.count);
+        }
+        return YES;
+    }
+}
+
+/*!
+ Warn when a dropped content candidate would have outranked the in-app already shown.
+
+ Only reachable via the fast path, and only if the selection rules in the `content_fetch` item
+ disagreed with the payload `/content` actually delivered — a backend contract violation. The
+ user has already been shown the wrong in-app by this point, so this is a diagnostic rather than
+ something recoverable.
+ */
+- (void)logIfMispredicted:(NSDictionary *)dropped against:(NSDictionary *)shown {
+    if (!dropped || !shown) {
+        return;
+    }
+
+    NSMutableArray *pair = [@[dropped, shown] mutableCopy];
+    [self sortByPriority:pair];
+    if (pair.firstObject == dropped) {
+        CleverTapLogStaticDebug(@"Content fetch candidate %@ outranks the already-shown %@ — the "
+                                "selection rules sent with content_fetch disagree with the delivered payload",
+                                [CTInAppNotification inAppId:dropped], [CTInAppNotification inAppId:shown]);
+    }
+}
+
+/*!
+ Strip payloads built for speculative evaluation only.
+
+ A synthetic candidate carries selection rules but no content, so displaying one would render an
+ empty in-app. They should never reach here — this is a boundary check on the display path, not
+ flow control, so anything filtered out is logged as a programming error.
+ */
++ (NSMutableArray<NSDictionary *> *)withoutSyntheticCandidates:(NSArray<NSDictionary *> *)inApps {
+    NSMutableArray<NSDictionary *> *displayable = [NSMutableArray arrayWithCapacity:inApps.count];
+    for (NSDictionary *inApp in inApps) {
+        if ([inApp[CLTAP_INAPP_SYNTHETIC_CANDIDATE] boolValue]) {
+            CleverTapLogStaticDebug(@"Refusing to display synthetic candidate %@ — it has no content",
+                                    [CTInAppNotification inAppId:inApp]);
+            continue;
+        }
+        [displayable addObject:inApp];
+    }
+    return displayable;
 }
 
 - (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray<NSDictionary *> *)appLaunchedNotifs {
@@ -312,7 +666,28 @@
 }
 
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
+    return [self evaluate:event withInApps:inApps recordTriggers:YES];
+}
+
+/*!
+ Evaluate in-apps against an event, optionally without recording trigger counts.
+
+ @param recordTriggers `YES` for a real evaluation. `NO` for a dry run — used to predict whether
+ a candidate would qualify without mutating persisted state, so the same campaign can be
+ evaluated for real later without its trigger count being counted twice.
+
+ A dry run is not simply "skip the increment". The real path increments *before* checking limits,
+ so `onEvery` / `onExactly` compare against N+1; reading the raw N would flip their result. The
+ offsetting counter reproduces that view without writing it.
+ */
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event
+                  withInApps:(NSArray *)inApps
+              recordTriggers:(BOOL)recordTriggers {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
+    id<CTTriggerCounting> triggerCounter = recordTriggers
+        ? self.triggerManager
+        : [[CTOffsetTriggerCounter alloc] initWithCounter:self.triggerManager offset:1];
+
     for (NSDictionary *inApp in inApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (!campaignId) {
@@ -329,8 +704,10 @@
         CleverTapLogStaticDebug(@"Triggers matched for event %@ against inApp %@",[event eventName], campaignId);
         
         // In-app matches the trigger, increment trigger count
-        [self.triggerManager incrementTrigger:campaignId];
-        
+        if (recordTriggers) {
+            [self.triggerManager incrementTrigger:campaignId];
+        }
+
         // Match limits
         NSArray *frequencyLimits = inApp[CLTAP_INAPP_FC_LIMITS];
         NSArray *occurrenceLimits = inApp[CLTAP_INAPP_OCCURRENCE_LIMITS];
@@ -338,7 +715,7 @@
         [whenLimits addObjectsFromArray:frequencyLimits];
         [whenLimits addObjectsFromArray:occurrenceLimits];
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
-                                           withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
+                                           withImpressionManager:self.impressionManager andTriggerManager:triggerCounter];
         if (matchesLimits) {
             CleverTapLogStaticDebug(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
             [eligibleInApps addObject:inApp];

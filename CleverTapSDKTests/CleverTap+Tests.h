@@ -33,6 +33,7 @@
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
 - (void)setUserSetLocation:(CLLocationCoordinate2D)location;
+- (NSArray *)mergeDisplayUnits:(NSArray *)incoming into:(NSArray *)existing;
 + (BOOL)isPersonalizationEnabled;
 - (id)getProperty:(NSString *)propertyName;
 - (void)flushQueue;
