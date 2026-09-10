@@ -33,7 +33,7 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
     func displayUnitsUpdated(_ displayUnits: [CleverTapDisplayUnit]) {
         print("[Native Display] displayUnitsUpdated, cache now holds \(displayUnits.count) unit(s)")
         for unit in displayUnits {
-            let ti = unit.json?["ti"] as? String ?? "nil"
+            let ti = NativeDisplayTableViewCell.campaignId(of: unit)
             print("[Native Display] displayUnitsUpdated ti=\(ti) unitID=\(unit.unitID ?? "nil") title=\(unit.contents?.first?.title ?? "nil")")
         }
         self.displayUnits = displayUnits

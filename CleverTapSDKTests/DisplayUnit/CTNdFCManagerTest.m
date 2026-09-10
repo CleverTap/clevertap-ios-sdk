@@ -196,6 +196,14 @@ static NSString *const kOtherCampaignId = @"70002";
     XCTAssertTrue([self canShow:kCampaignId]);
 }
 
+/// An unset mdc used to fall back to a ceiling of 1000. That number was copied from in-app. Native
+/// Display never sends mdc, so the ceiling had no source. It is gone now. An unset mdc means no
+/// session limit at all. This count is above the old ceiling. The test would have failed before.
+- (void)testAnUnsetMaxPerSessionPutsNoCeilingOnTheSession {
+    [self show:kCampaignId times:1001];
+    XCTAssertTrue([self canShow:kCampaignId]);
+}
+
 - (void)testTheAccountDailyMaxBlocksEveryCampaign {
     [self.fcManager updateGlobalLimitsPerDay:2 andPerSession:-1];
     [self show:kOtherCampaignId times:2];

@@ -2670,14 +2670,14 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
- Drops the Native Display units that have no room left under the counting caps.
+ Drops the Native Display units that have no room left under the account caps.
 
- Every unit goes through the check. An account that has no limits set lets them all through, so
- display units that came before this feature behave exactly as they did.
+ Every unit goes through the check. An account that has no limits set lets them all through. Display
+ units that came before this feature behave exactly as they did.
 
- @c frequencyLimits and @c occurrenceLimits are not checked again here. The SDK already checked them
- and sent the ids that passed in @c adUnit_eval, and the server sent content only for those. This is
- the only place @c ndmc, @c ndmp and @c mdc are applied.
+ @c frequencyLimits and @c occurrenceLimits are not checked again here. The SDK checked them during
+ evaluation. It sent the ids that passed in @c adUnit_eval. The server sent content only for those.
+ This is the only place @c ndmc and @c ndmp are applied.
  */
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
     if (!self.ndFCManager) return displayUnits;
@@ -2688,7 +2688,10 @@ static BOOL sharedInstanceErrorLogged;
     // Read once for the whole response. The value cannot change while this loop runs.
     BOOL accountHasCaps = [self.ndFCManager hasAccountCaps];
 
-    NSUInteger capManagedCount = 0;
+    // Counts only the capped units this response hands to the app. A unit held back is not counted.
+    // The warning below is about missing view reports. The app cannot report a view of a unit it
+    // never received.
+    NSUInteger capManagedDeliveredCount = 0;
     NSMutableArray<CleverTapDisplayUnit *> *withinCaps = [NSMutableArray new];
     for (CleverTapDisplayUnit *unit in displayUnits) {
         NSDictionary *json = unit.json;
@@ -2701,26 +2704,28 @@ static BOOL sharedInstanceErrorLogged;
             [withinCaps addObject:unit];
             continue;
         }
-        if (accountHasCaps) {
-            capManagedCount++;
-        }
-
-        // The two flags are passed separately on purpose. efc skips every cap. excludeGlobalFCaps
-        // skips only the two account caps. It leaves the campaign's own tlc, tdc and mdc in place.
+        // There are five cap fields. Native Display sends only excludeGlobalFCaps. It is read from
+        // the campaign's rule. The other four are efc, tlc, tdc and mdc. Those belong to in-app.
+        // Native Display puts a per-campaign cap in frequencyLimits or occurrenceLimits instead.
+        // CTLimitsMatcher checks those during evaluation. They are settled before a unit reaches
+        // this gate. The four in-app fields are passed as unset. -1 means no limit.
         BOOL canShow = [self.ndFCManager canShowCampaign:campaignId
-                                         excludeFromCaps:[json[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue]
+                                         excludeFromCaps:NO
                                        excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
-                                      totalLifetimeCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] fallback:-1]
-                                         totalDailyCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_DAILY_COUNT] fallback:-1]
-                                           maxPerSession:[self nativeDisplayIntFrom:json[CLTAP_INAPP_MAX_PER_SESSION] fallback:-1]];
+                                      totalLifetimeCount:-1
+                                         totalDailyCount:-1
+                                           maxPerSession:-1];
         if (canShow) {
             [withinCaps addObject:unit];
+            if (accountHasCaps) {
+                capManagedDeliveredCount++;
+            }
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: Native Display campaign %@ held back by its frequency caps", self, campaignId);
         }
     }
 
-    [self warnIfNativeDisplayViewsAreNeverReported:capManagedCount];
+    [self warnIfNativeDisplayViewsAreNeverReported:capManagedDeliveredCount];
     return withinCaps;
 }
 
@@ -2732,9 +2737,12 @@ static BOOL sharedInstanceErrorLogged;
 
  It waits for a second delivery before warning. Having no views after the first one is normal,
  because the user may not have scrolled to the unit yet.
+
+ The count must only include units the app was really given. A unit held back by its caps is not one
+ of them. Counting it would make this warn about units nobody could have reported.
  */
-- (void)warnIfNativeDisplayViewsAreNeverReported:(NSUInteger)capManagedCount {
-    if (capManagedCount == 0) return;
+- (void)warnIfNativeDisplayViewsAreNeverReported:(NSUInteger)capManagedDeliveredCount {
+    if (capManagedDeliveredCount == 0) return;
 
     if (self.sentCappedNativeDisplaysToApp && !self.appReportedANativeDisplayView) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display units with frequency caps have been delivered more than once and none has been reported as viewed. The caps cannot work until the app calls recordDisplayUnitViewedEventForID: for every unit it shows.", self);

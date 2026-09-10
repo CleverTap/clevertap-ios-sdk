@@ -37,6 +37,23 @@ class NativeDisplayButtonsTableViewCell: UITableViewCell {
         eventNameText.resignFirstResponder()
     }
     
+    // Charged has its own method. The Event name field above cannot send it. A Native Display
+    // campaign triggered by Charged needs this button.
+    @IBAction func recordChargedEventAction(_ sender: Any) {
+        let chargeDetails: [String: Any] = [
+            "Amount": 300,
+            "Payment mode": "Credit Card",
+            "Charged ID": 24052013
+        ]
+        let item: [String: Any] = [
+            "Category": "books",
+            "Book name": "The Millionaire next door",
+            "Quantity": 1
+        ]
+        print("[Native Display] recording Charged event")
+        CleverTap.sharedInstance()?.recordChargedEvent(withDetails: chargeDetails, andItems: [item])
+    }
+
     @IBAction func carouselEventAction(_ sender: Any) {
         CleverTap.sharedInstance()?.recordEvent("NativeDisplayCarousel")
     }

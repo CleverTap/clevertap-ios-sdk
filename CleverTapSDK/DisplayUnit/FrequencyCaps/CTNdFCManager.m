@@ -19,10 +19,6 @@
 // account-wide.
 static const int kCTNdUncapped = -1;
 
-// Used when a campaign sets no mdc of its own. Same value as in-app. High enough that it never
-// blocks anything in practice. Still a number we can compare against.
-static const int kCTNdSessionCapDefault = 1000;
-
 @interface CTNdFCManager ()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -121,8 +117,10 @@ static const int kCTNdSessionCapDefault = 1000;
                      maxPerSession:(int)maxPerSession
                  excludeGlobalCaps:(BOOL)excludeGlobalCaps {
     // 1. Has this campaign hit its own session cap? excludeGlobalFCaps does not skip this one.
-    int perSessionMax = maxPerSession >= 0 ? maxPerSession : kCTNdSessionCapDefault;
-    if ([self.impressionManager perSession:campaignId] >= perSessionMax) {
+    // Native Display never sends mdc, so this check is skipped every time today. The parameter is
+    // kept for a caller that does send one.
+    if (maxPerSession != kCTNdUncapped
+        && [self.impressionManager perSession:campaignId] >= maxPerSession) {
         return YES;
     }
 

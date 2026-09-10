@@ -9,15 +9,15 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NativeDisplayButtonsTableViewCell" customModule="SwiftStarter" customModuleProvider="target"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="NativeDisplayButtonsTableCell" rowHeight="161" id="ffG-Dd-7OQ" customClass="NativeDisplayButtonsTableViewCell" customModule="SwiftStarter" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="403" height="161"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="NativeDisplayButtonsTableCell" rowHeight="199.5" id="ffG-Dd-7OQ" customClass="NativeDisplayButtonsTableViewCell" customModule="SwiftStarter" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="403" height="199.5"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ffG-Dd-7OQ" id="6Tz-Nc-afZ">
-                <rect key="frame" x="0.0" y="0.0" width="403" height="161"/>
+                <rect key="frame" x="0.0" y="0.0" width="403" height="199.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Nbd-eb-IiI">
-                        <rect key="frame" x="10" y="0.0" width="383" height="161"/>
+                        <rect key="frame" x="10" y="0.0" width="383" height="199.5"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WHe-Fr-YFA">
                                 <rect key="frame" x="0.0" y="0.0" width="383" height="34.5"/>
@@ -58,8 +58,16 @@
                                     </button>
                                 </subviews>
                             </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Chg-Bt-001">
+                                <rect key="frame" x="0.0" y="88.5" width="383" height="28.5"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Record Charged"/>
+                                <connections>
+                                    <action selector="recordChargedEventAction:" destination="ffG-Dd-7OQ" eventType="touchUpInside" id="Chg-Ac-002"/>
+                                </connections>
+                            </button>
                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aSP-yy-yns">
-                                <rect key="frame" x="0.0" y="44.5" width="383" height="34"/>
+                                <rect key="frame" x="0.0" y="127" width="383" height="34"/>
                                 <subviews>
                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Display unit ID" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i1U-GD-zqP">
                                         <rect key="frame" x="0.0" y="0.0" width="296" height="34"/>
@@ -77,7 +85,7 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MDW-3R-z2H">
-                                <rect key="frame" x="0.0" y="88.5" width="383" height="28.5"/>
+                                <rect key="frame" x="0.0" y="171" width="383" height="28.5"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Get all display units"/>
                                 <connections>

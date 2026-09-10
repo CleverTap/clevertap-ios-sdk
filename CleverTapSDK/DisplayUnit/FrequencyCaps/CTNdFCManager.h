@@ -80,7 +80,11 @@ NS_ASSUME_NONNULL_BEGIN
         flag skips less than @c efc. The two are not the same.
  @param totalLifetimeCount @c tlc, or -1 for no limit.
  @param totalDailyCount @c tdc, or -1 for no limit.
- @param maxPerSession @c mdc, or negative to use the default.
+ @param maxPerSession @c mdc, or -1 for no limit.
+
+ @note Native Display never sends @c efc, @c tlc, @c tdc or @c mdc. Those four belong to in-app. A
+       Native Display campaign puts its own cap in @c frequencyLimits or @c occurrenceLimits. The
+       gate in @c CleverTap.m passes these four parameters unset.
  */
 - (BOOL)canShowCampaign:(NSString *)campaignId
         excludeFromCaps:(BOOL)excludeFromCaps
