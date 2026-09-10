@@ -2511,6 +2511,10 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
+    [self handleDisplayUnitResponse:jsonResp source:CTResponseSourceApp];
+}
+
+- (void)handleDisplayUnitResponse:(id)jsonResp source:(CTResponseSource)source {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
     if ([displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0) {
         if (self.isUserSwitching) {
@@ -2519,14 +2523,86 @@ static BOOL sharedInstanceErrorLogged;
         }
         NSArray<CleverTapDisplayUnit *> *displayUnits = [self _parseDisplayUnitsFromJSONArray:displayUnitJSON];
         if (displayUnits.count > 0) {
+            __weak typeof(self) weakSelf = self;
             [self initializeDisplayUnitWithCallback:^(BOOL success) {
-                if (success) {
-                    [self.displayUnitCache updateDisplayUnits:displayUnits];
-                    [self _notifyDisplayUnitsUpdated];
-                }
+                if (!success) return;
+                // Merging is a read-modify-write across two separately-locked cache calls, and up
+                // to CLTAP_CONTENT_FETCH concurrent /content responses can land at once — two
+                // interleaved merges would lose units. Serialize the whole sequence rather than
+                // relying on where the callback happens to be delivered.
+                [weakSelf.dispatchQueueManager runSerialAsync:^{
+                    __strong typeof(weakSelf) strongSelf = weakSelf;
+                    if (!strongSelf) return;
+
+                    NSArray<CleverTapDisplayUnit *> *unitsToStore = displayUnits;
+                    if (source == CTResponseSourceContentFetch) {
+                        // updateDisplayUnits: replaces the cache, and a content fetch response
+                        // carries only the personalized subset — storing it as-is would drop
+                        // everything /a1 delivered. Merge here rather than in the cache: the
+                        // CleverTapDisplayUnitCache protocol is public and its contract is
+                        // "replace", so a host-supplied cache must keep behaving that way.
+                        unitsToStore = [strongSelf mergeDisplayUnits:displayUnits
+                                                                into:[strongSelf.displayUnitCache getAllDisplayUnits]];
+                    }
+                    [strongSelf.displayUnitCache updateDisplayUnits:unitsToStore];
+
+                    // Deliver on main. The callback above is invoked via runSyncMainQueue, so
+                    // displayUnitsUpdated: has always arrived on the main thread — hosts do UI
+                    // work in it, and moving it to the serial queue would break them.
+                    [CTUtils runSyncMainQueue:^{
+                        [strongSelf _notifyDisplayUnitsUpdated];
+                    }];
+                }];
             }];
         }
     }
+}
+
+/*!
+ Merge freshly fetched display units over the ones already cached.
+
+ Existing order is preserved and a unit with a matching `unitID` is replaced in place, so a
+ personalized version supersedes its placeholder without jumping position in a carousel. Units
+ with no counterpart are appended.
+
+ @note `unitID` is never nil — `CleverTapDisplayUnit` substitutes the sentinel `0_0` when a
+ payload has no `wzrk_id`. Several such units therefore share an id and collapse to the last one
+ seen. That only matters for malformed payloads, and matching them by identity instead would
+ grow the cache without bound across responses.
+ */
+- (NSArray<CleverTapDisplayUnit *> *)mergeDisplayUnits:(NSArray<CleverTapDisplayUnit *> *)incoming
+                                                  into:(NSArray<CleverTapDisplayUnit *> *)existing {
+    if (existing.count == 0) {
+        return incoming;
+    }
+
+    NSMutableArray<CleverTapDisplayUnit *> *merged = [existing mutableCopy];
+    NSMutableDictionary<NSString *, NSNumber *> *indexByUnitId = [NSMutableDictionary dictionary];
+    [merged enumerateObjectsUsingBlock:^(CleverTapDisplayUnit *unit, NSUInteger idx, BOOL *stop) {
+        if (unit.unitID) {
+            indexByUnitId[unit.unitID] = @(idx);
+        }
+    }];
+
+    NSUInteger replaced = 0;
+    for (CleverTapDisplayUnit *unit in incoming) {
+        NSNumber *existingIndex = unit.unitID ? indexByUnitId[unit.unitID] : nil;
+        if (existingIndex) {
+            merged[existingIndex.unsignedIntegerValue] = unit;
+            replaced++;
+        } else {
+            if (unit.unitID) {
+                indexByUnitId[unit.unitID] = @(merged.count);
+            }
+            [merged addObject:unit];
+        }
+    }
+
+    CleverTapLogDebug(self.config.logLevel,
+                      @"%@: Merged %lu content fetch display unit(s) into %lu cached (%lu replaced, %lu added)",
+                      self, (unsigned long)incoming.count, (unsigned long)existing.count,
+                      (unsigned long)replaced, (unsigned long)(incoming.count - replaced));
+    return merged;
 }
 #endif
 
@@ -2684,7 +2760,7 @@ static BOOL sharedInstanceErrorLogged;
 #endif
                 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-                [self handleDisplayUnitResponse:jsonResp];
+                [self handleDisplayUnitResponse:jsonResp source:source];
 #endif
                 
                 [self handleFeatureFlagsResponse:jsonResp];
