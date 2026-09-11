@@ -2974,6 +2974,10 @@ static BOOL sharedInstanceErrorLogged;
         [self _resetVars];
         
         // push data on reset profile
+        // Start the new user's session before App Launched. Otherwise queueEvent: creates
+        // it instead, which clears appLaunchProcessed again right after recordAppLaunched:
+        // set it, and every later event gets stuck re-queueing.
+        [self.sessionManager createSessionIfNeeded];
         [self recordAppLaunched:action];
         if (properties) {
             [self profilePush:properties];
