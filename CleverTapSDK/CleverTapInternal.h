@@ -12,6 +12,11 @@
 @class CTFileDownloader;
 @class CTValidationResult;
 @class CTSessionManager;
+@class CTNdStore;
+@class CTNdFCManager;
+@class CTNdEvaluationManager;
+@class CTImpressionManager;
+@class CTInAppTriggerManager;
 
 @interface CleverTap (Internal)
 
@@ -37,6 +42,14 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, strong, readonly) CTCryptMigrator * _Nonnull cryptMigrator;
 @property (atomic, strong, readonly) CTSessionManager * _Nonnull sessionManager;
 @property (nonatomic, strong, readonly) CTCustomTemplatesManager * _Nullable customTemplatesManager;
+#endif
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+@property (nonatomic, strong, readonly) CTNdStore * _Nullable ndStore;
+@property (nonatomic, strong, readonly) CTNdFCManager * _Nullable ndFCManager;
+@property (nonatomic, strong, readonly) CTNdEvaluationManager * _Nullable ndEvaluationManager;
+@property (nonatomic, strong, readonly) CTImpressionManager * _Nullable ndImpressionManager;
+@property (nonatomic, strong, readonly) CTInAppTriggerManager * _Nullable ndTriggerManager;
 #endif
 
 @property (nonatomic, strong, readonly) CTFileDownloader * _Nullable fileDownloader;
@@ -69,5 +82,24 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  @param inAppId the campaign ID (ti) to fetch content for
  */
 - (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+/*!
+ @method
+
+ @abstract
+ Asks the server for a fresh Native Display rule bundle in the middle of a session.
+
+ @discussion
+ Sends a wzrk_fetch event with t set to kCTNdFetchTypeMeta. The server answers with
+ adUnit_notifs_ss. handleDisplayUnitResponse: already reads that key. Rules normally arrive with App
+ Launched. This is the way to get them without waiting for the next launch.
+
+ It is internal, not public. The t value is still a placeholder. A public method would make that
+ number a promise to customers before the backend team has settled it. The Android SDK keeps its
+ fetchNativeDisplayMeta internal for the same reason.
+ */
+- (void)fetchNativeDisplayMeta;
+#endif
 
 @end
