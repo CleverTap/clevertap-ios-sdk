@@ -2709,20 +2709,30 @@ static BOOL sharedInstanceErrorLogged;
         // Native Display puts a per-campaign cap in frequencyLimits or occurrenceLimits instead.
         // CTLimitsMatcher checks those during evaluation. They are settled before a unit reaches
         // this gate. The four in-app fields are passed as unset. -1 means no limit.
-        BOOL canShow = [self.ndFCManager canShowCampaign:campaignId
-                                         excludeFromCaps:NO
-                                       excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
-                                      totalLifetimeCount:-1
-                                         totalDailyCount:-1
-                                           maxPerSession:-1];
-        if (canShow) {
+        NSString *heldBackReason = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
+                                                             excludeFromCaps:NO
+                                                           excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
+                                                          totalLifetimeCount:-1
+                                                             totalDailyCount:-1
+                                                               maxPerSession:-1];
+        if (!heldBackReason) {
             [withinCaps addObject:unit];
             if (accountHasCaps) {
                 capManagedDeliveredCount++;
             }
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display campaign %@ held back by its frequency caps", self, campaignId);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display campaign %@ held back by its frequency caps. %@.", self, campaignId, heldBackReason);
         }
+    }
+
+    // A unit that passes the caps leaves no other trace. Without this line the logs of a working
+    // gate and the logs of a gate that never ran look the same.
+    if (displayUnits.count > 0) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display caps checked on %lu unit(s). %lu passed. %lu held back.",
+                          self,
+                          (unsigned long)displayUnits.count,
+                          (unsigned long)withinCaps.count,
+                          (unsigned long)(displayUnits.count - withinCaps.count));
     }
 
     [self warnIfNativeDisplayViewsAreNeverReported:capManagedDeliveredCount];
@@ -5210,6 +5220,21 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Display Units
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+
+- (void)fetchNativeDisplayMeta {
+    // The same two conditions that decide whether Native Display is set up at all. See the call to
+    // initializeNativeDisplaySupport in initWithConfig:andCleverTapID:. Native Display is not set
+    // up in either case. Nothing would hold the reply.
+    if (_config.analyticsOnly || [CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display metadata fetch skipped. This instance does not run Native Display.", self);
+        return;
+    }
+
+    CleverTapLogDebug(self.config.logLevel, @"%@: Fetching Native Display metadata with wzrk_fetch t %ld", self, (long)kCTNdFetchTypeMeta);
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT,
+                       CLTAP_EVENT_DATA: @{@"t": @(kCTNdFetchTypeMeta)}}
+            withType:CleverTapEventTypeFetch];
+}
 
 - (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self.dispatchQueueManager runSerialAsync:^{

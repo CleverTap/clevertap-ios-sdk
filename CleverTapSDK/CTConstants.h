@@ -267,6 +267,15 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ND_SS_EVAL_META_KEY @"adUnit_eval"
 #define CLTAP_ND_SUPPRESSED_META_KEY @"adUnit_suppressed"
 
+// The t value on the wzrk_fetch event that asks for a fresh Native Display rule bundle. The server
+// answers with adUnit_notifs_ss.
+//
+// TODO(verify): this number is a placeholder. The backend team has not given us the real one yet.
+// 100 is the same placeholder the Android SDK uses, in Constants.java FETCH_TYPE_ND_META. Keep the
+// two the same. 7 is not free. kCTInboxFetchTypeInboxV2 above is 7 and it is already released.
+// The other values in use are 0, 1, 4, 5 and 6.
+static const NSInteger kCTNdFetchTypeMeta = 100;
+
 // On disk. Every name here is new, so Native Display never reads or writes a key that is already
 // saved on a device.
 #define CLTAP_PREFS_ND_KEY_SS @"adUnit_notifs_ss"

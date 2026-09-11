@@ -83,4 +83,23 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  */
 - (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
 
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+/*!
+ @method
+
+ @abstract
+ Asks the server for a fresh Native Display rule bundle in the middle of a session.
+
+ @discussion
+ Sends a wzrk_fetch event with t set to kCTNdFetchTypeMeta. The server answers with
+ adUnit_notifs_ss. handleDisplayUnitResponse: already reads that key. Rules normally arrive with App
+ Launched. This is the way to get them without waiting for the next launch.
+
+ It is internal, not public. The t value is still a placeholder. A public method would make that
+ number a promise to customers before the backend team has settled it. The Android SDK keeps its
+ fetchNativeDisplayMeta internal for the same reason.
+ */
+- (void)fetchNativeDisplayMeta;
+#endif
+
 @end

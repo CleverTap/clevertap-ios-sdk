@@ -94,6 +94,26 @@ NS_ASSUME_NONNULL_BEGIN
           maxPerSession:(int)maxPerSession;
 
 /**
+ The same check as @c canShowCampaign:, with the cap that blocked the campaign named.
+
+ Returns nil when the campaign can still be shown. Returns a short sentence when a cap is full. The
+ sentence names the cap and prints the count against the limit. It is written for a log line. Do not
+ parse it.
+
+ Five caps can block a campaign. Three belong to the campaign, @c tlc, @c tdc and @c mdc. Two belong
+ to the account, @c ndmc and @c ndmp. A caller that only needs a yes or no should use
+ @c canShowCampaign:.
+
+ The parameters mean what they mean in @c canShowCampaign:.
+ */
+- (nullable NSString *)reasonCampaignIsHeldBack:(NSString *)campaignId
+                                excludeFromCaps:(BOOL)excludeFromCaps
+                              excludeGlobalCaps:(BOOL)excludeGlobalCaps
+                             totalLifetimeCount:(int)totalLifetimeCount
+                                totalDailyCount:(int)totalDailyCount
+                                  maxPerSession:(int)maxPerSession;
+
+/**
  Records one display: the impression, the campaign's daily and lifetime counts, and the day total.
 
  @param storeTimestamp whether to save the impression time on disk. Pass @c YES only for a campaign

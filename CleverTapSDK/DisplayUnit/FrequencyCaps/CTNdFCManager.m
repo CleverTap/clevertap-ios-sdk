@@ -113,44 +113,66 @@ static const int kCTNdUncapped = -1;
     return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
 }
 
-- (BOOL)hasSessionCapacityMaxedOut:(NSString *)campaignId
-                     maxPerSession:(int)maxPerSession
-                 excludeGlobalCaps:(BOOL)excludeGlobalCaps {
+// Each of the three checks below returns nil when the campaign still has room. It returns a short
+// sentence when a cap is full. The sentence names the cap. It prints the count against the limit.
+// Only a log line reads the sentence. Without that line a blocked campaign looks the same in the
+// logs as a campaign the server never sent.
+
+- (NSString *)fullSessionCapFor:(NSString *)campaignId
+                  maxPerSession:(int)maxPerSession
+              excludeGlobalCaps:(BOOL)excludeGlobalCaps {
     // 1. Has this campaign hit its own session cap? excludeGlobalFCaps does not skip this one.
     // Native Display never sends mdc, so this check is skipped every time today. The parameter is
     // kept for a caller that does send one.
-    if (maxPerSession != kCTNdUncapped
-        && [self.impressionManager perSession:campaignId] >= maxPerSession) {
-        return YES;
+    if (maxPerSession != kCTNdUncapped) {
+        int shownThisSession = (int)[self.impressionManager perSession:campaignId];
+        if (shownThisSession >= maxPerSession) {
+            return [NSString stringWithFormat:@"Its own session cap mdc is full at %d of %d", shownThisSession, maxPerSession];
+        }
     }
 
     // 2. Has the account hit its session cap? This one is account-wide. excludeGlobalFCaps skips
     // it.
-    if (excludeGlobalCaps) return NO;
+    if (excludeGlobalCaps) return nil;
     int globalSessionMax = [self globalSessionMax];
-    if (globalSessionMax == kCTNdUncapped) return NO;
-    return [self.impressionManager perSessionTotal] >= globalSessionMax;
+    if (globalSessionMax == kCTNdUncapped) return nil;
+    int accountShownThisSession = (int)[self.impressionManager perSessionTotal];
+    if (accountShownThisSession >= globalSessionMax) {
+        return [NSString stringWithFormat:@"The account session cap ndmc is full at %d of %d", accountShownThisSession, globalSessionMax];
+    }
+    return nil;
 }
 
-- (BOOL)hasLifetimeCapacityMaxedOut:(NSString *)campaignId totalLifetimeCount:(int)totalLifetimeCount {
-    if (totalLifetimeCount == kCTNdUncapped) return NO;
-    return [self lifetimeCountForCampaign:campaignId] >= totalLifetimeCount;
+- (NSString *)fullLifetimeCapFor:(NSString *)campaignId totalLifetimeCount:(int)totalLifetimeCount {
+    if (totalLifetimeCount == kCTNdUncapped) return nil;
+    int shownEver = [self lifetimeCountForCampaign:campaignId];
+    if (shownEver >= totalLifetimeCount) {
+        return [NSString stringWithFormat:@"Its own lifetime cap tlc is full at %d of %d", shownEver, totalLifetimeCount];
+    }
+    return nil;
 }
 
-- (BOOL)hasDailyCapacityMaxedOut:(NSString *)campaignId
-                 totalDailyCount:(int)totalDailyCount
-               excludeGlobalCaps:(BOOL)excludeGlobalCaps {
+- (NSString *)fullDailyCapFor:(NSString *)campaignId
+              totalDailyCount:(int)totalDailyCount
+            excludeGlobalCaps:(BOOL)excludeGlobalCaps {
     // 1. Has the account hit its daily cap? This one is account-wide. excludeGlobalFCaps skips it.
     if (!excludeGlobalCaps) {
         int maxPerDayCount = [self maxPerDayCount];
-        if (maxPerDayCount != kCTNdUncapped && [self shownTodayCount] >= maxPerDayCount) {
-            return YES;
+        if (maxPerDayCount != kCTNdUncapped) {
+            int accountShownToday = [self shownTodayCount];
+            if (accountShownToday >= maxPerDayCount) {
+                return [NSString stringWithFormat:@"The account daily cap ndmp is full at %d of %d", accountShownToday, maxPerDayCount];
+            }
         }
     }
 
     // 2. Has this campaign hit its own daily cap? excludeGlobalFCaps does not skip this one.
-    if (totalDailyCount == kCTNdUncapped) return NO;
-    return [self todayCountForCampaign:campaignId] >= totalDailyCount;
+    if (totalDailyCount == kCTNdUncapped) return nil;
+    int shownToday = [self todayCountForCampaign:campaignId];
+    if (shownToday >= totalDailyCount) {
+        return [NSString stringWithFormat:@"Its own daily cap tdc is full at %d of %d", shownToday, totalDailyCount];
+    }
+    return nil;
 }
 
 - (BOOL)canShowCampaign:(NSString *)campaignId
@@ -159,22 +181,40 @@ static const int kCTNdUncapped = -1;
      totalLifetimeCount:(int)totalLifetimeCount
         totalDailyCount:(int)totalDailyCount
           maxPerSession:(int)maxPerSession {
+    return [self reasonCampaignIsHeldBack:campaignId
+                          excludeFromCaps:excludeFromCaps
+                        excludeGlobalCaps:excludeGlobalCaps
+                       totalLifetimeCount:totalLifetimeCount
+                          totalDailyCount:totalDailyCount
+                            maxPerSession:maxPerSession] == nil;
+}
+
+- (NSString *)reasonCampaignIsHeldBack:(NSString *)campaignId
+                       excludeFromCaps:(BOOL)excludeFromCaps
+                     excludeGlobalCaps:(BOOL)excludeGlobalCaps
+                    totalLifetimeCount:(int)totalLifetimeCount
+                       totalDailyCount:(int)totalDailyCount
+                         maxPerSession:(int)maxPerSession {
     if (![campaignId isKindOfClass:[NSString class]] || campaignId.length == 0) {
-        return YES;
+        return nil;
     }
 
     // efc skips every cap. We can answer here. excludeGlobalFCaps cannot be answered here. It skips
     // only the two account caps. The campaign still has to obey its own tlc, tdc and mdc. That is
     // why it is passed down to each check instead.
-    if (excludeFromCaps) return YES;
+    if (excludeFromCaps) return nil;
 
-    return ![self hasSessionCapacityMaxedOut:campaignId
-                               maxPerSession:maxPerSession
-                           excludeGlobalCaps:excludeGlobalCaps]
-        && ![self hasLifetimeCapacityMaxedOut:campaignId totalLifetimeCount:totalLifetimeCount]
-        && ![self hasDailyCapacityMaxedOut:campaignId
-                           totalDailyCount:totalDailyCount
-                         excludeGlobalCaps:excludeGlobalCaps];
+    NSString *reason = [self fullSessionCapFor:campaignId
+                                 maxPerSession:maxPerSession
+                             excludeGlobalCaps:excludeGlobalCaps];
+    if (reason) return reason;
+
+    reason = [self fullLifetimeCapFor:campaignId totalLifetimeCount:totalLifetimeCount];
+    if (reason) return reason;
+
+    return [self fullDailyCapFor:campaignId
+                 totalDailyCount:totalDailyCount
+               excludeGlobalCaps:excludeGlobalCaps];
 }
 
 - (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
@@ -200,11 +240,25 @@ static const int kCTNdUncapped = -1;
         self.campaignCounts[campaignId] = counts;
         [CTPreferences putObject:self.campaignCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
     }
+
+    // The app is the only source of these counts. No count changes until the app calls
+    // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived.
+    CleverTapLogDebug(self.config.logLevel, @"%@: Counted a view of Native Display campaign %@. The campaign has %d view(s) this session and %d today. The account has %d view(s) this session and %d today.",
+                      self,
+                      campaignId,
+                      (int)[self.impressionManager perSession:campaignId],
+                      [self todayCountForCampaign:campaignId],
+                      (int)[self.impressionManager perSessionTotal],
+                      [self shownTodayCount]);
 }
 
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession {
     [CTPreferences putInt:perDay forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_MAX_PER_DAY_KEY]];
     [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_SESSION_MAX_KEY]];
+
+    // Without this line nobody can see which caps the account has. That is the first question to
+    // ask when Native Display stops appearing.
+    CleverTapLogDebug(self.config.logLevel, @"%@: Native Display account caps set by the server. ndmc allows %d per session. ndmp allows %d per day. -1 means no limit.", self, perSession, perDay);
 }
 
 - (void)removeStaleCampaignCounts:(NSArray *)staleCampaigns {
