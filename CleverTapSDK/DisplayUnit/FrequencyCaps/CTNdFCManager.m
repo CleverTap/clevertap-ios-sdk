@@ -243,13 +243,29 @@ static const int kCTNdUncapped = -1;
 
     // The app is the only source of these counts. No count changes until the app calls
     // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived.
-    CleverTapLogDebug(self.config.logLevel, @"%@: Counted a view of Native Display campaign %@. The campaign has %d view(s) this session and %d today. The account has %d view(s) this session and %d today.",
+    //
+    // Every number is named. The campaign has three counters. The account has two. The line also
+    // prints the two values the next request will carry. ndtlc holds today's count for the
+    // campaign. It also holds that campaign's count since install. ndmp holds the account total
+    // for today. Each wire number appears next to the named counter it came from. Nobody has to
+    // guess which counter a wire number means.
+    int campaignThisSession = (int)[self.impressionManager perSession:campaignId];
+    int campaignToday = [self todayCountForCampaign:campaignId];
+    int campaignSinceInstall = [self lifetimeCountForCampaign:campaignId];
+    int accountThisSession = (int)[self.impressionManager perSessionTotal];
+    int accountToday = [self shownTodayCount];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Counted a view of Native Display campaign %@. This campaign has %d view(s) this session, %d today, %d since install. The whole account has %d view(s) this session, %d today. The next request carries ndtlc [\"%@\", %d, %d] for this campaign. The next request carries ndmp %d for the account.",
                       self,
                       campaignId,
-                      (int)[self.impressionManager perSession:campaignId],
-                      [self todayCountForCampaign:campaignId],
-                      (int)[self.impressionManager perSessionTotal],
-                      [self shownTodayCount]);
+                      campaignThisSession,
+                      campaignToday,
+                      campaignSinceInstall,
+                      accountThisSession,
+                      accountToday,
+                      campaignId,
+                      campaignToday,
+                      campaignSinceInstall,
+                      accountToday);
 }
 
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession {
