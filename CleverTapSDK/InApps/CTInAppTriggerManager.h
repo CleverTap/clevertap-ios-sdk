@@ -16,9 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The word used to identify this store inside its preference keys, for example @c triggers.
  Two managers with the same word share storage, so each channel needs its own.
-
- It is called @c storageNamespace and not @c namespace because @c namespace is a reserved word in
- Objective-C++, and would break anyone compiling this header from a @c .mm file.
+ Named as it is for the reason given on @c CTImpressionManager @c storageNamespace.
  */
 @property (nonatomic, copy, readonly) NSString *storageNamespace;
 

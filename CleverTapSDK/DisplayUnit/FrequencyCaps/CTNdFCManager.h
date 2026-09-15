@@ -57,10 +57,9 @@ NS_ASSUME_NONNULL_BEGIN
 
  Always @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id is the @c ti plus a suffix. The
  suffix changes on every send. A campaign that runs again gets a new @c wzrk_id. Its counts would
- start from zero. The suffix is not always a date either. Nothing here tries to read it.
+ start from zero.
 
- It lives here, next to the caps, and not at the call site. Every store uses what this returns as its
- key. They match only as long as they all ask the same place.
+ Every store keys on what this returns. They match only as long as they all ask here.
  */
 + (NSString *)campaignIdFrom:(nullable NSDictionary *)unit;
 
@@ -72,12 +71,10 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether this campaign can be shown right now, under all the counting caps.
 
- @param campaignId the @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id changes on every
-        send. It would restart the counts.
+ @param campaignId the @c ti. See @c campaignIdFrom:.
  @param excludeFromCaps @c efc. Skips every cap.
- @param excludeGlobalCaps @c excludeGlobalFCaps. Skips only the two account caps, @c ndmp for the day
-        and @c ndmc for the session. The campaign's own @c tlc, @c tdc and @c mdc still apply. This
-        flag skips less than @c efc. The two are not the same.
+ @param excludeGlobalCaps @c excludeGlobalFCaps. Skips only the two account caps. See the class doc
+        above for how the two flags differ.
  @param totalLifetimeCount @c tlc, or -1 for no limit.
  @param totalDailyCount @c tdc, or -1 for no limit.
  @param maxPerSession @c mdc, or -1 for no limit.
@@ -98,11 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  Returns nil when the campaign can still be shown. Returns a short sentence when a cap is full. The
  sentence names the cap and prints the count against the limit. It is written for a log line. Do not
- parse it.
-
- Five caps can block a campaign. Three belong to the campaign, @c tlc, @c tdc and @c mdc. Two belong
- to the account, @c ndmc and @c ndmp. A caller that only needs a yes or no should use
- @c canShowCampaign:.
+ parse it. A caller that only needs a yes or no should use @c canShowCampaign:.
 
  The parameters mean what they mean in @c canShowCampaign:.
  */
@@ -117,10 +110,8 @@ NS_ASSUME_NONNULL_BEGIN
  Records one display: the impression, the campaign's daily and lifetime counts, and the day total.
 
  @param storeTimestamp whether to save the impression time on disk. Pass @c YES only for a campaign
-        that has @c frequencyLimits or @c occurrenceLimits. Matching those is the only thing that
-        ever reads saved times. Native Display impressions come from the app. There is no limit on
-        how many arrive. A time saved for each one would grow a list nobody reads. See
-        @c CTImpressionManager @c recordImpression:storeTimestamp:.
+        that has @c frequencyLimits or @c occurrenceLimits. See
+        @c CTImpressionManager @c recordImpression:storeTimestamp: for why.
  */
 - (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp;
 

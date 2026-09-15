@@ -2697,18 +2697,14 @@ static BOOL sharedInstanceErrorLogged;
         NSDictionary *json = unit.json;
         NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
         if (campaignId.length == 0) {
-            // No id means nothing to store a count under. There is no cap to check. Showing it
-            // is the safer mistake. Holding it back would hide a campaign for a reason nobody can
-            // see.
+            // No id means nothing to store a count under. Showing it is the safer mistake. Holding
+            // it back would hide a campaign for a reason nobody can see.
             CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has no ti, so its caps cannot be checked", self, unit.unitID);
             [withinCaps addObject:unit];
             continue;
         }
-        // There are five cap fields. Native Display sends only excludeGlobalFCaps. It is read from
-        // the campaign's rule. The other four are efc, tlc, tdc and mdc. Those belong to in-app.
-        // Native Display puts a per-campaign cap in frequencyLimits or occurrenceLimits instead.
-        // CTLimitsMatcher checks those during evaluation. They are settled before a unit reaches
-        // this gate. The four in-app fields are passed as unset. -1 means no limit.
+        // Of the five cap fields, Native Display sends only excludeGlobalFCaps. It comes from the
+        // campaign's rule. efc, tlc, tdc and mdc belong to in-app. They are passed unset.
         NSString *heldBackReason = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
                                                              excludeFromCaps:NO
                                                            excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
@@ -2725,8 +2721,8 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 
-    // A unit that passes the caps leaves no other trace. Without this line the logs of a working
-    // gate and the logs of a gate that never ran look the same.
+    // A unit that passes the caps leaves no other trace. Without this line a working gate and a
+    // gate that never ran look the same in the logs.
     if (displayUnits.count > 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display caps checked on %lu unit(s). %lu passed. %lu held back.",
                           self,
@@ -2742,14 +2738,14 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Warns when capped Native Display units keep arriving but the app never reports a view.
 
- Nothing is counted without those reports, so every cap stays open and the totals sent to the server
- stay at zero. Nothing else about the app looks wrong, which is why this is worth saying.
+ Nothing is counted without those reports. Every cap then stays open. The totals sent to the server
+ stay at zero. Nothing else about the app looks wrong. That is why this is worth saying.
 
  It waits for a second delivery before warning. Having no views after the first one is normal,
  because the user may not have scrolled to the unit yet.
 
- The count must only include units the app was really given. A unit held back by its caps is not one
- of them. Counting it would make this warn about units nobody could have reported.
+ @param capManagedDeliveredCount counts only units the app was really given. A unit held back by its
+        caps is not one of them.
  */
 - (void)warnIfNativeDisplayViewsAreNeverReported:(NSUInteger)capManagedDeliveredCount {
     if (capManagedDeliveredCount == 0) return;
@@ -5361,14 +5357,11 @@ static BOOL sharedInstanceErrorLogged;
  Adds one display to the Native Display counts.
 
  Every call counts, including two calls for the same unit in one session. There is no check for
- repeats, on purpose. The app's call is the only sign we have that a unit was shown, so throwing some
- of those calls away would mean second-guessing our only signal. Android counts every call too, and
- the totals go to the server, so both platforms have to count the same way.
+ repeats, on purpose. The app's call is the only sign we have that a unit was shown. Android counts
+ every call too. The totals go to the server. Both platforms have to count the same way.
 
- Every unit is counted. The content the server sends carries no cap settings of its own, so there is
- nothing on the unit that could tell us to skip it. The server needs these totals for the account
- limits, and it needs them from every unit the app showed. Counting cannot depend on which limits
- happen to be set right now either. A limit set tomorrow has to start from a real history.
+ Every unit is counted, whatever limits are set right now. The server needs these totals from every
+ unit the app showed. A limit set tomorrow has to start from a real history.
  */
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit {
     if (!self.ndFCManager) return;
@@ -5388,18 +5381,13 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Whether this campaign's impression times are worth saving on disk.
 
- Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits while checking the
- rules in @c adUnit_notifs_ss. Only campaigns in that list are ever checked, and a campaign in it
- with neither kind of limit is never checked either. Both cases can skip the write.
-
- This matters more here than for in-app. In-app saves one time per display, from its own drawing
- code, after the caps already allowed it, so the caps limit how much the list can grow. Here the app
- decides when and how often to report a view, and the whole saved list is rewritten every time we add
- to it, so nothing would stop the list growing and each write getting slower.
+ Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits against the rules in
+ @c adUnit_notifs_ss. A campaign missing from that list is never checked. A campaign in it with
+ neither kind of limit is never checked either. Both cases can skip the write. See
+ @c CTImpressionManager @c recordImpression:storeTimestamp: for why the write is worth skipping.
 
  One small gap: if content is shown before its rule arrives, those views leave no times behind, so a
- limit that starts applying later begins with no history. It only affects those few views. The other
- option is saving a time for every view of every campaign in case a rule turns up.
+ limit that starts applying later begins with no history. It only affects those few views.
  */
 - (BOOL)nativeDisplayCampaignNeedsTimestamps:(NSString *)campaignId {
     NSDictionary *rule = [self nativeDisplayRuleFor:campaignId];
@@ -5419,11 +5407,11 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
- Whether this campaign is marked as an exception to the two account limits.
+ Whether this campaign is an exception to the two account limits.
 
- The flag is @c excludeGlobalFCaps. It is read from the campaign's rule, not from the content. The
- content the server sends for Native Display carries no cap settings at all. The rule is the only
- place the flag arrives. In-app reads it from the content because in-app content does carry it.
+ The flag is @c excludeGlobalFCaps. It is read from the campaign's rule, not from the content. Native
+ Display content carries no cap settings at all. The rule is the only place the flag arrives. In-app
+ reads it from the content. In-app content does carry it.
  */
 - (BOOL)nativeDisplayExcludesGlobalCapsFor:(NSString *)campaignId {
     return [[self nativeDisplayRuleFor:campaignId][CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];

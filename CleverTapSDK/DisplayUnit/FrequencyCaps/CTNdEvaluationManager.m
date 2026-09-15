@@ -154,7 +154,7 @@
             if (![nativeDisplay isKindOfClass:[NSDictionary class]]) continue;
 
             // Same helper the cap manager uses. Triggers and impressions must use one id. Two
-            // helpers could drift apart. Then one would write the id and the other would read it.
+            // helpers could drift apart. One would then write under a key the other never reads.
             NSString *campaignId = [CTNdFCManager campaignIdFrom:nativeDisplay];
             if (campaignId.length == 0) continue;
 
@@ -173,9 +173,9 @@
                                                withImpressionManager:self.impressionManager
                                                    andTriggerManager:self.triggerManager];
             if (!matchesLimits) {
-                // Every limit in the list has to pass. The list is printed whole. The trigger count
-                // is printed next to it. onEvery and onExactly are read from that count. The count
-                // is a lifetime total for this one campaign. It is not a count of views.
+                // Every limit in the list has to pass. The trigger count is printed next to the
+                // list. onEvery and onExactly are read from that count. It is a lifetime total for
+                // this campaign. It is not a count of views.
                 CleverTapLogStaticDebug(@"Native Display campaign %@ matched event %@, but its limits did not pass. Limits: %@. This campaign has now matched a trigger %lu time(s) in total since install.",
                                         campaignId, [event eventName], whenLimits,
                                         (unsigned long)[self.triggerManager getTriggers:campaignId]);

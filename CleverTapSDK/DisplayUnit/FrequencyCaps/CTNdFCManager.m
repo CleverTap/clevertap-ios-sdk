@@ -114,9 +114,7 @@ static const int kCTNdUncapped = -1;
 }
 
 // Each of the three checks below returns nil when the campaign still has room. It returns a short
-// sentence when a cap is full. The sentence names the cap. It prints the count against the limit.
-// Only a log line reads the sentence. Without that line a blocked campaign looks the same in the
-// logs as a campaign the server never sent.
+// sentence when a cap is full. See reasonCampaignIsHeldBack: in the header.
 
 - (NSString *)fullSessionCapFor:(NSString *)campaignId
                   maxPerSession:(int)maxPerSession
@@ -131,8 +129,7 @@ static const int kCTNdUncapped = -1;
         }
     }
 
-    // 2. Has the account hit its session cap? This one is account-wide. excludeGlobalFCaps skips
-    // it.
+    // 2. Has the account hit its session cap? excludeGlobalFCaps skips this one.
     if (excludeGlobalCaps) return nil;
     int globalSessionMax = [self globalSessionMax];
     if (globalSessionMax == kCTNdUncapped) return nil;
@@ -199,9 +196,8 @@ static const int kCTNdUncapped = -1;
         return nil;
     }
 
-    // efc skips every cap. We can answer here. excludeGlobalFCaps cannot be answered here. It skips
-    // only the two account caps. The campaign still has to obey its own tlc, tdc and mdc. That is
-    // why it is passed down to each check instead.
+    // efc skips every cap. It can be answered here. excludeGlobalFCaps skips less. It is passed
+    // down to each check instead.
     if (excludeFromCaps) return nil;
 
     NSString *reason = [self fullSessionCapFor:campaignId
@@ -220,8 +216,7 @@ static const int kCTNdUncapped = -1;
 - (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
     if (![campaignId isKindOfClass:[NSString class]] || campaignId.length == 0) return;
 
-    // Record the impression. Session counts always go up. The time is saved only when asked for.
-    // Only frequencyLimits and occurrenceLimits ever read it.
+    // Session counts always go up. The time is saved only when asked for.
     [self.impressionManager recordImpression:campaignId storeTimestamp:storeTimestamp];
 
     // Add to the total shown today.
@@ -242,13 +237,8 @@ static const int kCTNdUncapped = -1;
     }
 
     // The app is the only source of these counts. No count changes until the app calls
-    // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived.
-    //
-    // Every number is named. The campaign has three counters. The account has two. The line also
-    // prints the two values the next request will carry. ndtlc holds today's count for the
-    // campaign. It also holds that campaign's count since install. ndmp holds the account total
-    // for today. Each wire number appears next to the named counter it came from. Nobody has to
-    // guess which counter a wire number means.
+    // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived. It also
+    // prints the ndtlc and ndmp values the next request will carry.
     int campaignThisSession = (int)[self.impressionManager perSession:campaignId];
     int campaignToday = [self todayCountForCampaign:campaignId];
     int campaignSinceInstall = [self lifetimeCountForCampaign:campaignId];
@@ -272,8 +262,7 @@ static const int kCTNdUncapped = -1;
     [CTPreferences putInt:perDay forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_MAX_PER_DAY_KEY]];
     [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_SESSION_MAX_KEY]];
 
-    // Without this line nobody can see which caps the account has. That is the first question to
-    // ask when Native Display stops appearing.
+    // Which caps the account has is the first question to ask when Native Display stops appearing.
     CleverTapLogDebug(self.config.logLevel, @"%@: Native Display account caps set by the server. ndmc allows %d per session. ndmp allows %d per day. -1 means no limit.", self, perSession, perDay);
 }
 
