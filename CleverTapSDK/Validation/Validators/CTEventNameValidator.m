@@ -8,16 +8,11 @@
 #import "CTEventNameValidator.h"
 #import "CTUtils.h"
 
-@interface CTEventNameValidator ()
-@property (nonatomic, strong) NSMutableArray<CTValidationResult *> *warnings;
-@end
-
 @implementation CTEventNameValidator
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config {
     if (self = [super init]) {
         _config = config;
-        _warnings = [NSMutableArray array]; 
     }
     return self;
 }
@@ -53,18 +48,19 @@
                                         message:message
                                          reason:CTDropReasonDiscardedEventName];
     }
+    NSMutableArray<CTValidationResult *> *warnings = [NSMutableArray array];
     //Truncate if exceeds max length
     if (self.config.maxEventNameLength) {
         NSInteger maxLength = [self.config.maxEventNameLength integerValue];
         if (cleaned.length > maxLength) {
             cleaned = [cleaned substringToIndex:maxLength];
+            [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorEventNameTooLong message:[NSString stringWithFormat:@"Event name '%@' exceeds the limit of %li characters. Trimmed to '%@'", eventName, (long)maxLength, cleaned] data:nil]];
         }
-        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorEventNameTooLong message:[NSString stringWithFormat:@"Event name '%@' exceeds the limit of %li characters. Trimmed to '%@'", eventName, (long)maxLength, cleaned] data:nil]];
     }
     //Check if modifications were made during normalization
     if (![cleaned isEqualToString:originalName]) {
-        [self.warnings addObject:[CTValidationResult warningWithCode: CTValidationErrorInvalidCharacters message:[NSString stringWithFormat: @"Event name '%@' was normalized to '%@'", originalName, cleaned] data:cleaned]];
-        return [CTValidationResult warningWithSubResults:self.warnings data:cleaned];
+        [warnings addObject:[CTValidationResult warningWithCode: CTValidationErrorInvalidCharacters message:[NSString stringWithFormat: @"Event name '%@' was normalized to '%@'", originalName, cleaned] data:cleaned]];
+        return [CTValidationResult warningWithSubResults:warnings data:cleaned];
     }
     //Success - no issues found
     return [CTValidationResult successWithData:cleaned];

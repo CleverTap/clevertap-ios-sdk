@@ -66,8 +66,10 @@ static CTDataValidator *_eventDataValidator;
     }
     NSString *cleanedEventName = nameResult.cleanedData;
     if (nameResult.outcome == CTValidationOutcomeWarning) {
-        CleverTapLogStaticDebug(@"%@: Event name modified - %@", self, nameResult.errorDesc);
-        [errors addObject:nameResult];
+        for (CTValidationResult *warning in nameResult.subResults) {
+            CleverTapLogStaticDebug(@"%@: Event name modified - %@", self, warning.errorDesc);
+        }
+        [errors addObjectsFromArray:nameResult.subResults];
     }
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
