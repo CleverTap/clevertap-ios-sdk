@@ -1345,9 +1345,27 @@ static BOOL sharedInstanceErrorLogged;
     [self queueEvent:event withType:CleverTapEventTypeData];
 }
 
+// Hard multi-instance guard for Live Activity analytics events.
+//
+// Unlike push (which arrives at a static entry point and is ROUTED by wzrk_acct_id),
+// Live Activity impression/click/lifecycle events are client-side API calls made on a
+// specific CleverTap instance. The caller is responsible for calling on the instance that
+// owns the activity. If the wzrk carries a wzrk_acct_id that does NOT match this instance's
+// account, we DROP the event to prevent cross-account attribution leakage.
+// A missing/empty wzrk_acct_id imposes no constraint (proceeds).
+- (BOOL)ct_liveActivityWzrkTargetsThisInstance:(NSDictionary *)wzrk {
+    id rawAcctId = wzrk[CLTAP_WZRK_ACCT_ID];
+    NSString *acctId = [rawAcctId isKindOfClass:[NSString class]] ? rawAcctId : nil;
+    if (acctId.length == 0) return YES;
+    if ([acctId isEqualToString:self.config.accountId]) return YES;
+    CleverTapLogInternal(self.config.logLevel, @"%@: Live Activity event dropped — wzrk_acct_id '%@' does not match this instance's account '%@'. Record the event on the instance that owns the activity.", self, acctId, self.config.accountId);
+    return NO;
+}
+
 - (void)pushLiveActivityEventNamed:(NSString *)eventName data:(NSDictionary *)data {
     if ([CTUIUtils runningInsideAppExtension]) return;
     if (eventName.length == 0) return;
+    if (![self ct_liveActivityWzrkTargetsThisInstance:data]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[CLTAP_EVENT_NAME] = eventName;
     event[CLTAP_EVENT_DATA] = data ?: @{};
@@ -1357,6 +1375,7 @@ static BOOL sharedInstanceErrorLogged;
 // Live Activity impression — identical shape/queue to a push "Notification Viewed" event.
 - (void)pushLiveActivityViewedEventWithData:(NSDictionary *)wzrk {
     if ([CTUIUtils runningInsideAppExtension]) return;
+    if (![self ct_liveActivityWzrkTargetsThisInstance:wzrk]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
     event[CLTAP_EVENT_DATA] = wzrk ?: @{};
@@ -1366,6 +1385,7 @@ static BOOL sharedInstanceErrorLogged;
 // Live Activity click — identical shape/queue to a push "Notification Clicked" event.
 - (void)pushLiveActivityClickedEventWithData:(NSDictionary *)wzrk {
     if ([CTUIUtils runningInsideAppExtension]) return;
+    if (![self ct_liveActivityWzrkTargetsThisInstance:wzrk]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_CLICKED_EVENT_NAME;
     event[CLTAP_EVENT_DATA] = wzrk ?: @{};

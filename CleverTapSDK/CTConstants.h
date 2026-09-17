@@ -147,6 +147,7 @@ static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
+#define CLTAP_WZRK_ACCT_ID @"wzrk_acct_id"
 #define CLTAP_NOTIFICATION_PIVOT @"wzrk_pivot"
 #define CLTAP_NOTIFICATION_PIVOT_DEFAULT @"wzrk_default"
 #define CLTAP_NOTIFICATION_CONTROL_GROUP_ID @"wzrk_cgId"

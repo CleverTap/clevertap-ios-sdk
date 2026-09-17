@@ -130,14 +130,18 @@ class LiveActivitiesViewController: UIViewController {
 
     /// In production the `wzrk` dictionary comes from the `wzrk` object in the activity payload
     /// injected by the CleverTap backend, e.g.:
-    /// `{ "wzrk_activityId": "<id>", "wzrk_activityType": 0, "wzrk_milestoneId": "<id>", "wzrk_id": 12345 }`
-    /// (`wzrk_id` is the campaign id.) Here we build a representative one for the local demo.
+    /// `{ "wzrk_activityId": "<id>", "wzrk_activityType": 0, "wzrk_milestoneId": "<id>",
+    ///    "wzrk_id": "1784798893_20260916", "wzrk_acct_id": "485-7W7-495Z", "wzrk_pid": "..." }`
+    /// (`wzrk_id` is the campaign id — a composite STRING; `wzrk_acct_id` must match the instance
+    /// the event is recorded on or the SDK drops it.) Here we build a representative one.
     private func demoWzrk() -> [AnyHashable: Any] {
         return [
             "wzrk_activityId": "demo-activity",
             "wzrk_activityType": 0,
             "wzrk_milestoneId": "orderPacked",
-            "wzrk_id": 12345
+            "wzrk_id": "1784798893_20260916",
+            "wzrk_acct_id": "485-7W7-495Z",
+            "wzrk_rnv": true
         ]
     }
 
