@@ -11,11 +11,12 @@
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
 #import "CTImpressionManager.h"
-#import "CTNdEvaluationManager.h"
-#import "CTNdFCManager.h"
-#import "CTNdStore.h"
+// CTNdStore and CTNdFCManager are written in Swift. This is the generated header that declares them
+// to Objective-C. It also carries the members CTNdFCManager+Tests.h used to expose. An internal
+// member of an @objcMembers Swift class lands in that header, so the test can reach it without a
+// category.
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
 #import "NdHelper.h"
-#import "CTNdFCManager+Tests.h"
 
 /**
  The Native Display gate and the helpers it uses. None of them has a header declaration.

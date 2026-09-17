@@ -14,9 +14,9 @@
 #import "CTLocalDataStore.h"
 #import "CTDeviceInfo.h"
 #import "CTDispatchQueueManager.h"
-#import "CTNdStore.h"
-#import "CTNdFCManager.h"
-#import "CTNdEvaluationManager.h"
+// CTNdStore and CTNdFCManager are written in Swift. This is the generated header that declares them
+// to Objective-C.
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
 
 @implementation NdHelper
 

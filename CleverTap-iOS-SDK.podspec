@@ -30,7 +30,18 @@ s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTa
     'CleverTapSDK/CTAttachToBatchHeaderDelegate.h',
     'CleverTapSDK/CTBatchSentDelegate.h',
     'CleverTapSDK/CTMultiDelegateManager.h',
-    'CleverTapSDK/InApps/CTImpressionManager.h'
+    'CleverTapSDK/InApps/CTImpressionManager.h',
+    'CleverTapSDK/InApps/CTInAppTriggerManager.h',
+    'CleverTapSDK/InApps/Matchers/CTEventAdapter.h',
+    'CleverTapSDK/InApps/Matchers/CTTriggersMatcher.h',
+    'CleverTapSDK/InApps/Matchers/CTLimitsMatcher.h',
+    'CleverTapSDK/CTUtils.h',
+    'CleverTapSDK/CTLocalDataStore.h',
+    'CleverTapSDK/CTDeviceInfo.h',
+    'CleverTapSDK/CTDispatchQueueManager.h',
+    'CleverTapSDK/Profile/CTProfileOperationType.h',
+    'CleverTapSDK/InApps/Matchers/CTLimitAdapter.h',
+    'CleverTapSDK/InApps/Matchers/CTTriggerValue.h'
 s.tvos.deployment_target    = '9.0'
 s.tvos.source_files         = 'CleverTapSDK/*.{h,m,swift}', 'CleverTapSDK/Encryption/*.{h,m,swift}', 'CleverTapSDK/FileDownload/*.{h,m}', 'CleverTapSDK/ProductConfig/**/*.{h,m}', 'CleverTapSDK/FeatureFlags/**/*.{h,m}', 'CleverTapSDK/ProductExperiences/*.{h,m}', 'CleverTapSDK/Swizzling/*.{h,m}', 'CleverTapSDK/Session/*.{h,m,swift}', 'CleverTapSDK/EventDatabase/*.{h,m}', 'CleverTapSDK/Validation/*.{h,m,swift}', 'CleverTapSDK/Validation/Core/*.{h,m,swift}', 'CleverTapSDK/Validation/Validators/*.{h,m,swift}', 'CleverTapSDK/Profile/*.{h,m,swift}'
 s.tvos.exclude_files        = 'CleverTapSDK/include/**/*.h', 'CleverTapSDK/CleverTapJSInterface.{h,m}', 'CleverTapSDK/CTInAppNotification.{h,m}', 'CleverTapSDK/CTNotificationButton.{h,m}', 'CleverTapSDK/CTNotificationAction.{h,m}', 'CleverTapSDK/CTPushPrimerManager.{h,m}', 'CleverTapSDK/InApps/*.{h,m}', 'CleverTapSDK/InApps/**/*.{h,m}', 'CleverTapSDK/CTInAppFCManager.{h,m}', 'CleverTapSDK/CTInAppDisplayViewController.{h,m}', 'CleverTapSDK/CTContentFetchManager.{h,m}'

@@ -81,9 +81,6 @@ static NSArray *sslCertNames;
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
 #import "CleverTapDisplayUnitCache.h"
-#import "CTNdStore.h"
-#import "CTNdFCManager.h"
-#import "CTNdEvaluationManager.h"
 // Native Display uses these two classes with its own storage names. They are imported here as well
 // as in the in-app block above. Display units are built even when in-app is compiled out.
 #import "CTImpressionManager.h"
@@ -676,7 +673,8 @@ static BOOL sharedInstanceErrorLogged;
                                                                  triggerManager:self.ndTriggerManager
                                                                         ndStore:self.ndStore
                                                                  localDataStore:self.localDataStore];
-    self.ndEvaluationManager.location = self.userSetLocation;
+    [self.ndEvaluationManager setLocationWithLatitude:self.userSetLocation.latitude
+                                            longitude:self.userSetLocation.longitude];
 }
 #endif
 
@@ -798,7 +796,7 @@ static BOOL sharedInstanceErrorLogged;
     [self.inAppEvaluationManager setLocation:location];
 #endif
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-    [self.ndEvaluationManager setLocation:location];
+    [self.ndEvaluationManager setLocationWithLatitude:location.latitude longitude:location.longitude];
 #endif
     if (!self.isAppForeground) return;
     // if in foreground, queue the ping event to transmit location update to server
@@ -3224,7 +3222,6 @@ static BOOL sharedInstanceErrorLogged;
         [self _resetProductConfig];
         
         [self _resetVars];
-        
         // push data on reset profile
         [self recordAppLaunched:action];
         if (properties) {
@@ -3698,9 +3695,14 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordErrorWithMessage:(NSString *)message andErrorCode:(int)code {
     [self.dispatchQueueManager runSerialAsync:^{
         NSString *currentVCName = self.currentViewControllerName ? self.currentViewControllerName : @"Unknown";
-        
+        // The header marks message as nonnull. A caller can still pass nil.
+        // A nil value in the dictionary below raises an exception.
+        // This block runs on a background queue. The exception reaches no caller.
+        // The app stops instead. The fallback value is the one Location already uses.
+        NSString *errorMessage = message ? message : @"Unknown";
+
         [self recordEvent:@"Error Occurred" withProps:@{
-            @"Error Message" : message,
+            @"Error Message" : errorMessage,
             @"Error Code" : @(code),
             @"Location" : currentVCName
         }];

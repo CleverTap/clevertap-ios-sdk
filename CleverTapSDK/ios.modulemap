@@ -36,7 +36,8 @@ framework module CleverTapSDK {
     header "CTDelayedInAppResult.h"
     header "CTInAppStore.h"
 
-    // Internal headers required by CTSessionManager.swift.
+    // Internal headers required by CTSessionManager.swift and by the Swift files in
+    // DisplayUnit/FrequencyCaps.
     // Grouped as an explicit submodule so they are NOT auto-imported when a
     // client writes `import CleverTapSDK` — they must opt-in explicitly.
     // Using a single module map (rather than a separate module.private.modulemap
@@ -56,6 +57,20 @@ framework module CleverTapSDK {
         header "CTBatchSentDelegate.h"
         header "CTMultiDelegateManager.h"
         header "CTImpressionManager.h"
+        header "CTInAppTriggerManager.h"
+        header "CTEventAdapter.h"
+        header "CTTriggersMatcher.h"
+        header "CTLimitsMatcher.h"
+        header "CTUtils.h"
+        header "CTLocalDataStore.h"
+
+        // Pulled in by the headers above. Clang needs every header reached from a framework
+        // module to sit inside that module too.
+        header "CTDeviceInfo.h"
+        header "CTDispatchQueueManager.h"
+        header "CTProfileOperationType.h"
+        header "CTLimitAdapter.h"
+        header "CTTriggerValue.h"
         export *
     }
 
