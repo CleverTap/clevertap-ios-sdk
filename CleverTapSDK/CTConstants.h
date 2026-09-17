@@ -147,6 +147,7 @@ static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
+#define CLTAP_WZRK_ACCT_ID @"wzrk_acct_id"
 #define CLTAP_NOTIFICATION_PIVOT @"wzrk_pivot"
 #define CLTAP_NOTIFICATION_PIVOT_DEFAULT @"wzrk_default"
 #define CLTAP_NOTIFICATION_CONTROL_GROUP_ID @"wzrk_cgId"
@@ -413,6 +414,14 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
 #define CLTAP_OPEN_URL_ACTION_KEY @"iOS"
+
+#pragma mark Constants for Live Activities
+// APNs push payload keys for incoming CT Live Activity pushes (update / end)
+#define CLTAP_LIVE_ACTIVITY_PUSH_MARKER       @"wzrk_la"
+#define CLTAP_LIVE_ACTIVITY_PUSH_ACTIVITY_ID  @"cleverTapActivityId"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_KEY    @"event"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_UPDATE @"update"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_END    @"end"
 
 #pragma mark HTTP Codes
 #define HTTP_OK 200
