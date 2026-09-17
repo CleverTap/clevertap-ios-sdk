@@ -15,7 +15,8 @@
 
 + (void)putString:(NSString *_Nonnull)resetValue forKey:(NSString *_Nonnull)key;
 
-+ (id _Nonnull)getObjectForKey:(NSString *_Nonnull)key;
+// Returns nil when the key was never written. NSUserDefaults is read straight through.
++ (id _Nullable)getObjectForKey:(NSString *_Nonnull)key;
 
 + (void)putObject:(id _Nonnull)object forKey:(NSString *_Nonnull)key;
 

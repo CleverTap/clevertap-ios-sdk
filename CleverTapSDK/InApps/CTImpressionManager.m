@@ -8,6 +8,7 @@
 
 #import "CTImpressionManager.h"
 #import "CTPreferences.h"
+#import "CTConstants.h"
 #import "CleverTapInternal.h"
 #import "CTSystemClock.h"
 
@@ -15,6 +16,7 @@
 
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
+@property (nonatomic, copy, readwrite) NSString *storageNamespace;
 
 @property (nonatomic, strong) NSMutableDictionary *sessionImpressions;
 @property (nonatomic, strong) NSMutableDictionary *impressions;
@@ -30,14 +32,24 @@
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager {
-    if (self = [super init]) {
-        return [self initWithAccountId:accountId
-                              deviceId:deviceId
-                       delegateManager:delegateManager
-                                 clock:[[CTSystemClock alloc] init]
-                                locale:[NSLocale currentLocale]];
-    }
-    return self;
+    return [self initWithAccountId:accountId
+                          deviceId:deviceId
+                   delegateManager:delegateManager
+                  storageNamespace:CLTAP_PREFS_INAPP_IMPRESSIONS_NAMESPACE
+                             clock:[[CTSystemClock alloc] init]
+                            locale:[NSLocale currentLocale]];
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                 storageNamespace:(NSString *)storageNamespace {
+    return [self initWithAccountId:accountId
+                          deviceId:deviceId
+                   delegateManager:delegateManager
+                  storageNamespace:storageNamespace
+                             clock:[[CTSystemClock alloc] init]
+                            locale:[NSLocale currentLocale]];
 }
 
 - (instancetype)initWithAccountId:(NSString *)accountId
@@ -45,17 +57,32 @@
                   delegateManager:(CTMultiDelegateManager *)delegateManager
                             clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale {
+    return [self initWithAccountId:accountId
+                          deviceId:deviceId
+                   delegateManager:delegateManager
+                  storageNamespace:CLTAP_PREFS_INAPP_IMPRESSIONS_NAMESPACE
+                             clock:clock
+                            locale:locale];
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                 storageNamespace:(NSString *)storageNamespace
+                            clock:(id <CTClock>)clock
+                           locale:(NSLocale *)locale {
     if (self = [super init]) {
         self.accountId = accountId;
         self.deviceId = deviceId;
-        
+        self.storageNamespace = storageNamespace;
+
         self.clock = clock;
         self.locale = locale;
-        
+
         self.sessionImpressions = [NSMutableDictionary new];
         self.impressions = [NSMutableDictionary new];
         self.sessionImpressionsTotal = 0;
-        
+
         [delegateManager addSwitchUserDelegate:self];
     }
     return self;
@@ -63,10 +90,14 @@
 
 #pragma mark Manage Impressions
 - (void)recordImpression:(NSString *)campaignId {
+    [self recordImpression:campaignId storeTimestamp:YES];
+}
+
+- (void)recordImpression:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
     if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
         return;
     }
-    
+
     self.sessionImpressionsTotal++;
     // Record session impressions
     @synchronized (self.sessionImpressions) {
@@ -74,7 +105,11 @@
         existing++;
         self.sessionImpressions[campaignId] = @(existing);
     }
-    
+
+    if (!storeTimestamp) {
+        return;
+    }
+
     NSNumber *now = [self.clock timeIntervalSince1970];
     [self addImpression:campaignId timestamp:now];
 }
@@ -218,7 +253,7 @@
 }
 
 - (NSString *)getImpressionKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, @"impressions", campaignId];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, self.storageNamespace, campaignId];
 }
 
 @end
