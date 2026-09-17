@@ -55,9 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The campaign id this unit's counts are stored under. Empty string if the unit has none.
 
- Always @c ti, which is the campaign. Never @c wzrk_id. A @c wzrk_id is the @c ti plus a suffix. The
- suffix changes on every send. A campaign that runs again gets a new @c wzrk_id. Its counts would
- start from zero.
+ Always @c ti, which is the campaign. Never @c wzrk_id.
 
  Every store keys on what this returns. They match only as long as they all ask here.
  */
