@@ -17,6 +17,18 @@
             if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
                 _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
             }
+            NSDictionary *serverMetaData = jsonObject[@"metadata"];
+            if ([serverMetaData isKindOfClass:[NSDictionary class]] && serverMetaData.count > 0) {
+                NSMutableDictionary *metaData = [NSMutableDictionary dictionary];
+                NSString *actionUrl = [_actionUrl stringByTrimmingCharactersInSet:
+                                       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                if (actionUrl.length > 0) {
+                    metaData[CLTAP_PROP_WZRK_ACTION] = @"url";
+                    metaData[CLTAP_PROP_WZRK_DATA] = actionUrl;
+                }
+                [metaData addEntriesFromDictionary:serverMetaData];
+                _metaData = [metaData copy];
+            }
             NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
             if (_media) {
                 NSString *contentType = _media[@"content_type"];

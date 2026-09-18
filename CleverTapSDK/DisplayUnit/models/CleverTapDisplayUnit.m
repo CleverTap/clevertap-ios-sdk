@@ -47,4 +47,14 @@
     return self;
 }
 
+- (NSDictionary<NSString *, id> *)metaDataForContentAtIndex:(NSInteger)contentIndex {
+    if (contentIndex < 0 || contentIndex >= (NSInteger)_contents.count) {
+        CleverTapLogStaticDebug(@"DisplayUnit: content index %ld out of range for unit %@",
+                                (long)contentIndex, _unitID);
+        return @{};
+    }
+    NSDictionary *metaData = _contents[contentIndex].metaData;
+    return metaData ? metaData : @{};
+}
+
 @end
