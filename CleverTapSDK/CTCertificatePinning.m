@@ -1,6 +1,7 @@
 #if CLEVERTAP_SSL_PINNING
 
 #import "CTCertificatePinning.h"
+#import "CTConstants.h"
 
 @implementation CTCertificatePinning
 
@@ -30,7 +31,7 @@
                                                                   options:0
                                                                     error:&error];
     if (plistData == nil) {
-        NSLog(@"Error serializing plist: %@", error);
+        CleverTapLogStaticDebug(@"Error serializing plist: %@", error);
         return NO;
     }
     
@@ -39,7 +40,7 @@
     if ([plistData writeToFile:[[self plistFilePathForAccountId:accountId] stringByExpandingTildeInPath]
                        options:NSDataWritingAtomic
                          error:&writeError] == NO) {
-        NSLog(@"Error saving plist to the filesystem: %@", writeError);
+        CleverTapLogStaticDebug(@"Error saving plist to the filesystem: %@", writeError);
         return NO;
     }
     
@@ -56,7 +57,7 @@
     NSString *path = [self plistFilePathForAccountId:accountId];
     NSDictionary *SSLPinsDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByExpandingTildeInPath]];
     if (SSLPinsDict == nil) {
-        NSLog(@"Error accessing the SSL Pins plist at %@", path);
+        CleverTapLogStaticDebug(@"Error accessing the SSL Pins plist at %@", path);
         return NO;
     }
     
