@@ -559,4 +559,40 @@
     XCTAssertNil(evtData[@"wzrk_element_id"]);
 }
 
+#pragma mark - Display Unit element-view params merging
+
+/// The element-level viewed path (`-recordDisplayUnitElementViewedEventForID:`)
+/// builds with `clicked:NO`, so it must raise Notification Viewed while merging
+/// per-slide attribution exactly as the clicked path does.
+- (void)testBuildDisplayViewStateEvent_viewed_raisesViewedEventWithMergedParams {
+    NSDictionary *unitJson = @{
+        @"wzrk_id": @"1234",
+        @"wzrk_pivot": @"wzrk_default"
+    };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+    NSDictionary *params = @{
+        @"wzrk_element_id": @"1907971814",
+        @"wzrk_index": @"0"
+    };
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:NO
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:params
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    XCTAssertEqualObjects(captured[CLTAP_EVENT_NAME], CLTAP_NOTIFICATION_VIEWED_EVENT_NAME);
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    XCTAssertEqualObjects(evtData[@"wzrk_element_id"], @"1907971814");
+    XCTAssertEqualObjects(evtData[@"wzrk_index"], @"0");
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"1234");
+    XCTAssertEqualObjects(evtData[@"wzrk_pivot"], @"wzrk_default");
+}
+
 @end
