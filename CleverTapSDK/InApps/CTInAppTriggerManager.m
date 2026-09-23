@@ -8,12 +8,14 @@
 
 #import "CTInAppTriggerManager.h"
 #import "CTPreferences.h"
+#import "CTConstants.h"
 #import "CTMultiDelegateManager.h"
 
 @interface CTInAppTriggerManager()
 
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
+@property (nonatomic, copy, readwrite) NSString *storageNamespace;
 
 @end
 
@@ -22,10 +24,21 @@
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager {
+    return [self initWithAccountId:accountId
+                          deviceId:deviceId
+                   delegateManager:delegateManager
+                  storageNamespace:CLTAP_PREFS_INAPP_TRIGGERS_NAMESPACE];
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                 storageNamespace:(NSString *)storageNamespace {
     self = [super init];
     if (self) {
         self.accountId = accountId;
         self.deviceId = deviceId;
+        self.storageNamespace = storageNamespace;
         [delegateManager addSwitchUserDelegate:self];
     }
     return self;
@@ -49,7 +62,7 @@
 }
 
 - (NSString *)getTriggersKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, @"triggers", campaignId];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, self.storageNamespace, campaignId];
 }
 
 #pragma mark Switch User Delegate
