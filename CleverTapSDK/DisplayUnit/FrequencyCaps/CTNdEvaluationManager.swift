@@ -288,9 +288,13 @@ final class CTNdEvaluationManager: NSObject {
         var reply: [String: Any] = [:]
         reply[CLTAP_NOTIFICATION_ID_TAG] = wzrkId
         reply[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?? CLTAP_NOTIFICATION_PIVOT_DEFAULT
-        if let controlGroupId = suppressedUnit[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] {
-            reply[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = controlGroupId
-        }
+        // wzrk_cgId is always part of the reply. The stub may not have one. 0 is sent in that case.
+        // The reply keeps the same shape every time. The value is always a number. A string value
+        // is converted to one.
+        let rawControlGroupId = suppressedUnit[CLTAP_NOTIFICATION_CONTROL_GROUP_ID]
+        reply[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = (rawControlGroupId as? NSNumber)?.intValue
+            ?? Int(rawControlGroupId as? String ?? "")
+            ?? 0
 
         lock.lock()
         suppressedNativeDisplays.append(reply)

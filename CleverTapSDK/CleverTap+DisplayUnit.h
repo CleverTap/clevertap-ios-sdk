@@ -113,7 +113,7 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  This method returns all the display units.
 
  @return all units currently held, or @c nil if no cache has been installed
- yet or the cache holds no units. Matches the Android contract.
+ yet or the cache holds no units.
  */
 - (NSArray<CleverTapDisplayUnit *>*_Nullable)getAllDisplayUnits;
 

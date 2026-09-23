@@ -2574,9 +2574,10 @@ static BOOL sharedInstanceErrorLogged;
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     if (![jsonResp isKindOfClass:[NSDictionary class]]) return;
 
-    // Caps and rules first, on every response, even one that arrives during a user switch. They
-    // belong to the account and not to a user. They should stay up to date either way. The
-    // content step below also reads what this writes.
+    // Caps first, on every response, even one that arrives during a user switch. They belong to the
+    // account and not to a user. They should stay up to date either way. The content step below
+    // also reads what this writes. The rules and the control group replies are a different case.
+    // saveNativeDisplayRulesAndCaps: stops before those two during a user switch.
     [self saveNativeDisplayRulesAndCaps:jsonResp];
 
     // Only the content is held back during a user switch. The thing to avoid is showing the old
@@ -2613,6 +2614,12 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndFCManager removeStaleCampaignCounts:staleIds];
         }
 
+        // The rules and the control group replies below belong to a user. A user switch stops here.
+        // The store key holds the device id. The device id has already changed by this point.
+        // Saving the rules would put the old user's rules under the new user's key. A control group
+        // reply would go out on the new user's next batch.
+        if (self.isUserSwitching) return;
+
         // The rules the SDK checks on the device. This replaces whatever was saved. An empty array
         // really does mean clear them. The server sends this list only when it is sending the full
         // current set.
@@ -2638,9 +2645,13 @@ static BOOL sharedInstanceErrorLogged;
 - (void)deliverNativeDisplayContent:(NSDictionary *)jsonResp {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
     NSArray *appLaunchedJSON = [self nativeDisplayAppLaunchedEntries:jsonResp];
+    BOOL hasDisplayUnits = [displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0;
+
+    // This response says nothing at all about Native Display. The cache is left as it is.
+    if (!hasDisplayUnits && appLaunchedJSON.count == 0) return;
 
     NSMutableArray<CleverTapDisplayUnit *> *displayUnits = [NSMutableArray new];
-    if ([displayUnitJSON isKindOfClass:[NSArray class]]) {
+    if (hasDisplayUnits) {
         [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
     }
     // Suppressed stubs carry no content. They are dropped here. They were already replied to in
@@ -2653,16 +2664,22 @@ static BOOL sharedInstanceErrorLogged;
     }
     [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithContent]];
 
-    if (displayUnits.count == 0) return;
-
     NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
     [self initializeDisplayUnitWithCallback:^(BOOL success) {
         if (success) {
             // One write for the whole response. updateDisplayUnits: replaces the cache instead of
             // adding to it. Writing the two lists one after the other would keep only the second.
+            //
+            // An empty list is written too. This response did carry Native Display units. None of
+            // them came through. The cache has to lose what it still holds. Otherwise
+            // getAllDisplayUnits returns a unit that is no longer allowed.
             [self.displayUnitCache updateDisplayUnits:withinCaps];
-            [self _notifyDisplayUnitsUpdated];
+            if (withinCaps.count > 0) {
+                [self _notifyDisplayUnitsUpdated];
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@: No Native Display unit came through, the cache was cleared", self);
+            }
         }
     }];
 }
@@ -5359,8 +5376,8 @@ static BOOL sharedInstanceErrorLogged;
  Adds one display to the Native Display counts.
 
  Every call counts, including two calls for the same unit in one session. There is no check for
- repeats, on purpose. The app's call is the only sign we have that a unit was shown. Android counts
- every call too. The totals go to the server. Both platforms have to count the same way.
+ repeats, on purpose. The app's call is the only sign we have that a unit was shown. The totals go
+ to the server. A check for repeats would make those totals too low.
 
  Every unit is counted, whatever limits are set right now. The server needs these totals from every
  unit the app showed. A limit set tomorrow has to start from a real history.
