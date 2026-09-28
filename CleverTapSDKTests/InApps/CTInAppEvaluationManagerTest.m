@@ -1266,6 +1266,30 @@
     XCTAssertEqualObjects((@[@100, @500]), [self queuedInAppIds]);
 }
 
+/*!
+ A window that is never closed suppresses app-launch in-apps for the rest of the session, which
+ is far worse than the duplicate it exists to prevent. This asserts the recovery path: once the
+ completion runs, in-apps work again.
+
+ The matching prevention — never opening a window when the content fetch will be skipped, as
+ during a user switch — lives in openAppLaunchedArbitrationIfNeeded:.
+ */
+- (void)testArbitrationWindowDoesNotSuppressInAppsForeverAfterCompletion {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+
+    // Several later launches must all display, i.e. nothing is still suppressing.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:600 priority:1]]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:700 priority:1]]];
+    XCTAssertEqualObjects((@[@100, @600, @700]), [self queuedInAppIds]);
+}
+
 - (void)testArbitrationCompletionWithNoCandidatesShowsNothing {
     [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
     [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];

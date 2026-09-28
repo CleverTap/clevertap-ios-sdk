@@ -44,6 +44,14 @@
  */
 - (void)openAppLaunchedArbitrationIfNeeded:(NSDictionary *)jsonResp {
 #if !defined(CLEVERTAP_TVOS)
+    // A window must never outlive the fetch that closes it. During a user switch the content
+    // fetch is skipped entirely, so its completion would never run and the window would suppress
+    // app-launch in-apps for the rest of the session. Do not open one.
+    if (self.isUserSwitching) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Not opening App Launched arbitration, content fetch is skipped during a user switch", self);
+        return;
+    }
+
     NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:jsonResp];
     if (items.count == 0) {
         return;
