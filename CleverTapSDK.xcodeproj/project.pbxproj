@@ -511,6 +511,7 @@
 		DDDDDDDD0000000000000E01 /* CTNdFCManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDD0000000000000F01 /* CTNdFCManagerTests.swift */; };
 		DDDDDDDD0000000000000801 /* CTNdGateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDD0000000000000901 /* CTNdGateTest.m */; };
 		DDDDDDDD0000000000000A01 /* CTNdStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDD0000000000000B01 /* CTNdStoreTests.swift */; };
+		DDDDDDDD0000000000001401 /* CTNdEvaluationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDD0000000000001501 /* CTNdEvaluationManagerTests.swift */; };
 		6BA3B2E82B07E207004E834B /* CTTriggersMatcher+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BA3B2E72B07E207004E834B /* CTTriggersMatcher+Tests.m */; };
 		6BAFFE9C2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BAFFE9B2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.m */; };
 		6BAFFEA82C45243B00654CAF /* CTFileDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 48F9FD1A2C3D30B600617770 /* CTFileDownloader.h */; };
@@ -1226,6 +1227,7 @@
 		DDDDDDDD0000000000000F01 /* CTNdFCManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTNdFCManagerTests.swift; sourceTree = "<group>"; };
 		DDDDDDDD0000000000000901 /* CTNdGateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTNdGateTest.m; sourceTree = "<group>"; };
 		DDDDDDDD0000000000000B01 /* CTNdStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTNdStoreTests.swift; sourceTree = "<group>"; };
+		DDDDDDDD0000000000001501 /* CTNdEvaluationManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTNdEvaluationManagerTests.swift; sourceTree = "<group>"; };
 		6BA3B2E22B07E06C004E834B /* CTInAppStore+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTInAppStore+Tests.h"; sourceTree = "<group>"; };
 		6BA3B2E32B07E0F2004E834B /* CTInAppEvaluationManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTInAppEvaluationManager+Tests.h"; sourceTree = "<group>"; };
 		6BA3B2E42B07E128004E834B /* CTInAppFCManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTInAppFCManager+Tests.h"; sourceTree = "<group>"; };
@@ -1995,6 +1997,7 @@
 				DDDDDDDD0000000000000F01 /* CTNdFCManagerTests.swift */,
 				DDDDDDDD0000000000000901 /* CTNdGateTest.m */,
 				DDDDDDDD0000000000000B01 /* CTNdStoreTests.swift */,
+				DDDDDDDD0000000000001501 /* CTNdEvaluationManagerTests.swift */,
 			);
 			path = DisplayUnit;
 			sourceTree = "<group>";
@@ -3198,6 +3201,7 @@
 				DDDDDDDD0000000000000E01 /* CTNdFCManagerTests.swift in Sources */,
 				DDDDDDDD0000000000000801 /* CTNdGateTest.m in Sources */,
 				DDDDDDDD0000000000000A01 /* CTNdStoreTests.swift in Sources */,
+				DDDDDDDD0000000000001401 /* CTNdEvaluationManagerTests.swift in Sources */,
 				32394C2529FA272600956058 /* CTValidatorTest.m in Sources */,
 				4847D1722CDA17C2008DC327 /* CTEventDatabaseTests.m in Sources */,
 				6BB778CE2BEE48C300A41628 /* CTCustomTemplateInAppDataTest.m in Sources */,

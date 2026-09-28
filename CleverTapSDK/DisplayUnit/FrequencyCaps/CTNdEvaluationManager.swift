@@ -32,7 +32,7 @@ private let kCTNdSkipKeysUserAttributeEvaluation: Set<String> = ["cc", "tz", "Ca
 /// in it. That is why `CTNdFCManager` does not check those two limits again when the unit is shown.
 ///
 /// This class also holds the `adUnit_suppressed` list. Those are not made here. They are control
-/// group replies. The server picked this user to see nothing. We tell it we noticed. Response
+/// group acknowledgements. The server picked this user to see nothing. We tell it we noticed. Response
 /// handling adds them through `recordSuppressedNativeDisplay(_:)`. Both lists live here because that
 /// is where in-app keeps its versions. Both survive an app restart.
 ///
@@ -84,7 +84,7 @@ final class CTNdEvaluationManager: NSObject {
     /// either.
     private(set) var evaluatedServerSideNativeDisplayIds: [Any] = []
 
-    /// Control group replies waiting to be sent. See `recordSuppressedNativeDisplay(_:)`.
+    /// Control group acknowledgements waiting to be sent. See `recordSuppressedNativeDisplay(_:)`.
     private(set) var suppressedNativeDisplays: [Any] = []
 
     /// The properties of the last App Launched event, merged into profile change events.
@@ -262,15 +262,54 @@ final class CTNdEvaluationManager: NSObject {
         }
     }
 
-    // MARK: - Control group replies
+    /// Returns the App-Launched entries that are still inside their own limits.
+    ///
+    /// App-Launched campaigns are not listed in `adUnit_notifs_ss`. Each entry carries its own
+    /// `frequencyLimits` and `occurrenceLimits`. The SDK never reports them in `adUnit_eval`. This is
+    /// the only place those limits are applied.
+    ///
+    /// An entry with no campaign id passes through. An entry with no limits passes through.
+    func retainAppLaunchedWithinLimits(_ content: [[AnyHashable: Any]]) -> [[AnyHashable: Any]] {
+        if content.isEmpty { return content }
+
+        return content.filter { entry in
+            // Same helper the cap manager uses. Triggers and impressions must use one id. Two
+            // helpers could drift apart. One would then write under a key the other never reads.
+            let campaignId = CTNdFCManager.campaignId(from: entry)
+
+            var whenLimits: [Any] = []
+            whenLimits.append(contentsOf: entry[CLTAP_INAPP_FC_LIMITS] as? [Any] ?? [])
+            whenLimits.append(contentsOf: entry[CLTAP_INAPP_OCCURRENCE_LIMITS] as? [Any] ?? [])
+            if campaignId.isEmpty || whenLimits.isEmpty { return true }
+
+            // The server sent this entry. That counts as a trigger match. The count goes up whether
+            // the limits pass or not. occurrenceLimits are counted in triggers. They need this.
+            triggerManager.incrementTrigger(campaignId)
+
+            let withinLimits = limitsMatcher.match(whenLimits: whenLimits,
+                                                   forCampaignId: campaignId,
+                                                   with: impressionManager,
+                                                   andTriggerManager: triggerManager)
+            if !withinLimits {
+                // Every limit in the list has to pass. The trigger count is printed next to the
+                // list. onEvery and onExactly are read from that count. It is a lifetime total for
+                // this campaign. It is not a count of views.
+                log("App-Launched Native Display campaign \(campaignId) arrived, but its limits did not pass. Limits: \(whenLimits). This campaign has now matched a trigger \(triggerManager.getTriggers(campaignId)) time(s) in total since install.")
+            }
+            return withinLimits
+        }
+    }
+
+    // MARK: - Control group acknowledgements
 
     /// Records that a campaign was not shown because the user is in its control group.
     ///
     /// The server sends these inside `adUnit_notifs_applaunched` as stubs. They carry `wzrk_id` and
-    /// `wzrk_cgId` but no content. We reply here rather than on the server. The control group event
-    /// then happens at the same moment the unit would have been shown.
+    /// `wzrk_cgId` but no content. The SDK sends the acknowledgement. The server does not work it out
+    /// on its own. The control group event then happens at the same moment the unit would have been
+    /// shown.
     ///
-    /// A stub with no `wzrk_id` is logged and dropped. There is nothing to reply about.
+    /// A stub with no `wzrk_id` is logged and dropped. There is nothing to acknowledge.
     ///
     /// The parameter is `Any?` so that a caller passing something other than a dictionary is handled
     /// the same way the Objective-C version handled it.
@@ -280,27 +319,27 @@ final class CTNdEvaluationManager: NSObject {
 
         guard let wzrkId = suppressedUnit[CLTAP_NOTIFICATION_ID_TAG] as? String, !wzrkId.isEmpty else {
             // The server always sends wzrk_id on these stubs. This should not happen. Without one
-            // there is nothing to reply about. Log it instead of dropping it silently.
-            log("Dropping Native Display control group reply, no wzrk_id on \(suppressedUnit)")
+            // there is nothing to acknowledge. Log it instead of dropping it silently.
+            log("Dropping Native Display control group acknowledgement, no wzrk_id on \(suppressedUnit)")
             return
         }
 
-        var reply: [String: Any] = [:]
-        reply[CLTAP_NOTIFICATION_ID_TAG] = wzrkId
-        reply[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?? CLTAP_NOTIFICATION_PIVOT_DEFAULT
-        // wzrk_cgId is always part of the reply. The stub may not have one. 0 is sent in that case.
-        // The reply keeps the same shape every time. The value is always a number. A string value
-        // is converted to one.
+        var acknowledgement: [String: Any] = [:]
+        acknowledgement[CLTAP_NOTIFICATION_ID_TAG] = wzrkId
+        acknowledgement[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?? CLTAP_NOTIFICATION_PIVOT_DEFAULT
+        // wzrk_cgId is always part of the acknowledgement. The stub may not have one. 0 is sent in
+        // that case. The acknowledgement keeps the same shape every time. The value is always a
+        // number. A string value is converted to one.
         let rawControlGroupId = suppressedUnit[CLTAP_NOTIFICATION_CONTROL_GROUP_ID]
-        reply[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = (rawControlGroupId as? NSNumber)?.intValue
+        acknowledgement[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = (rawControlGroupId as? NSNumber)?.intValue
             ?? Int(rawControlGroupId as? String ?? "")
             ?? 0
 
         lock.lock()
-        suppressedNativeDisplays.append(reply)
+        suppressedNativeDisplays.append(acknowledgement)
         lock.unlock()
         saveSuppressedNativeDisplays()
-        log("Recorded Native Display control group reply for \(wzrkId)")
+        log("Recorded Native Display control group acknowledgement for \(wzrkId)")
     }
 
     // MARK: - AttachToBatchHeader delegate
@@ -336,9 +375,23 @@ final class CTNdEvaluationManager: NSObject {
 
         if removeSent(header[CLTAP_ND_SS_EVAL_META_KEY], from: &evaluatedServerSideNativeDisplayIds) {
             saveEvaluatedServerSideNativeDisplayIds()
+            // The server stops sending a campaign once it knows the SDK found it eligible. A
+            // campaign that keeps arriving is a sign that never reached the server. This line shows
+            // it did reach the server.
+            lock.lock()
+            let stillWaiting = evaluatedServerSideNativeDisplayIds.count
+            lock.unlock()
+            // Cast before printing. The value arrives as an NSArray. Printing that gives the
+            // Objective-C form, which runs over several lines.
+            let sentIds = header[CLTAP_ND_SS_EVAL_META_KEY] as? [Any] ?? []
+            log("The server received the Native Display campaigns the SDK found eligible. Campaign ids: \(sentIds). They were sent in \(CLTAP_ND_SS_EVAL_META_KEY). \(stillWaiting) more campaign id(s) are still waiting to be sent.")
         }
         if removeSent(header[CLTAP_ND_SUPPRESSED_META_KEY], from: &suppressedNativeDisplays) {
             saveSuppressedNativeDisplays()
+            lock.lock()
+            let stillWaiting = suppressedNativeDisplays.count
+            lock.unlock()
+            log("The server received the Native Display control group acknowledgements. They were sent in \(CLTAP_ND_SUPPRESSED_META_KEY). \(stillWaiting) more acknowledgement(s) are still waiting to be sent.")
         }
     }
 
@@ -384,10 +437,19 @@ final class CTNdEvaluationManager: NSObject {
     func deviceIdDidChange(_ newDeviceId: String) {
         lock.lock()
         defer { lock.unlock() }
+
+        let leftBehind = evaluatedServerSideNativeDisplayIds.count + suppressedNativeDisplays.count
         deviceId = newDeviceId
         // Anything still waiting belongs to the old user. We leave it under their key. It must not
         // be sent under the new user's key.
         loadPendingLists()
+
+        let loaded = evaluatedServerSideNativeDisplayIds.count + suppressedNativeDisplays.count
+        if leftBehind > 0 || loaded > 0 {
+            // An entry that has not been sent yet stops here. The server keeps sending that
+            // campaign until the entry arrives. Without this line the entries appear to vanish.
+            log("A user switch changed the Native Display storage key. \(leftBehind) pending entry(ies) stay with the previous user. \(loaded) entry(ies) saved earlier for the new user were loaded.")
+        }
     }
 
     // MARK: - Logging

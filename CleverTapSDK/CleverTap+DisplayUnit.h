@@ -216,4 +216,22 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  */
 - (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache;
 
+/*!
+ @method
+
+ @abstract
+ Asks CleverTap for a fresh set of Native Display frequency cap rules.
+
+ @discussion
+ The SDK is given these rules when the app launches. Call this to ask for them again in the middle
+ of a session. The rules that arrive replace the ones the SDK already holds.
+
+ The rules do not arrive straight away. They come back on a later response from CleverTap. Any
+ display unit delivered before then is checked against the rules the SDK holds at that moment.
+
+ This call does nothing on an analytics only instance. It also does nothing inside an app extension.
+ Neither one shows display units.
+ */
+- (void)fetchNativeDisplayMeta;
+
 @end

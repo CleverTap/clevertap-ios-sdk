@@ -2576,7 +2576,8 @@ static BOOL sharedInstanceErrorLogged;
 
     // Caps first, on every response, even one that arrives during a user switch. They belong to the
     // account and not to a user. They should stay up to date either way. The content step below
-    // also reads what this writes. The rules and the control group replies are a different case.
+    // also reads what this writes. The rules and the control group acknowledgements are a different
+    // case.
     // saveNativeDisplayRulesAndCaps: stops before those two during a user switch.
     [self saveNativeDisplayRulesAndCaps:jsonResp];
 
@@ -2614,11 +2615,14 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndFCManager removeStaleCampaignCounts:staleIds];
         }
 
-        // The rules and the control group replies below belong to a user. A user switch stops here.
-        // The store key holds the device id. The device id has already changed by this point.
-        // Saving the rules would put the old user's rules under the new user's key. A control group
-        // reply would go out on the new user's next batch.
-        if (self.isUserSwitching) return;
+        // The rules and the control group acknowledgements below belong to a user. A user switch
+        // stops here. The store key holds the device id. The device id has already changed by this
+        // point. Saving the rules would put the old user's rules under the new user's key. A control
+        // group acknowledgement would go out on the new user's next batch.
+        if (self.isUserSwitching) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display rules and control group acknowledgements in this response were skipped because the user is being switched. The account caps in it were still saved. The next response after the switch brings the rules for the new user.", self);
+            return;
+        }
 
         // The rules the SDK checks on the device. This replaces whatever was saved. An empty array
         // really does mean clear them. The server sends this list only when it is sending the full
@@ -2662,7 +2666,17 @@ static BOOL sharedInstanceErrorLogged;
             [appLaunchedWithContent addObject:entry];
         }
     }
-    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithContent]];
+    // The first question to ask when a campaign does not appear is whether the server sent it at
+    // all. Every other Native Display count in the log is taken after a filter has run. This one is
+    // taken before any of them.
+    CleverTapLogDebug(self.config.logLevel, @"%@: Native Display response carried %lu unit(s) in %@ and %lu in %@. %lu of the App-Launched ones are control group stubs and hold no content.",
+                      self,
+                      (unsigned long)(hasDisplayUnits ? displayUnitJSON.count : 0), CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY,
+                      (unsigned long)appLaunchedJSON.count, CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY,
+                      (unsigned long)(appLaunchedJSON.count - appLaunchedWithContent.count));
+
+    NSArray *appLaunchedWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:appLaunchedWithContent];
+    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithinLimits]];
 
     NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
@@ -2682,6 +2696,29 @@ static BOOL sharedInstanceErrorLogged;
             }
         }
     }];
+}
+
+/**
+ Drops the App-Launched entries that have used up their own limits.
+
+ App-Launched campaigns are not listed in @c adUnit_notifs_ss. Each entry carries its own
+ @c frequencyLimits and @c occurrenceLimits. The SDK never reports them in @c adUnit_eval. This is
+ the only place those limits are applied.
+
+ The evaluator is missing on the send test path. That path applies no limits. The entries pass
+ through.
+
+ A failure drops every App-Launched entry. Their limits could not be checked. An unchecked entry must
+ not reach the app. The failure is caught here, so content in @c adUnit_notifs still arrives.
+ */
+- (NSArray *)appLaunchedNativeDisplaysWithinLimits:(NSArray *)entries {
+    if (entries.count == 0 || !self.ndEvaluationManager) return entries;
+    @try {
+        return [self.ndEvaluationManager retainAppLaunchedWithinLimits:entries];
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to check the App-Launched Native Display limits, so those units were dropped: %@", self, e.debugDescription);
+        return @[];
+    }
 }
 
 /**
@@ -2718,15 +2755,17 @@ static BOOL sharedInstanceErrorLogged;
             [withinCaps addObject:unit];
             continue;
         }
-        // Of the five cap fields, Native Display sends only excludeGlobalFCaps. It comes from the
-        // campaign's rule. efc, tlc, tdc and mdc belong to in-app. They are passed unset.
+        // Of the five cap fields, Native Display sends only excludeGlobalFCaps. efc, tlc, tdc and mdc
+        // belong to in-app. They are passed unset.
+        BOOL excludesGlobalCaps = [self nativeDisplayExcludesGlobalCaps:json forCampaignId:campaignId];
         NSString *heldBackReason = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
                                                              excludeFromCaps:NO
-                                                           excludeGlobalCaps:[self nativeDisplayExcludesGlobalCapsFor:campaignId]
+                                                           excludeGlobalCaps:excludesGlobalCaps
                                                           totalLifetimeCount:-1
                                                              totalDailyCount:-1
                                                                maxPerSession:-1];
         if (!heldBackReason) {
+            [self logNativeDisplayExemptionIfItMattered:campaignId unitJSON:json exempt:excludesGlobalCaps];
             [withinCaps addObject:unit];
             if (accountHasCaps) {
                 capManagedDeliveredCount++;
@@ -2748,6 +2787,37 @@ static BOOL sharedInstanceErrorLogged;
 
     [self warnIfNativeDisplayViewsAreNeverReported:capManagedDeliveredCount];
     return withinCaps;
+}
+
+/**
+ Logs the campaigns that only got through because they are an exception to the two account caps.
+
+ A campaign held back by a cap is logged with the cap named. A campaign let through by
+ @c excludeGlobalFCaps leaves no line at all. One campaign then stops while the next carries on, and
+ nothing in the log says why.
+
+ The cap is asked a second time, with the exemption taken away. Nothing is logged when the answer is
+ the same, because the flag changed nothing. The second question is only asked for a campaign that
+ carries the flag.
+ */
+- (void)logNativeDisplayExemptionIfItMattered:(NSString *)campaignId unitJSON:(NSDictionary *)unitJSON exempt:(BOOL)exempt {
+    if (!exempt) return;
+
+    NSString *reasonWithoutFlag = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
+                                                            excludeFromCaps:NO
+                                                          excludeGlobalCaps:NO
+                                                         totalLifetimeCount:-1
+                                                            totalDailyCount:-1
+                                                              maxPerSession:-1];
+    if (!reasonWithoutFlag) return;
+
+    // The flag arrives in one of two places. App-Launched units carry it on the content. Units for
+    // event-triggered campaigns get it from the campaign's rule.
+    NSString *source = unitJSON[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil
+        ? @"the unit content"
+        : [NSString stringWithFormat:@"the campaign's rule in %@", CLTAP_ND_SS_JSON_RESPONSE_KEY];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Native Display campaign %@ was let through by %@, read from %@. Without that flag it would have been held back. %@.",
+                      self, campaignId, CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS, source, reasonWithoutFlag);
 }
 
 /**
@@ -5393,25 +5463,28 @@ static BOOL sharedInstanceErrorLogged;
 
     [self.ndFCManager checkUpdateDailyLimits];
     [self.ndFCManager didShowCampaign:campaignId
-                       storeTimestamp:[self nativeDisplayCampaignNeedsTimestamps:campaignId]];
+                       storeTimestamp:[self nativeDisplayNeedsTimestamps:displayUnit.json forCampaignId:campaignId]];
     self.appReportedANativeDisplayView = YES;
 }
 
 /**
  Whether this campaign's impression times are worth saving on disk.
 
- Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits against the rules in
- @c adUnit_notifs_ss. A campaign missing from that list is never checked. A campaign in it with
- neither kind of limit is never checked either. Both cases can skip the write. See
- @c CTImpressionManager @c recordImpression:storeTimestamp: for why the write is worth skipping.
+ Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits. A campaign that
+ sets neither kind of limit is never checked, so it can skip the write. See @c CTImpressionManager
+ @c recordImpression:storeTimestamp: for why the write is worth skipping.
 
  One small gap: if content is shown before its rule arrives, those views leave no times behind, so a
  limit that starts applying later begins with no history. It only affects those few views.
  */
-- (BOOL)nativeDisplayCampaignNeedsTimestamps:(NSString *)campaignId {
-    NSDictionary *rule = [self nativeDisplayRuleFor:campaignId];
-    NSArray *frequencyLimits = rule[CLTAP_INAPP_FC_LIMITS];
-    NSArray *occurrenceLimits = rule[CLTAP_INAPP_OCCURRENCE_LIMITS];
+- (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId {
+    return [self nativeDisplayHasLimits:unitJSON]
+        || [self nativeDisplayHasLimits:[self nativeDisplayRuleFor:campaignId]];
+}
+
+- (BOOL)nativeDisplayHasLimits:(NSDictionary *)source {
+    NSArray *frequencyLimits = source[CLTAP_INAPP_FC_LIMITS];
+    NSArray *occurrenceLimits = source[CLTAP_INAPP_OCCURRENCE_LIMITS];
     return ([frequencyLimits isKindOfClass:[NSArray class]] && frequencyLimits.count > 0)
         || ([occurrenceLimits isKindOfClass:[NSArray class]] && occurrenceLimits.count > 0);
 }
@@ -5428,11 +5501,13 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Whether this campaign is an exception to the two account limits.
 
- The flag is @c excludeGlobalFCaps. It is read from the campaign's rule, not from the content. Native
- Display content carries no cap settings at all. The rule is the only place the flag arrives. In-app
- reads it from the content. In-app content does carry it.
+ The flag is @c excludeGlobalFCaps. The unit's own content is read first. App-Launched units carry the
+ flag there. The campaign's rule in @c adUnit_notifs_ss is read next. Units for event-triggered
+ campaigns carry no cap settings, and their rule is the only place the flag arrives.
  */
-- (BOOL)nativeDisplayExcludesGlobalCapsFor:(NSString *)campaignId {
+- (BOOL)nativeDisplayExcludesGlobalCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId {
+    id flag = unitJSON[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS];
+    if (flag) return [flag boolValue];
     return [[self nativeDisplayRuleFor:campaignId][CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
 }
 

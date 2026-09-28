@@ -83,19 +83,4 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  */
 - (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
 
-#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-/*!
- @method
-
- @abstract
- Asks the server for a fresh Native Display rule bundle in the middle of a session.
-
- @discussion
- Sends a wzrk_fetch event with t set to kCTNdFetchTypeMeta. The server answers with
- adUnit_notifs_ss. handleDisplayUnitResponse: already reads that key. Rules normally arrive with App
- Launched. This is the way to get them without waiting for the next launch.
- */
-- (void)fetchNativeDisplayMeta;
-#endif
-
 @end

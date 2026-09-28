@@ -34,8 +34,9 @@
 @property (atomic, assign) BOOL appReportedANativeDisplayView;
 
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits;
-- (BOOL)nativeDisplayExcludesGlobalCapsFor:(NSString *)campaignId;
-- (BOOL)nativeDisplayCampaignNeedsTimestamps:(NSString *)campaignId;
+- (BOOL)nativeDisplayExcludesGlobalCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
+- (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
+- (NSArray *)appLaunchedNativeDisplaysWithinLimits:(NSArray *)entries;
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit;
 - (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback;
 - (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp;
@@ -79,8 +80,8 @@ static NSString *const kOtherCampaignId = @"70002";
 
 #pragma mark Helpers
 
-/// A content unit with the shape the server sends. ti is a number here. It has no cap fields.
-/// Native Display content carries none.
+/// A content unit with the shape the server sends. ti is a number here. Cap fields are added
+/// through the extras argument.
 - (CleverTapDisplayUnit *)unitWithTi:(NSString *)ti {
     return [self unitWithTi:ti extras:@{}];
 }
@@ -108,6 +109,28 @@ static NSString *const kOtherCampaignId = @"70002";
     for (int i = 0; i < times; i++) {
         [self.helper.ndFCManager didShowCampaign:campaignId storeTimestamp:NO];
     }
+}
+
+/// One raw entry, in the shape the server sends inside adUnit_notifs_applaunched. The limits are
+/// added through the extras argument. The App-Launched filter reads entries, not display units.
+- (NSDictionary *)entryWithTi:(NSString *)ti extras:(NSDictionary *)extras {
+    NSMutableDictionary *entry = [@{
+        CLTAP_INAPP_ID: @([ti intValue]),
+        CLTAP_NOTIFICATION_ID_TAG: [ti stringByAppendingString:@"_20260810"],
+        @"type": @"simple"
+    } mutableCopy];
+    [entry addEntriesFromDictionary:extras];
+    return entry;
+}
+
+/// Runs the App-Launched filter and returns the campaign ids that came through, in the order they
+/// came through.
+- (NSArray<NSString *> *)appLaunched:(NSArray *)entries {
+    NSMutableArray<NSString *> *ids = [NSMutableArray new];
+    for (NSDictionary *entry in [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]) {
+        [ids addObject:[CTNdFCManager campaignIdFrom:entry]];
+    }
+    return ids;
 }
 
 #pragma mark Every unit goes through the gate
@@ -175,21 +198,62 @@ static NSString *const kOtherCampaignId = @"70002";
     XCTAssertEqualObjects(units, [self.cleverTap nativeDisplayUnitsStillAllowedToShow:units]);
 }
 
-#pragma mark The cap settings come from the rule, never from the content
+#pragma mark Handing the App-Launched entries to the evaluator
 
-- (void)testTheTwoSkipFlagsOnTheContentAreIgnored {
-    // efc and excludeGlobalFCaps are read from the campaign's rule in adUnit_notifs_ss. The content
-    // the server sends for Native Display carries no cap settings. A unit that somehow arrives with
-    // these two set must not be treated as an exception to anything.
+// The limits themselves are checked in CTNdEvaluationManagerTests. These two cover the route into
+// that check, which only Objective-C can reach.
+
+- (void)testAnEntryOverItsLimitIsDropped {
+    // Proves the entries really do go through the evaluator. Nothing else on this path would drop
+    // this entry. It carries no cap field the account limits read.
+    NSDictionary *overLimit = [self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }];
+    NSDictionary *noLimits = [self entryWithTi:kOtherCampaignId extras:@{}];
+
+    NSArray *expected = @[kOtherCampaignId];
+    XCTAssertEqualObjects(expected, ([self appLaunched:@[overLimit, noLimits]]));
+}
+
+- (void)testThereIsNoLimitCheckWithoutAnEvaluator {
+    // The send test path builds no Native Display evaluator. Nothing is checked there. The list must
+    // come back untouched.
+    self.cleverTap.ndEvaluationManager = nil;
+
+    NSArray *entries = @[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }]];
+
+    XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]);
+}
+
+#pragma mark Where the cap settings are read from
+
+- (void)testEfcOnTheContentIsIgnored {
+    // efc belongs to in-app. Native Display never sends it. A unit that somehow arrives with it set
+    // must not be treated as an exception to anything.
     [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
     [self show:kOtherCampaignId times:1];
 
     CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId extras:@{
-        CLTAP_INAPP_EXCLUDE_FROM_CAPS: @1,
-        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+        CLTAP_INAPP_EXCLUDE_FROM_CAPS: @1
     }];
 
     XCTAssertEqualObjects(@[], [self gate:@[unit]]);
+}
+
+- (void)testTheContentFlagLetsTheUnitThroughAFullAccountCap {
+    // App-Launched units carry excludeGlobalFCaps on the content. Their campaign is not listed in
+    // adUnit_notifs_ss, so the content is the only place the flag arrives.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[unit]]);
 }
 
 - (void)testTheThreeCountingCapFieldsOnTheContentAreIgnored {
@@ -224,7 +288,7 @@ static NSString *const kOtherCampaignId = @"70002";
 #pragma mark Reading the exemption flag
 
 - (void)testACampaignWithNoRuleIsNotAnException {
-    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCapsFor:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
 }
 
 - (void)testTheRuleIsFoundByTiAndNotByWzrkId {
@@ -236,8 +300,8 @@ static NSString *const kOtherCampaignId = @"70002";
         CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
     }]];
 
-    XCTAssertTrue([self.cleverTap nativeDisplayExcludesGlobalCapsFor:kCampaignId]);
-    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCapsFor:kWzrkId]);
+    XCTAssertTrue([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kWzrkId]);
 }
 
 - (void)testAFlagOfZeroOrAMissingFlagIsNotAnException {
@@ -246,8 +310,21 @@ static NSString *const kOtherCampaignId = @"70002";
         @{ CLTAP_INAPP_ID: @70002 }
     ]];
 
-    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCapsFor:kCampaignId]);
-    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCapsFor:kOtherCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kOtherCampaignId]);
+}
+
+- (void)testTheContentFlagWinsOverTheRule {
+    // The content is read first. A campaign that carries the flag needs no rule. A zero on the
+    // content is an answer too. The rule is not read after it.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[
+        @{ CLTAP_INAPP_ID: @70001, CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }
+    ]];
+
+    NSDictionary *contentSaysNo = @{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @0 };
+    NSDictionary *contentSaysYes = @{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 };
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:contentSaysNo forCampaignId:kCampaignId]);
+    XCTAssertTrue([self.cleverTap nativeDisplayExcludesGlobalCaps:contentSaysYes forCampaignId:kOtherCampaignId]);
 }
 
 #pragma mark Which campaigns get their impression times saved
@@ -258,7 +335,7 @@ static NSString *const kOtherCampaignId = @"70002";
         CLTAP_INAPP_FC_LIMITS: @[@{ @"type": @"hours", @"limit": @2, @"frequency": @1 }]
     }]];
 
-    XCTAssertTrue([self.cleverTap nativeDisplayCampaignNeedsTimestamps:kCampaignId]);
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
 }
 
 - (void)testACampaignWithOccurrenceLimitsNeedsItsTimesSaved {
@@ -267,7 +344,16 @@ static NSString *const kOtherCampaignId = @"70002";
         CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onEvery", @"limit": @2 }]
     }]];
 
-    XCTAssertTrue([self.cleverTap nativeDisplayCampaignNeedsTimestamps:kCampaignId]);
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
+}
+
+- (void)testLimitsOnTheContentAlsoNeedTheTimesSaved {
+    // An App-Launched campaign has no rule. Its limits sit on the content.
+    NSDictionary *content = @{
+        CLTAP_INAPP_FC_LIMITS: @[@{ @"type": @"hours", @"limit": @2, @"frequency": @1 }]
+    };
+
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:content forCampaignId:kCampaignId]);
 }
 
 - (void)testACampaignWithEmptyLimitListsNeedsNoTimesSaved {
@@ -279,11 +365,11 @@ static NSString *const kOtherCampaignId = @"70002";
         CLTAP_INAPP_OCCURRENCE_LIMITS: @[]
     }]];
 
-    XCTAssertFalse([self.cleverTap nativeDisplayCampaignNeedsTimestamps:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
 }
 
 - (void)testACampaignWithNoRuleNeedsNoTimesSaved {
-    XCTAssertFalse([self.cleverTap nativeDisplayCampaignNeedsTimestamps:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
 }
 
 #pragma mark Counting a view the app reported
