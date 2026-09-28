@@ -12,6 +12,11 @@
 @class CTFileDownloader;
 @class CTValidationResult;
 @class CTSessionManager;
+@class CTNdStore;
+@class CTNdFCManager;
+@class CTNdEvaluationManager;
+@class CTImpressionManager;
+@class CTInAppTriggerManager;
 
 @interface CleverTap (Internal)
 
@@ -37,6 +42,14 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, strong, readonly) CTCryptMigrator * _Nonnull cryptMigrator;
 @property (atomic, strong, readonly) CTSessionManager * _Nonnull sessionManager;
 @property (nonatomic, strong, readonly) CTCustomTemplatesManager * _Nullable customTemplatesManager;
+#endif
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+@property (nonatomic, strong, readonly) CTNdStore * _Nullable ndStore;
+@property (nonatomic, strong, readonly) CTNdFCManager * _Nullable ndFCManager;
+@property (nonatomic, strong, readonly) CTNdEvaluationManager * _Nullable ndEvaluationManager;
+@property (nonatomic, strong, readonly) CTImpressionManager * _Nullable ndImpressionManager;
+@property (nonatomic, strong, readonly) CTInAppTriggerManager * _Nullable ndTriggerManager;
 #endif
 
 @property (nonatomic, strong, readonly) CTFileDownloader * _Nullable fileDownloader;
