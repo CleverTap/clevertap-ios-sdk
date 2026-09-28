@@ -9,6 +9,11 @@
 #ifndef CleverTap_InAppsResponseHandler_h
 #define CleverTap_InAppsResponseHandler_h
 
+// Declares both CleverTap and CTResponseSource, which the method declarations below need.
+// Without it this header only parses when the importing file happens to have included
+// CleverTapInternal.h first.
+#import "CleverTapInternal.h"
+
 @interface CleverTap(InAppsResponseHandler)
 
 /// Equivalent to `handleInAppResponse:source:` with `CTResponseSourceApp`.

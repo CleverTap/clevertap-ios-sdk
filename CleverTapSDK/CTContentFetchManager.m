@@ -40,8 +40,23 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
 @property (nonatomic, assign) NSUInteger completedBatches;
 
-/// Per-batch completion blocks keyed by queue index. Guarded by `queueLock`.
+/*!
+ Per-batch completion blocks keyed by **batch token**, not by queue index.
+
+ Queue indices are reused: a user switch clears the queue while a request may still be in flight,
+ and the next batch lands back at index 0. Keying by index let a stale callback consume the new
+ batch's completion and mark its queue entry complete. A token is never reused, so a stale
+ callback finds nothing and does nothing.
+
+ Guarded by `queueLock`.
+ */
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, dispatch_block_t> *batchCompletions;
+
+/// Token per queue index, parallel to `contentFetchQueue`. Guarded by `queueLock`.
+@property (nonatomic, strong) NSMutableArray<NSNumber *> *batchTokens;
+
+/// Monotonic, never reused. Guarded by `queueLock`.
+@property (nonatomic, assign) NSUInteger nextBatchToken;
 
 @end
 
@@ -161,6 +176,7 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         self.allRequestsGroup = dispatch_group_create();
         self.inFlightRequestIndices = [[NSMutableSet alloc] init];
         self.batchCompletions = [[NSMutableDictionary alloc] init];
+        self.batchTokens = [[NSMutableArray alloc] init];
     }
     
     return self;
@@ -195,32 +211,55 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     [self.contentFetchQueue addObject:events];
     CleverTapLogDebug(self.config.logLevel, @"%@: Added content fetch with %ld events", self, [events count]);
     NSUInteger batchIndex = self.contentFetchQueue.count - 1;
+    NSUInteger token = self.nextBatchToken++;
+    [self.batchTokens addObject:@(token)];
     if (completion) {
-        self.batchCompletions[@(batchIndex)] = completion;
+        self.batchCompletions[@(token)] = completion;
     }
     [self.queueLock unlock];
-    
+
     [self fetchContentAtIndex:batchIndex];
 }
 
 - (void)markCompletedAtIndex:(NSUInteger)i {
+    [self markCompletedAtIndex:i token:[self tokenAtIndex:i]];
+}
+
+/*!
+ @param token The batch this callback belongs to. If the slot now holds a different batch — the
+ queue was cleared by a user switch and reused — the callback is stale and everything is skipped,
+ so it cannot complete or consume the completion of the batch that replaced it.
+ */
+- (void)markCompletedAtIndex:(NSUInteger)i token:(NSUInteger)token {
     [self.queueLock lock];
-    
+
+    // NSNotFound means the caller had no token to verify against — an entry appended straight to
+    // contentFetchQueue. Fall back to the index-only behaviour for those.
+    BOOL isStale = (token != NSNotFound) &&
+                   ((i >= self.batchTokens.count) || ![self.batchTokens[i] isEqualToNumber:@(token)]);
+    if (isStale) {
+        [self.queueLock unlock];
+        CleverTapLogInternal(self.config.logLevel,
+                             @"%@: Ignoring stale content fetch callback for index %ld, batch %ld is gone",
+                             self, (long)i, (long)token);
+        return;
+    }
+
     [self.inFlightRequestIndices removeObject:@(i)];
-    
+
     if (i < self.contentFetchQueue.count && self.contentFetchQueue[i] != [NSNull null]) {
         self.contentFetchQueue[i] = [NSNull null];
         self.completedBatches++;
     }
 
-    // Take the completion before cleanup, which resets the queue and therefore the indices.
-    dispatch_block_t completion = self.batchCompletions[@(i)];
+    // Take the completion before cleanup, which resets the queue and therefore the tokens.
+    dispatch_block_t completion = self.batchCompletions[@(token)];
     if (completion) {
-        [self.batchCompletions removeObjectForKey:@(i)];
+        [self.batchCompletions removeObjectForKey:@(token)];
     }
 
     [self cleanupIfAllCompleted];
-    
+
     [self.queueLock unlock];
 
     // Invoke outside the lock — the block is caller-supplied and may re-enter.
@@ -229,13 +268,29 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     }
 }
 
+/// Token currently occupying a queue slot, or `NSNotFound` if the slot has none. Takes `queueLock`.
+- (NSUInteger)tokenAtIndex:(NSUInteger)i {
+    [self.queueLock lock];
+    NSUInteger token = (i < self.batchTokens.count) ? [self.batchTokens[i] unsignedIntegerValue] : NSNotFound;
+    [self.queueLock unlock];
+    return token;
+}
+
+/// Give a token to any queue slot that lacks one. Caller must hold `queueLock`.
+- (void)padBatchTokensLocked {
+    while (self.batchTokens.count < self.contentFetchQueue.count) {
+        [self.batchTokens addObject:@(self.nextBatchToken++)];
+    }
+}
+
 - (void)cleanupIfAllCompleted {
     if (self.completedBatches == self.contentFetchQueue.count && self.contentFetchQueue.count > 0) {
         CleverTapLogInternal(self.config.logLevel, @"%@: All %ld batches completed, clearing queue",
                              self, self.contentFetchQueue.count);
-        
+
         [self.contentFetchQueue removeAllObjects];
         [self.inFlightRequestIndices removeAllObjects];
+        [self.batchTokens removeAllObjects];
         self.completedBatches = 0;
     }
 }
@@ -248,23 +303,34 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         [self.queueLock unlock];
         return;
     }
+    // Entries can also be appended to contentFetchQueue directly, so top up any slot that has no
+    // token yet rather than assuming the two arrays are in step.
+    [self padBatchTokensLocked];
+    // Captured for the lifetime of this request. Every later mutation is checked against it, so a
+    // callback that outlives its batch cannot touch whichever batch took over the slot.
+    NSUInteger token = (i < self.batchTokens.count) ? [self.batchTokens[i] unsignedIntegerValue] : NSNotFound;
     [self.inFlightRequestIndices addObject:@(i)];
     [self.queueLock unlock];
-    
+
     dispatch_group_enter(self.allRequestsGroup);
-    
+
     dispatch_async(self.concurrentQueue, ^{
         NSArray *batch;
         [self.queueLock lock];
-        if (i >= self.contentFetchQueue.count || self.contentFetchQueue[i] == [NSNull null]) {
+        BOOL isStale = (token != NSNotFound) &&
+                       ((i >= self.batchTokens.count) || ![self.batchTokens[i] isEqualToNumber:@(token)]);
+        if (isStale || i >= self.contentFetchQueue.count || self.contentFetchQueue[i] == [NSNull null]) {
             // The batch is gone — already completed, or the queue was cleared by a user switch.
             // Release its bookkeeping and run any registered completion, so a caller waiting on
             // this batch is not left hanging. Deliberately not markCompletedAtIndex:, which would
             // re-run cleanup and signal an "all batches completed" transition that did not happen.
-            [self.inFlightRequestIndices removeObject:@(i)];
-            dispatch_block_t completion = self.batchCompletions[@(i)];
+            // Only touch the in-flight index when the slot is still ours.
+            if (!isStale) {
+                [self.inFlightRequestIndices removeObject:@(i)];
+            }
+            dispatch_block_t completion = self.batchCompletions[@(token)];
             if (completion) {
-                [self.batchCompletions removeObjectForKey:@(i)];
+                [self.batchCompletions removeObjectForKey:@(token)];
             }
             [self.queueLock unlock];
 
@@ -281,7 +347,7 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
                                                           self.semaphoreTimeout * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(self.concurrencySemaphore, semaphore_timeout) != 0) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out waiting for concurrency slot at index: %ld", self, i);
-            [self markCompletedAtIndex:i];
+            [self markCompletedAtIndex:i token:token];
             NSError *error = [NSError errorWithDomain:NSURLErrorDomain
                                                  code:NSURLErrorTimedOut
                                              userInfo:@{
@@ -295,7 +361,7 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         
         CleverTapLogDebug(self.config.logLevel, @"%@: Will send Content fetch for index: %ld", self, i);
         [self sendContentRequest:batch completed:^{
-            [self markCompletedAtIndex:i];
+            [self markCompletedAtIndex:i token:token];
             dispatch_semaphore_signal(self.concurrencySemaphore);
             dispatch_group_leave(self.allRequestsGroup);
         }];
@@ -423,6 +489,7 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         [self.queueLock lock];
         [self.contentFetchQueue removeAllObjects];
         [self.inFlightRequestIndices removeAllObjects];
+        [self.batchTokens removeAllObjects];
         self.completedBatches = 0;
         // Anything still registered here timed out above and its batch is being abandoned. Run
         // the blocks anyway — a caller waiting on one must not be left hanging by a user switch.

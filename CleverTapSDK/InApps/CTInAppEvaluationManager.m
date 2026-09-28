@@ -306,8 +306,9 @@
     NSMutableArray *eligibleSynthetics = [self evaluate:event withInApps:synthetics recordTriggers:NO];
     if (eligibleSynthetics.count == 0) {
         CleverTapLogStaticDebug(@"No content fetch candidate can qualify, showing App Launched in-app without waiting");
-        [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
-        return YES;
+        // Only display if the slot was actually claimed — the timeout may have closed the window
+        // and shown its own winner while this prediction was being computed.
+        return [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
     }
 
     // Same comparator as the real selection, but resolve the winner inline rather than through
@@ -334,8 +335,7 @@
 
     CleverTapLogStaticDebug(@"App Launched in-app %@ outranks every content fetch candidate, showing without waiting",
                             [CTInAppNotification inAppId:predicted]);
-    [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
-    return YES;
+    return [self markAppLaunchedArbitrationShown:appLaunchedWinners.firstObject];
 }
 
 /*!
@@ -344,14 +344,18 @@
  Leaves the cycle in place but closed, so a content response arriving afterwards is suppressed
  rather than displayed as a second in-app.
  */
-- (void)markAppLaunchedArbitrationShown:(NSDictionary *)shown {
+- (BOOL)markAppLaunchedArbitrationShown:(NSDictionary *)shown {
     @synchronized (self.arbitrationLock) {
         CTInAppArbitrationCycle *cycle = self.appLaunchedArbitrationCycle;
         if (!cycle || cycle.closed) {
-            return;
+            // The timeout closed the window while the prediction was being computed, and has
+            // already displayed its buffered winner. Claiming the slot now would show a second.
+            CleverTapLogStaticDebug(@"App Launched arbitration closed before the fast path could claim it, deferring to the shown candidate");
+            return NO;
         }
         cycle.closed = YES;
         cycle.shownCandidate = shown;
+        return YES;
     }
 }
 
