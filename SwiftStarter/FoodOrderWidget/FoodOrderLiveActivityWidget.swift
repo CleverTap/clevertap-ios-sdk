@@ -72,7 +72,17 @@ struct FoodOrderLiveActivityWidget: Widget {
     /// running Activity and read the current wzrk.
     static func clickURL(for attributes: FoodOrderActivityAttributes) -> URL? {
         let tag = attributes.wzrk?.wzrk_activityId ?? "food-order-\(attributes.orderId)"
-        return URL(string: "swiftstarter://liveactivity?tag=\(tag)&type=FoodOrderActivityAttributes")
+        // Build via URLComponents so a wzrk_activityId containing reserved characters
+        // (& # ? space …) is percent-encoded and reaches the app intact — raw string
+        // interpolation would truncate the query or start a fragment.
+        var components = URLComponents()
+        components.scheme = "swiftstarter"
+        components.host = "liveactivity"
+        components.queryItems = [
+            URLQueryItem(name: "tag", value: tag),
+            URLQueryItem(name: "type", value: "FoodOrderActivityAttributes")
+        ]
+        return components.url
     }
 
     private func progressIcon(_ step: Int) -> String {

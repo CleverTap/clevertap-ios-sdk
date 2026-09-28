@@ -245,9 +245,16 @@ final class CTLiveActivityManager: NSObject {
                             // The end push's final content-state can surface AFTER the .ended
                             // notification, so wait briefly for it to settle before reading.
                             let w = await self.settledWzrk(for: activity)
-                            self.updateTrackedWzrk(activityID: activity.id, wzrk: w)
                             self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: w)
                             self.sendActivityDeactivate(liveActivityId: liveActivityId, wzrk: w)
+                            // Drop the in-memory entry + end handler now that the terminal Ended
+                            // has fired, so a later deviceIdDidChange (user switch) can't iterate a
+                            // stale entry and re-send Ended + unregister. The observation task is
+                            // intentionally kept alive (no cancel/break) so the subsequent
+                            // .dismissed — when iOS removes the activity from screen — is still
+                            // reported (see below); its wzrk is rebuilt from the activity directly.
+                            self.removeActivityEntry(activityID: activity.id)
+                            self.removeEndHandler(activityID: activity.id)
                             self.removePersistedActivity(activityID: activity.id)
                         } else if state == .dismissed {
                             let w = await self.settledWzrk(for: activity)

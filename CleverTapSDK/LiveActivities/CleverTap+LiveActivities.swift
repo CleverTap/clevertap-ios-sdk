@@ -9,6 +9,12 @@ import ObjectiveC
 
 private var kLiveActivityManagerKey: UInt8 = 0
 
+/// Serializes lazy creation of the per-instance `CTLiveActivityManager`. Without this, two
+/// concurrent callers (e.g. `registerPushToStart` on the main thread and an impression fired from
+/// a background observer `Task`) could both pass the associated-object nil check and each create a
+/// manager — registering duplicate switch-user delegates and starting duplicate observation tasks.
+private let kLiveActivityManagerInitLock = NSLock()
+
 // MARK: - CleverTap Swift Extension (Live Activities)
 
 public extension CleverTap {
@@ -19,6 +25,14 @@ public extension CleverTap {
     /// creating one if it doesn't exist yet. Returns `nil` on iOS < 16.2.
     @available(iOS 16.2, *)
     internal var liveActivityManager: CTLiveActivityManager {
+        // Fast path — already created.
+        if let existing = objc_getAssociatedObject(self, &kLiveActivityManagerKey) as? CTLiveActivityManager {
+            return existing
+        }
+        // Slow path — create atomically so concurrent callers share one manager (see lock docs).
+        kLiveActivityManagerInitLock.lock()
+        defer { kLiveActivityManagerInitLock.unlock() }
+        // Re-check inside the lock: another thread may have created it while we waited.
         if let existing = objc_getAssociatedObject(self, &kLiveActivityManagerKey) as? CTLiveActivityManager {
             return existing
         }
