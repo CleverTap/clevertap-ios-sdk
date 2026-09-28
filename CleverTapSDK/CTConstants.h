@@ -128,6 +128,27 @@ extern NSString *const kSessionId;
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
+// Keys within a single `content_fetch` array item
+#define CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME @"eventName"
+#define CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY @"responseKey"
+#define CLTAP_CONTENT_FETCH_ITEM_TGT_ID @"tgtId"
+// SDK-internal marker, never sent or received. Tags a payload built from a content_fetch item's
+// selection rules, which can be evaluated and sorted but must never be displayed — it carries
+// only the rules that decide a winner, no content.
+#define CLTAP_INAPP_SYNTHETIC_CANDIDATE @"__ct_synthetic_candidate"
+// How long an app-launch in-app is held waiting for the content fetch to return a competing
+// candidate. A UX bound, not a correctness one — deliberately far below the content fetch's own
+// limits (CLTAP_REQUEST_TIME_OUT_INTERVAL, plus 5s if it waits for a concurrency slot), since
+// matching those would delay the in-app by up to 15s. A response arriving after this has fired
+// is dropped instead of shown, so a slow fetch cannot produce a second in-app.
+//
+// TODO: 3.0 is a placeholder pending team discussion. It was chosen against an observed ~2s
+// round trip on staging, which is a single data point. The value only trades off how often the
+// personalized in-app wins versus the app-launch one — shorter falls back more often, longer
+// delays display more often — and cannot cause a double in-app either way. Worth deciding with
+// real latency numbers, and whether it should be server-driven or SDK-configurable rather than
+// a compile-time constant.
+#define CLTAP_INAPP_ARBITRATION_TIMEOUT_SECONDS 3.0
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
 #define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"

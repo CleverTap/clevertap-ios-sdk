@@ -21,6 +21,8 @@
 @property (nonatomic, strong) dispatch_queue_t concurrentQueue;
 
 - (void)markCompletedAtIndex:(NSUInteger)i;
+/// The primitive every completion path funnels through — override this, not the index-only form.
+- (void)markCompletedAtIndex:(NSUInteger)i token:(NSUInteger)token;
 - (void)fetchContentAtIndex:(NSUInteger)i;
 
 @end

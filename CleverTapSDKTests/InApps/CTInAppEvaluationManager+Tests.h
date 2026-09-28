@@ -19,6 +19,7 @@
 @property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 - (void)sortByPriority:(NSMutableArray *)inApps;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps recordTriggers:(BOOL)recordTriggers;
 - (BOOL)shouldSuppress:(NSDictionary *)inApp;
 - (void)suppress:(NSDictionary *)inApp;
 - (NSString *)generateWzrkId:(NSString *)ti;

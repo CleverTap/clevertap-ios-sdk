@@ -25,6 +25,19 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeFetch,
 };
 
+/*!
+ Identifies which endpoint a response being parsed came from.
+
+ The `/content` response is re-fed through the same handler chain as `/a1`, so handlers that
+ must behave differently for the two need to know the origin.
+ */
+typedef NS_ENUM(NSInteger, CTResponseSource) {
+    /// Response to an event batch POST to `/a1`.
+    CTResponseSourceApp,
+    /// Response to a content fetch POST to `/content`.
+    CTResponseSourceContentFetch,
+};
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
