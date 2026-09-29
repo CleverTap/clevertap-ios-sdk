@@ -146,4 +146,52 @@
     XCTAssertEqual(((NSString *)result.cleanedData).length, 1024U);
 }
 
+- (void)test_validateEventName_repeatedCalls_doNotAccumulateWarnings {
+    // Warnings must not carry over between calls on a shared validator instance.
+    for (NSInteger i = 0; i < 50; i++) {
+        [self.validator validateEventName:@"my.event"];
+    }
+    CTValidationResult *result = [self.validator validateEventName:@"my.event"];
+    XCTAssertEqual(result.subResults.count, 1U);
+}
+
+- (void)test_validateEventName_truncatedName_reportsBothWarnings {
+    NSString *longName = [@"" stringByPaddingToLength:1025 withString:@"a" startingAtIndex:0];
+    CTValidationResult *result = [self.validator validateEventName:longName];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+    XCTAssertEqual(result.subResults.count, 2U);
+    XCTAssertEqual(result.errorCode, CTValidationErrorEventNameTooLong);
+}
+
+#pragma mark - Concurrency
+
+- (void)test_validateEventName_concurrentCallsOnSharedValidator_doNotCrashOrLeakWarnings {
+    const NSInteger iterations = 2000;
+
+    XCTestExpectation *done = [self expectationWithDescription:@"concurrent validation"];
+    done.expectedFulfillmentCount = 2;
+
+    dispatch_queue_t q1 = dispatch_queue_create("test.nameValidator.1", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t q2 = dispatch_queue_create("test.nameValidator.2", DISPATCH_QUEUE_SERIAL);
+
+    dispatch_async(q1, ^{
+        for (NSInteger i = 0; i < iterations; i++) {
+            CTValidationResult *result = [self.validator validateEventName:@"Purchase"];
+            // A clean name must never pick up warnings produced by the other queue.
+            XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+        }
+        [done fulfill];
+    });
+    dispatch_async(q2, ^{
+        for (NSInteger i = 0; i < iterations; i++) {
+            CTValidationResult *result = [self.validator validateEventName:@"my.event"];
+            XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+            XCTAssertEqual(result.subResults.count, 1U);
+        }
+        [done fulfill];
+    });
+
+    [self waitForExpectationsWithTimeout:30 handler:nil];
+}
+
 @end

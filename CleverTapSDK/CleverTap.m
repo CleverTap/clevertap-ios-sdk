@@ -3446,7 +3446,6 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordErrorWithMessage:(NSString *)message andErrorCode:(int)code {
     [self.dispatchQueueManager runSerialAsync:^{
         NSString *currentVCName = self.currentViewControllerName ? self.currentViewControllerName : @"Unknown";
-        
         [self recordEvent:@"Error Occurred" withProps:@{
             @"Error Message" : message,
             @"Error Code" : @(code),
