@@ -5157,6 +5157,32 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 }
 
+- (void)recordDisplayUnitElementViewedEventForID:(NSString *)unitID additionalProperties:(NSDictionary *)additionalProperties {
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
+    if (sanitized) {
+        [params addEntriesFromDictionary:sanitized];
+    }
+#if !defined(CLEVERTAP_TVOS)
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTEventBuilder buildDisplayViewStateEvent:NO
+                                   forDisplayUnit:displayUnit
+                               andQueryParameters:params
+                                completionHandler:^(NSDictionary *event,
+                                                    NSArray<CTValidationResult*> *errors) {
+            if (event) {
+                self.wzrkParams = [self ct_filteredWzrkFields:event[CLTAP_EVENT_DATA]];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            }
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
 /// Drop entries with non-string keys, empty keys, @c nil values, and @c NSNull
 /// values from a caller-supplied dict. Caller-supplied @c wzrk_* keys are
 /// retained — server attribution wins at merge time (cached unit @c wzrk_*

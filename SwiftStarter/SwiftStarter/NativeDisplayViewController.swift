@@ -30,7 +30,8 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
     
     func displayUnitsUpdated(_ displayUnits: [CleverTapDisplayUnit]) {
         // you will get display units here
-        print("displayUnitsUpdated")
+        print("[ND] displayUnitsUpdated - \(displayUnits.count) unit(s) on this screen")
+        displayUnits.forEach { $0.ndLogSlides() }
         self.displayUnits = displayUnits
         updateAllDisplayUnitsSection()
     }
@@ -68,7 +69,10 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
             }
             
             cell.onShowDetails = { [weak self] in
-                self?.displayUnits = CleverTap.sharedInstance()?.getAllDisplayUnits() ?? []
+                let units = CleverTap.sharedInstance()?.getAllDisplayUnits() ?? []
+                print("[ND] getAllDisplayUnits - \(units.count) unit(s) in the cache")
+                units.forEach { $0.ndLogSlides() }
+                self?.displayUnits = units
                 self?.updateAllDisplayUnitsSection()
             }
             
@@ -109,12 +113,59 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
     }
     
     func showNativeDisplayAlert(_ displayUnit: CleverTapDisplayUnit) {
-        let fullMessage = getDisplayUnitText(displayUnit)
-        
-        let alert = UIAlertController(title: "Native Display", message: fullMessage, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        
-        self.present(alert, animated: true, completion: nil)
+        let sheet = UIAlertController(title: "Native Display",
+                                      message: getDisplayUnitText(displayUnit),
+                                      preferredStyle: .actionSheet)
+
+        // One row per slide; verify each event carries the slide's own wzrk_element_id/index and unit-level wzrk_id.
+        for (index, content) in (displayUnit.contents ?? []).enumerated() {
+            let label = content.title ?? "untitled"
+            sheet.addAction(UIAlertAction(title: "Slide \(index): \(label)", style: .default) { [weak self] _ in
+                self?.showElementEventOptions(for: displayUnit, contentIndex: index)
+            })
+        }
+
+        sheet.addAction(UIAlertAction(title: "Log all slides to console", style: .default) { _ in
+            displayUnit.ndLogSlides()
+        })
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        presentSheet(sheet)
+    }
+
+    /// Clicked / viewed for one slide, with the exact dictionary handed to the
+    func showElementEventOptions(for displayUnit: CleverTapDisplayUnit, contentIndex: Int) {
+        guard let unitID = displayUnit.unitID else {
+            print("[ND] unit has no unitID - cannot raise element events")
+            return
+        }
+        let metaData = displayUnit.metaData(forContentAt: contentIndex)
+
+        let sheet = UIAlertController(title: "Slide \(contentIndex)",
+                                      message: ndMetaDataText(metaData),
+                                      preferredStyle: .actionSheet)
+
+        sheet.addAction(UIAlertAction(title: "Element Clicked", style: .default) { _ in
+            print("[ND] recordDisplayUnitElementClickedEvent unit=\(unitID) slide=\(contentIndex) props=\(metaData)")
+            CleverTap.sharedInstance()?.recordDisplayUnitElementClickedEvent(forID: unitID,
+                                                                            additionalProperties: metaData)
+        })
+        sheet.addAction(UIAlertAction(title: "Element Viewed", style: .default) { _ in
+            print("[ND] recordDisplayUnitElementViewedEvent unit=\(unitID) slide=\(contentIndex) props=\(metaData)")
+            CleverTap.sharedInstance()?.recordDisplayUnitElementViewedEvent(forID: unitID,
+                                                                           additionalProperties: metaData)
+        })
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        presentSheet(sheet)
+    }
+
+    /// Action sheets need an anchor on iPad or presenting them throws.
+    func presentSheet(_ sheet: UIAlertController) {
+        if let popover = sheet.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = CGRect(x: tableView.bounds.midX, y: tableView.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+        present(sheet, animated: true)
     }
     
     func getDisplayUnitText(_ displayUnit: CleverTapDisplayUnit) -> String {
@@ -140,5 +191,35 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
         Image: \(imageURL)
         """
         return fullMessage
+    }
+}
+
+// MARK: - Per-slide attribution logging (split of clicks)
+
+func ndMetaDataText(_ metaData: [String: Any]) -> String {
+    guard !metaData.isEmpty else {
+        return "metaData empty - the event will carry unit-level wzrk_* only"
+    }
+    return metaData.keys.sorted().map { "\($0) = \(metaData[$0] ?? "")" }.joined(separator: "\n")
+}
+
+extension CleverTapDisplayUnit {
+
+    /// Prints each slide's BE metadata merged with SDK-derived wzrk_action/data.
+    /// Empty output means the slide has no metadata.
+    func ndLogSlides() {
+        let slides = contents ?? []
+        print("[ND] unit=\(unitID ?? "nil") type=\(type ?? "nil") slides=\(slides.count)")
+        for (index, content) in slides.enumerated() {
+            print("[ND]   slide \(index) title=\(content.title ?? "-") actionUrl=\(content.actionUrl ?? "-")")
+            let slideMetaData = self.metaData(forContentAt: index)
+            if slideMetaData.isEmpty {
+                print("[ND]   slide \(index) metaData EMPTY - no `metadata` object on this content item")
+            } else {
+                for key in slideMetaData.keys.sorted() {
+                    print("[ND]   slide \(index) \(key)=\(slideMetaData[key] ?? "")")
+                }
+            }
+        }
     }
 }
