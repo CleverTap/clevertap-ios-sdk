@@ -106,4 +106,40 @@
     XCTAssertEqualObjects(result[@""], @1);
 }
 
+#pragma mark - Collection values (recursive conversion)
+
+- (void)test_buildFromPath_dictionaryValue_isConvertedRecursively {
+    NSDictionary *nested = @{ @"inner": @[@1, @2], @"name": @"x" };
+    NSDictionary *result = [self.builder buildFromPath:@"outer" value:nested];
+
+    NSDictionary *outer = result[@"outer"];
+    XCTAssertEqualObjects(outer[@"name"], @"x");
+    XCTAssertEqualObjects(outer[@"inner"], (@[@1, @2]));
+    // The value is rebuilt into fresh mutable containers all the way down,
+    // not handed back by reference.
+    XCTAssertTrue([outer isKindOfClass:[NSMutableDictionary class]]);
+    XCTAssertTrue([outer[@"inner"] isKindOfClass:[NSMutableArray class]]);
+}
+
+- (void)test_buildFromPath_arrayValue_isConvertedRecursively {
+    NSArray *value = @[@{ @"k": @"v" }, @5];
+    NSDictionary *result = [self.builder buildFromPath:@"list" value:value];
+
+    NSArray *list = result[@"list"];
+    XCTAssertEqual(list.count, 2u);
+    XCTAssertTrue([list isKindOfClass:[NSMutableArray class]]);
+    NSDictionary *first = list[0];
+    XCTAssertEqualObjects(first[@"k"], @"v");
+    XCTAssertTrue([first isKindOfClass:[NSMutableDictionary class]]);
+}
+
+- (void)test_buildFromPath_collectionWithNSNull_preservesNSNull {
+    NSArray *value = @[[NSNull null], @1];
+    NSDictionary *result = [self.builder buildFromPath:@"list" value:value];
+
+    NSArray *list = result[@"list"];
+    XCTAssertEqualObjects(list[0], [NSNull null]);
+    XCTAssertEqualObjects(list[1], @1);
+}
+
 @end

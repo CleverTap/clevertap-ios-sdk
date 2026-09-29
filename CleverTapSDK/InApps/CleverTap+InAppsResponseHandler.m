@@ -115,9 +115,11 @@
         }
     }
     
-    // Parse in-app Mode
+    // Parse in-app Mode. Only apply it when the response actually carries a mode
     NSString *mode = jsonResp[CLTAP_INAPP_MODE_JSON_RESPONSE_KEY];
-    [self.inAppStore setMode:mode];
+    if ([mode isKindOfClass:[NSString class]] && mode.length > 0) {
+        [self.inAppStore setMode:mode];
+    }
     
     // Handle stale in-apps
     @try {

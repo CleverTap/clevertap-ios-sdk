@@ -62,6 +62,52 @@ class InactionInAppStorageStrategyTests: XCTestCase {
         XCTAssertNil(retrieved)
     }
 
+    // retrieveAfterTimer is a dequeue: InAppScheduler calls it and throws the
+    // result away on the error and discarded paths purely to drop the entry.
+    func testRetrieveAfterTimer_hit_removesFromCache() {
+        let inApp: [String: Any] = ["ti": "myId", "type": "interstitial"]
+        _ = strategy.prepareForScheduling(inApps: [inApp])
+        XCTAssertEqual(strategy.getCacheSize(), 1)
+
+        XCTAssertNotNil(strategy.retrieveAfterTimer(id: "myId"))
+        XCTAssertEqual(strategy.getCacheSize(), 0)
+        XCTAssertNil(strategy.retrieveAfterTimer(id: "myId"))
+    }
+
+    func testRetrieveAfterTimer_hit_leavesOtherEntriesInPlace() {
+        let inApps: [[String: Any]] = [
+            ["ti": "id1", "type": "interstitial"],
+            ["ti": "id2", "type": "cover"]
+        ]
+        _ = strategy.prepareForScheduling(inApps: inApps)
+
+        XCTAssertNotNil(strategy.retrieveAfterTimer(id: "id1"))
+        XCTAssertEqual(strategy.getCacheSize(), 1)
+        XCTAssertNotNil(strategy.retrieveAfterTimer(id: "id2"))
+        XCTAssertEqual(strategy.getCacheSize(), 0)
+    }
+
+    func testRetrieveAfterTimer_miss_leavesCacheUntouched() {
+        _ = strategy.prepareForScheduling(inApps: [["ti": "id1", "type": "interstitial"]])
+
+        XCTAssertNil(strategy.retrieveAfterTimer(id: "nonexistent"))
+        XCTAssertEqual(strategy.getCacheSize(), 1)
+    }
+
+    // Writes used to bypass cacheQueue entirely, so a concurrent read could hit
+    // the dictionary mid-mutation. Mutating a Swift Dictionary while another
+    // thread reads it can crash rather than just return stale data.
+    func testConcurrentPrepareAndRetrieve_doesNotCrash() {
+        DispatchQueue.concurrentPerform(iterations: 200) { i in
+            if i % 2 == 0 {
+                _ = self.strategy.prepareForScheduling(inApps: [["ti": "id\(i)", "type": "interstitial"]])
+            } else {
+                _ = self.strategy.retrieveAfterTimer(id: "id\(i - 1)")
+                _ = self.strategy.getCacheSize()
+            }
+        }
+    }
+
     func testClearAll_emptiesCache() {
         let inApps: [[String: Any]] = [
             ["ti": "id1", "type": "interstitial"],

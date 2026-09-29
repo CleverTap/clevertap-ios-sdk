@@ -17,7 +17,6 @@ typedef NS_ENUM(NSInteger, CTFlattenedEventDataType) {
 + (instancetype)noData;
 - (nullable NSDictionary<NSString *, id> *)profileChanges;
 - (nullable NSDictionary<NSString *, id> *)eventProperties;
-- (BOOL)isNoData;
 
 @end
 
