@@ -28,7 +28,7 @@ import Foundation
         if let delayMs = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? Int {
             return TimeInterval(delayMs)
         }
-        if let delayMs = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? Int {
+        if let delayMs = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? Double {
             return TimeInterval(delayMs)
         }
         return 0

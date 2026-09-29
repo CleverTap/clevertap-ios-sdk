@@ -607,6 +607,7 @@ static BOOL sharedInstanceErrorLogged;
     self.inAppEvaluationManager = evaluationManager;
     self.inAppEvaluationManager.location = self.userSetLocation;
     self.inAppDisplayManager = displayManager;
+    [self.delegateManager addSwitchUserDelegate:displayManager];
     
     self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore validationConfig:self.validationConfig];
     
@@ -1774,13 +1775,23 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     
-    NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
-    if (discardedEvents && discardedEvents.count > 0) {
-        @try {
-            [self.validationConfig setDiscardedEventNames:discardedEvents];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
+    @try {
+        // make sure event names are strings
+        NSArray *rawDiscardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+        NSMutableSet<NSString *> *discardedEvents = [NSMutableSet set];
+        for (id event in rawDiscardedEvents) {
+            if ([event isKindOfClass:[NSString class]]) {
+                [discardedEvents addObject:event];
+            } else if ([event isKindOfClass:[NSNumber class]]) {
+                [discardedEvents addObject:[(NSNumber *)event stringValue]];
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, rawDiscardedEvents);
+                return;
+            }
         }
+        [self.validationConfig setDiscardedEventNames:discardedEvents];
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
     }
 }
 
@@ -1798,6 +1809,14 @@ static BOOL sharedInstanceErrorLogged;
     NSString *key = [self arpKey];
     if (!key) return nil;
     NSDictionary *arp = [CTPreferences getObjectForKey:key];
+    // older SDK versions cached discarded events here, drop them once so they
+    // are never sent back to the server
+    if (arp[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
+        NSMutableDictionary *cleaned = [arp mutableCopy];
+        [cleaned removeObjectForKey:CLTAP_DISCARDED_EVENT_JSON_KEY];
+        arp = cleaned;
+        [self saveARP:arp];
+    }
     CleverTapLogInternal(self.config.logLevel, @"%@: Getting ARP: %@ for key: %@", self, arp, key);
     return arp;
 }
@@ -1810,6 +1829,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)updateARP:(NSDictionary *)arp {
+    // keep discarded events in memory for the current session
+    [self processDiscardedEventsRequest:arp];
+
     NSMutableDictionary *update;
     NSDictionary *staleARP = [self getARP];
     if (staleARP) {
@@ -1818,7 +1840,9 @@ static BOOL sharedInstanceErrorLogged;
         update = [[NSMutableDictionary alloc] init];
     }
     [update addEntriesFromDictionary:arp];
-    
+    // removing discarded events so they dont get cached to UserDefaults
+    [update removeObjectForKey:CLTAP_DISCARDED_EVENT_JSON_KEY];
+
     // Remove any keys that have the value -1
     NSArray *keys = [update allKeys];
     for (NSUInteger i = 0; i < [keys count]; i++) {
@@ -1829,7 +1853,6 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
     [self saveARP:update];
-    [self processDiscardedEventsRequest:update];
     [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
 }
 
@@ -1926,7 +1949,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
-    [self queueEvent:event withType:type flattenedEventData:CTFlattenedEventData.noData];
+    [self queueEvent:event withType:type flattenedEventData:[self getFlattenedEventProperties:event[CLTAP_EVENT_DATA]]];
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
@@ -2099,8 +2122,8 @@ static BOOL sharedInstanceErrorLogged;
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
-    [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+        [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
@@ -2108,7 +2131,8 @@ static BOOL sharedInstanceErrorLogged;
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
     } else if (eventName) {
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
-        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
+        [eventData addEntriesFromDictionary:flattenedEventChanges];
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
 #endif
 }

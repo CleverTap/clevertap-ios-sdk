@@ -15,6 +15,7 @@
 #import "CTInAppStore.h"
 #import "CTFileDownloader.h"
 #import "CTCustomTemplatesManager.h"
+#import "CTSwitchUserDelegate.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,7 +25,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
     CleverTapInAppResume,
 };
 
-@interface CTInAppDisplayManager : NSObject {
+@interface CTInAppDisplayManager : NSObject <CTSwitchUserDelegate> {
     __weak CTPushPrimerManager *pushPrimerManager;
 }
 
