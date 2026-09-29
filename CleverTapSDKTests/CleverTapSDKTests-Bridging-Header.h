@@ -10,3 +10,4 @@
 #import "CTConstants.h"
 #import "CTValidationConfig.h"
 #import "CTLimitAdapter.h"
+#import "CTTriggerRadius.h"
