@@ -7,13 +7,9 @@
 // CTTriggerRadius is a plain data holder (no shared/global state), so the suite needs
 // neither .serialized nor an init() fixture — a fresh instance per @Test is sufficient.
 //
-// Bridging note: the ObjC header is NS_ASSUME_NONNULL, so the three `strong NSNumber`
-// properties import into Swift as NON-optional (NSNumber), even though they are actually
-// nil until assigned (empty @implementation, synthesized). The default-nil assertions
-// therefore read the true runtime value via KVC (value(forKey:)) rather than the
-// non-optional typed accessor. This latent nullability mismatch (nonnull but nil-default,
-// and CTTriggerAdapter assigns possibly-nil JSON values) is flagged for Step 5, where the
-// Swift properties should become optional (NSNumber?).
+// The Swift class declares the three properties as optional (NSNumber?), fixing the
+// original ObjC nonnull-but-nil-default nullability mismatch, so the default-nil
+// assertions use plain `== nil`.
 
 import Testing
 import Foundation
@@ -27,9 +23,9 @@ struct CTTriggerRadiusTests {
     @Test("init leaves all properties nil")
     func initPropertiesAreNil() {
         let radius = CTTriggerRadius()
-        #expect(radius.value(forKey: "latitude") == nil)
-        #expect(radius.value(forKey: "longitude") == nil)
-        #expect(radius.value(forKey: "radius") == nil)
+        #expect(radius.latitude == nil)
+        #expect(radius.longitude == nil)
+        #expect(radius.radius == nil)
     }
 
     // MARK: - property round-trips
