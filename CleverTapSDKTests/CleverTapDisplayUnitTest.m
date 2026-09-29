@@ -175,15 +175,29 @@
     XCTAssertEqualObjects(content.metaData[@"wzrk_data"], @"https://example.com/action");
 }
 
-/// Pins the merge order: the server block is copied in last, so where the BE
-/// sends wzrk_action / wzrk_data its values replace the SDK-derived pair.
+/// Pins the merge order: the SDK-derived pair is written last, so it wins over
+/// anything the BE sends for wzrk_action / wzrk_data. Only the SDK knows which
+/// platform url actually ran, so a BE-sent pair would be the wrong platform's.
 /// Reordering the two blocks in `-initWithJSON:` must fail this test.
-- (void)test_initWithJSON_serverActionAndData_overrideDerivedPair {
+- (void)test_initWithJSON_derivedActionAndData_overrideServerPair {
+    NSMutableDictionary *metadata = [[self serverMetadata] mutableCopy];
+    metadata[@"wzrk_action"] = @"none";
+    metadata[@"wzrk_data"] = @"myapp://offers/50-android";
+    NSDictionary *json = [self contentJSONWithMetadata:metadata
+                                                iosUrl:@"https://example.com/action"];
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    XCTAssertEqualObjects(content.metaData[@"wzrk_action"], @"url");
+    XCTAssertEqualObjects(content.metaData[@"wzrk_data"], @"https://example.com/action");
+    // Identity keys still come from the server untouched.
+    XCTAssertEqualObjects(content.metaData[@"wzrk_element_id"], @"1907971814");
+}
+
+/// With no iOS url there is nothing to derive, so whatever the BE sent stays.
+- (void)test_initWithJSON_noIosUrl_keepsServerSentActionPair {
     NSMutableDictionary *metadata = [[self serverMetadata] mutableCopy];
     metadata[@"wzrk_action"] = @"none";
     metadata[@"wzrk_data"] = @"";
-    NSDictionary *json = [self contentJSONWithMetadata:metadata
-                                                iosUrl:@"https://example.com/action"];
+    NSDictionary *json = [self contentJSONWithMetadata:metadata iosUrl:nil];
     CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
     XCTAssertEqualObjects(content.metaData[@"wzrk_action"], @"none");
     XCTAssertEqualObjects(content.metaData[@"wzrk_data"], @"");
@@ -208,14 +222,27 @@
     XCTAssertNil(content.metaData);
 }
 
-/// Documents current behaviour, not desired behaviour. `action.url.ios.text` is
-/// assumed to be a string; a non-string raises while deriving wzrk_data, the
-/// @catch swallows it and the whole content item is lost. Update this test if a
-/// type guard is ever added to -initWithJSON:.
-- (void)test_initWithJSON_nonStringIosUrl_contentFailsToParse {
+/// `action.url.ios.text` comes from server JSON and is not guaranteed to be a
+/// string. A non-string must not cost us the item: the item still parses, it
+/// just carries no SDK-derived action pair.
+- (void)test_initWithJSON_nonStringIosUrl_itemStillParsesWithoutActionPair {
     NSDictionary *json = [self contentJSONWithMetadata:[self serverMetadata] iosUrl:@12345];
     CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
-    XCTAssertNil(content);
+    XCTAssertNotNil(content);
+    XCTAssertNil(content.metaData[@"wzrk_action"]);
+    XCTAssertNil(content.metaData[@"wzrk_data"]);
+    XCTAssertEqualObjects(content.metaData[@"wzrk_element_id"], @"1907971814");
+}
+
+/// A JSON null arrives as NSNull, which is the realistic version of the case
+/// above - the backend sends "text": null when no url is configured.
+- (void)test_initWithJSON_nullIosUrl_itemStillParsesWithoutActionPair {
+    NSDictionary *json = [self contentJSONWithMetadata:[self serverMetadata] iosUrl:[NSNull null]];
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    XCTAssertNotNil(content);
+    XCTAssertNil(content.metaData[@"wzrk_action"]);
+    XCTAssertNil(content.metaData[@"wzrk_data"]);
+    XCTAssertEqualObjects(content.metaData[@"wzrk_element_id"], @"1907971814");
 }
 
 @end
@@ -354,10 +381,11 @@
     XCTAssertEqualObjects([unit metaDataForContentAtIndex:0], @{});
 }
 
-/// Documents current behaviour: because a malformed url makes the content item
-/// nil and -initWithJSON: adds it to the list unchecked, one bad slide costs the
-/// entire unit. Update this test if that is ever hardened.
-- (void)test_initWithJSON_nonStringIosUrlOnASlide_unitFailsToParse {
+/// The type check in -[CleverTapDisplayUnitContent initWithJSON:] keeps a slide
+/// with a non-string url parseable, so the unit that holds it survives too. Note
+/// the unit's own loop still adds content unchecked, so if a slide ever does come
+/// back nil for another reason, the whole unit is lost.
+- (void)test_initWithJSON_nonStringIosUrlOnASlide_unitStillParses {
     NSDictionary *json = @{
         @"wzrk_id": @"unit_123",
         @"content": @[
@@ -369,7 +397,9 @@
         ]
     };
     CleverTapDisplayUnit *unit = [[CleverTapDisplayUnit alloc] initWithJSON:json];
-    XCTAssertNil(unit);
+    XCTAssertNotNil(unit);
+    XCTAssertEqual(unit.contents.count, 1U);
+    XCTAssertEqualObjects([unit metaDataForContentAtIndex:0][@"wzrk_element_id"], @"1907971814");
 }
 
 @end
