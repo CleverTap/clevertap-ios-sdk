@@ -4,7 +4,6 @@
 #import "CleverTapJSInterfacePrivate.h"
 #import "CTUIUtils.h"
 #import "CTDismissButton.h"
-#import "CTUriHelper.h"
 
 typedef enum {
     kWRSlideStatusNormal = 0,

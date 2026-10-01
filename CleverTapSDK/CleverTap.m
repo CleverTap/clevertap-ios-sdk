@@ -7,7 +7,6 @@
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
-#import "CTUriHelper.h"
 #import "CTInAppUtils.h"
 #import "CTDeviceInfo.h"
 #import "CTPreferences.h"
