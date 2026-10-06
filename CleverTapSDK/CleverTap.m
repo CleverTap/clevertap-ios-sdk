@@ -2596,6 +2596,10 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
+    [self handleDisplayUnitResponse:jsonResp source:CTResponseSourceApp];
+}
+
+- (void)handleDisplayUnitResponse:(id)jsonResp source:(CTResponseSource)source {
     if (![jsonResp isKindOfClass:[NSDictionary class]]) return;
 
     // Caps first, on every response, even one that arrives during a user switch. They belong to the
@@ -2603,6 +2607,9 @@ static BOOL sharedInstanceErrorLogged;
     // also reads what this writes. The rules and the control group acknowledgements are a different
     // case.
     // saveNativeDisplayRulesAndCaps: stops before those two during a user switch.
+    //
+    // Every key read in there is read only when it is present. A response that carries none of them
+    // leaves all of it untouched. There is no need to ask which endpoint the response came from.
     [self saveNativeDisplayRulesAndCaps:jsonResp];
 
     // Only the content is held back during a user switch. The thing to avoid is showing the old
@@ -2615,7 +2622,7 @@ static BOOL sharedInstanceErrorLogged;
         }
         return;
     }
-    [self deliverNativeDisplayContent:jsonResp];
+    [self deliverNativeDisplayContent:jsonResp source:source];
 }
 
 - (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp {
@@ -2670,7 +2677,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)deliverNativeDisplayContent:(NSDictionary *)jsonResp {
+- (void)deliverNativeDisplayContent:(NSDictionary *)jsonResp source:(CTResponseSource)source {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
     NSArray *appLaunchedJSON = [self nativeDisplayAppLaunchedEntries:jsonResp];
     BOOL hasDisplayUnits = [displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0;
@@ -2705,21 +2712,46 @@ static BOOL sharedInstanceErrorLogged;
 
     NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
+    __weak typeof(self) weakSelf = self;
     [self initializeDisplayUnitWithCallback:^(BOOL success) {
-        if (success) {
+        if (!success) return;
+        // The callback above arrives on the main thread. The step below reads the cache and then
+        // writes it. Several content fetch responses can be in flight at the same time. Two of those
+        // steps running together would lose units. The serial queue makes them run one after the
+        // other.
+        [weakSelf.dispatchQueueManager runSerialAsync:^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) return;
+
             // One write for the whole response. updateDisplayUnits: replaces the cache instead of
             // adding to it. Writing the two lists one after the other would keep only the second.
-            //
-            // An empty list is written too. This response did carry Native Display units. None of
-            // them came through. The cache has to lose what it still holds. Otherwise
-            // getAllDisplayUnits returns a unit that is no longer allowed.
-            [self.displayUnitCache updateDisplayUnits:withinCaps];
-            if (withinCaps.count > 0) {
-                [self _notifyDisplayUnitsUpdated];
-            } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@: No Native Display unit came through, the cache was cleared", self);
+            NSArray<CleverTapDisplayUnit *> *unitsToStore = withinCaps;
+            if (source == CTResponseSourceContentFetch) {
+                // A content fetch response carries one campaign's content. It is not the full set.
+                // Replacing the cache with it would drop everything the event batch delivered. The
+                // new content is merged over what is already held.
+                //
+                // The merge is done here and not inside the cache. CleverTapDisplayUnitCache is a
+                // public protocol. Its contract says updateDisplayUnits: replaces. A cache supplied
+                // by the app has to keep working that way.
+                unitsToStore = [strongSelf mergeDisplayUnits:withinCaps
+                                                        into:[strongSelf.displayUnitCache getAllDisplayUnits]];
             }
-        }
+            [strongSelf.displayUnitCache updateDisplayUnits:unitsToStore];
+
+            if (unitsToStore.count > 0) {
+                // Deliver on main. displayUnitsUpdated: has always arrived there. Apps do interface
+                // work inside it.
+                [CTUtils runSyncMainQueue:^{
+                    [strongSelf _notifyDisplayUnitsUpdated];
+                }];
+            } else {
+                // An empty list is written too. This response did carry Native Display units. None
+                // of them came through. The cache has to lose what it still holds. Otherwise
+                // getAllDisplayUnits returns a unit that is no longer allowed.
+                CleverTapLogInternal(strongSelf.config.logLevel, @"%@: No Native Display unit came through, the cache was cleared", strongSelf);
+            }
+        }];
     }];
 }
 
@@ -2931,6 +2963,53 @@ static BOOL sharedInstanceErrorLogged;
     }
     return fallback;
 }
+
+/*!
+ Merge freshly fetched display units over the ones already cached.
+
+ Existing order is preserved and a unit with a matching `unitID` is replaced in place, so a
+ personalized version supersedes its placeholder without jumping position in a carousel. Units
+ with no counterpart are appended.
+
+ @note `unitID` is never nil — `CleverTapDisplayUnit` substitutes the sentinel `0_0` when a
+ payload has no `wzrk_id`. Several such units therefore share an id and collapse to the last one
+ seen. That only matters for malformed payloads, and matching them by identity instead would
+ grow the cache without bound across responses.
+ */
+- (NSArray<CleverTapDisplayUnit *> *)mergeDisplayUnits:(NSArray<CleverTapDisplayUnit *> *)incoming
+                                                  into:(NSArray<CleverTapDisplayUnit *> *)existing {
+    if (existing.count == 0) {
+        return incoming;
+    }
+
+    NSMutableArray<CleverTapDisplayUnit *> *merged = [existing mutableCopy];
+    NSMutableDictionary<NSString *, NSNumber *> *indexByUnitId = [NSMutableDictionary dictionary];
+    [merged enumerateObjectsUsingBlock:^(CleverTapDisplayUnit *unit, NSUInteger idx, BOOL *stop) {
+        if (unit.unitID) {
+            indexByUnitId[unit.unitID] = @(idx);
+        }
+    }];
+
+    NSUInteger replaced = 0;
+    for (CleverTapDisplayUnit *unit in incoming) {
+        NSNumber *existingIndex = unit.unitID ? indexByUnitId[unit.unitID] : nil;
+        if (existingIndex) {
+            merged[existingIndex.unsignedIntegerValue] = unit;
+            replaced++;
+        } else {
+            if (unit.unitID) {
+                indexByUnitId[unit.unitID] = @(merged.count);
+            }
+            [merged addObject:unit];
+        }
+    }
+
+    CleverTapLogDebug(self.config.logLevel,
+                      @"%@: Merged %lu content fetch display unit(s) into %lu cached (%lu replaced, %lu added)",
+                      self, (unsigned long)incoming.count, (unsigned long)existing.count,
+                      (unsigned long)replaced, (unsigned long)(incoming.count - replaced));
+    return merged;
+}
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -3018,6 +3097,12 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 
 - (void)parseResponse:(NSData *)responseData responseEncrypted:(BOOL)responseEncrypted {
+    [self parseResponse:responseData responseEncrypted:responseEncrypted source:CTResponseSourceApp];
+}
+
+- (void)parseResponse:(NSData *)responseData
+    responseEncrypted:(BOOL)responseEncrypted
+               source:(CTResponseSource)source {
     if (responseData) {
         @try {
             if (responseEncrypted) {
@@ -3044,12 +3129,28 @@ static BOOL sharedInstanceErrorLogged;
                 }
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-                [self handleInAppResponse:jsonResp];
+                [self handleInAppResponse:jsonResp source:source];
 #endif
                 
 #if !defined(CLEVERTAP_TVOS)
-                if (!self.isUserSwitching) {
-                    [self.contentFetchManager handleContentFetch:jsonResp];
+                if (source == CTResponseSourceContentFetch) {
+                    // A content fetch response must not trigger another content fetch. There is no
+                    // depth bound anywhere in the chain, so a response echoing the key back would
+                    // loop indefinitely.
+                    if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Ignoring %@ in a content fetch response", self, CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY);
+                    }
+                } else if (!self.isUserSwitching) {
+                    // An app-launch arbitration window needs to know when this batch has settled.
+                    // The completion runs exactly once — including on HTTP failure and on user
+                    // switch — so a window can never be left open, which would otherwise suppress
+                    // app-launch in-apps for the rest of the session.
+                    __weak typeof(self) weakSelf = self;
+                    [self.contentFetchManager handleContentFetch:jsonResp completion:^{
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+                        [weakSelf.inAppEvaluationManager appLaunchedArbitrationContentFetchDidComplete];
+#endif
+                    }];
                 } else if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response will not be handled due to user switch", self);
                 }
@@ -3065,7 +3166,7 @@ static BOOL sharedInstanceErrorLogged;
 #endif
                 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-                [self handleDisplayUnitResponse:jsonResp];
+                [self handleDisplayUnitResponse:jsonResp source:source];
 #endif
                 
                 [self handleFeatureFlagsResponse:jsonResp];
@@ -6267,7 +6368,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager didReceiveResponse:(NSData *)data {
-    [self parseResponse:data responseEncrypted:NO];
+    [self parseResponse:data responseEncrypted:NO source:CTResponseSourceContentFetch];
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager addMetadataToEvent:(NSMutableDictionary *)event ofType:(CleverTapEventType)eventType {
