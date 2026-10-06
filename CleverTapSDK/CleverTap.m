@@ -2676,7 +2676,8 @@ static BOOL sharedInstanceErrorLogged;
                       (unsigned long)(appLaunchedJSON.count - appLaunchedWithContent.count));
 
     NSArray *appLaunchedWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:appLaunchedWithContent];
-    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithinLimits]];
+    NSArray *appLaunchedWithinGlobalCaps = [self appLaunchedNativeDisplaysWithinGlobalCaps:appLaunchedWithinLimits];
+    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithinGlobalCaps]];
 
     NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
@@ -2719,6 +2720,47 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to check the App-Launched Native Display limits, so those units were dropped: %@", self, e.debugDescription);
         return @[];
     }
+}
+
+/**
+ Drops the App-Launched entries that do not fit in the room the account caps have left.
+
+ The server sends the whole App-Launched set in one response. It does not cut that set down to the
+ account caps. The SDK picks how many of them to hand over. Content for a regular event is cut down
+ by the server before it is sent. Only this path needs the check.
+
+ @c nativeDisplayUnitsStillAllowedToShow: below reads the same two caps. It reads counts that only
+ change when the app reports a view. No view is reported while one response is handled. Every entry
+ in that response sees the same counts there. A set of three would all pass with room for one. The
+ running total kept here is what stops a single response from going over.
+
+ Entries are taken in the order the server sent them. That order is the campaign priority.
+
+ A campaign with @c excludeGlobalFCaps is handed over and uses up none of the room. The two account
+ caps do not apply to it.
+ */
+- (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries {
+    if (entries.count == 0 || !self.ndFCManager) return entries;
+
+    // Check the date first. The room left today must not be read from yesterday's count.
+    [self.ndFCManager checkUpdateDailyLimits];
+
+    int remaining = [self.ndFCManager globalCapRemaining];
+    NSMutableArray *withinGlobalCaps = [NSMutableArray new];
+    for (NSDictionary *entry in entries) {
+        NSString *campaignId = [CTNdFCManager campaignIdFrom:entry];
+        if ([self nativeDisplayExcludesGlobalCaps:entry forCampaignId:campaignId]) {
+            [withinGlobalCaps addObject:entry];
+            continue;
+        }
+        if (remaining > 0) {
+            [withinGlobalCaps addObject:entry];
+            remaining--;
+            continue;
+        }
+        CleverTapLogDebug(self.config.logLevel, @"%@: App-Launched Native Display campaign %@ was dropped. The account caps have no room left for it in this response.", self, campaignId);
+    }
+    return withinGlobalCaps;
 }
 
 /**

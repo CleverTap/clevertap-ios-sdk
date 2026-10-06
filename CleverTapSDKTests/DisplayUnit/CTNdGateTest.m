@@ -37,6 +37,7 @@
 - (BOOL)nativeDisplayExcludesGlobalCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
 - (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
 - (NSArray *)appLaunchedNativeDisplaysWithinLimits:(NSArray *)entries;
+- (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries;
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit;
 - (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback;
 - (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp;
@@ -128,6 +129,16 @@ static NSString *const kOtherCampaignId = @"70002";
 - (NSArray<NSString *> *)appLaunched:(NSArray *)entries {
     NSMutableArray<NSString *> *ids = [NSMutableArray new];
     for (NSDictionary *entry in [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]) {
+        [ids addObject:[CTNdFCManager campaignIdFrom:entry]];
+    }
+    return ids;
+}
+
+/// Runs the App-Launched account cap trim and returns the campaign ids that came through, in the
+/// order they came through.
+- (NSArray<NSString *> *)appLaunchedWithinGlobalCaps:(NSArray *)entries {
+    NSMutableArray<NSString *> *ids = [NSMutableArray new];
+    for (NSDictionary *entry in [self.cleverTap appLaunchedNativeDisplaysWithinGlobalCaps:entries]) {
         [ids addObject:[CTNdFCManager campaignIdFrom:entry]];
     }
     return ids;
@@ -225,6 +236,96 @@ static NSString *const kOtherCampaignId = @"70002";
     }]];
 
     XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]);
+}
+
+#pragma mark Cutting the App-Launched set down to the account caps
+
+// The gate below reads counts that only change when the app reports a view. No view is reported
+// while one response is handled. These entries arrive together, so the running total is kept here
+// instead.
+
+- (void)testTheAppLaunchedSetIsCutDownToTheRoomLeftToday {
+    // Room for one. Three entries arrive. Each one on its own passes the gate, because the daily
+    // count does not move while this response is handled. Only the running total stops the other
+    // two.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testTheSessionCapCanBeTheOneThatDecides {
+    // The smaller of the two caps decides. Here the day has plenty of room. The session does not.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:100 andPerSession:2];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testAnAccountWithNoLimitsTakesTheWholeAppLaunchedSet {
+    // ndmc and ndmp are new keys. A response may not carry them. Such an account has no account
+    // level cap. Nothing here may cut the set down.
+    [self show:kOtherCampaignId times:50];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}]
+    ]]));
+}
+
+- (void)testNothingComesThroughOnceTheAccountCapsAreFull {
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    XCTAssertEqualObjects(@[], ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}]
+    ]]));
+}
+
+- (void)testAnExemptEntryComesThroughAndUsesUpNoRoom {
+    // excludeGlobalFCaps takes the entry outside the two account caps. It must not take the room
+    // the next entry needs. Room for one, so the entry after it still comes through.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testTheRoomGoesToTheEntriesTheServerSentFirst {
+    // The server sends them in priority order. The first entry takes the last place. The order of
+    // what comes through must match the order it arrived in.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:2];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[@"70004"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:@"70004" extras:@{}],
+        [self entryWithTi:kCampaignId extras:@{}]
+    ]]));
+}
+
+- (void)testThereIsNoGlobalCapCheckWithoutAnFCManager {
+    // Analytics only instances and app extensions have no Native Display managers. Nothing is
+    // capped there. The list must come back untouched.
+    self.cleverTap.ndFCManager = nil;
+
+    NSArray *entries = @[[self entryWithTi:kCampaignId extras:@{}]];
+    XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinGlobalCaps:entries]);
 }
 
 #pragma mark Where the cap settings are read from

@@ -564,6 +564,54 @@ final class CTNdFCManagerTests {
         #expect(helper.triggerManager.getTriggers(kWzrkId) == 0)
     }
 
+    // MARK: - How much room the account caps have left
+
+    @Test("An account with no limits has room that never runs out")
+    func anAccountWithNoLimitsHasRoomThatNeverRunsOut() {
+        // ndmc and ndmp are new keys. A response may not carry them. Such an account has no account
+        // level cap. A plain subtraction on an unset limit gives -1. That would stop everything.
+        fcManager.updateGlobalLimits(perDay: -1, andPerSession: -1)
+        show(kCampaignId, times: 50)
+
+        #expect(fcManager.globalCapRemaining() == Int32.max)
+    }
+
+    @Test("The daily limit can be the one that decides")
+    func theDailyLimitCanBeTheOneThatDecides() {
+        fcManager.updateGlobalLimits(perDay: 5, andPerSession: -1)
+        show(kCampaignId, times: 4)
+
+        #expect(fcManager.globalCapRemaining() == 1)
+    }
+
+    @Test("The session limit can be the one that decides")
+    func theSessionLimitCanBeTheOneThatDecides() {
+        fcManager.updateGlobalLimits(perDay: 100, andPerSession: 3)
+        show(kCampaignId, times: 1)
+
+        #expect(fcManager.globalCapRemaining() == 2)
+    }
+
+    @Test("The smaller of the two limits decides")
+    func theSmallerOfTheTwoLimitsDecides() {
+        // Two were shown. The day has 8 left. The session has 1 left. The answer is the session's.
+        fcManager.updateGlobalLimits(perDay: 10, andPerSession: 3)
+        show(kCampaignId, times: 2)
+
+        #expect(fcManager.globalCapRemaining() == 1)
+    }
+
+    @Test("The room left never goes below zero")
+    func theRoomLeftNeverGoesBelowZero() {
+        // A cap can be lowered after units were shown. The count is then above the limit. A caller
+        // that only checks for zero would read a negative answer as room.
+        fcManager.updateGlobalLimits(perDay: 10, andPerSession: -1)
+        show(kCampaignId, times: 6)
+        fcManager.updateGlobalLimits(perDay: 2, andPerSession: -1)
+
+        #expect(fcManager.globalCapRemaining() == 0)
+    }
+
     // MARK: - Keeping Native Display and in-app apart
 
     @Test("Native Display counts do not touch the in-app stores")

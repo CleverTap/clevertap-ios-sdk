@@ -200,6 +200,36 @@ final class CTNdFCManager: NSObject {
                                                 withResetValue: 0))
     }
 
+    /// How much room the account caps have left right now.
+    ///
+    /// Two limits are read. `ndmp` gives the room left today. `ndmc` gives the room left in this
+    /// session. The smaller of the two is the answer. A limit the server never sent is skipped.
+    ///
+    /// The answer is `Int32.max` when the server has sent neither limit. Such an account has no
+    /// account level cap. The answer is never below zero.
+    ///
+    /// Call `checkUpdateDailyLimits` first. The daily count is otherwise read from the wrong day.
+    ///
+    /// Both counts behind these limits only change when the app reports a view. The answer stays the
+    /// same for every caller until that happens. A caller that hands over several units in one go
+    /// must subtract one per unit itself. See `appLaunchedNativeDisplaysWithinGlobalCaps:` in
+    /// `CleverTap.m`.
+    func globalCapRemaining() -> Int32 {
+        var remaining = Int32.max
+
+        let maxPerDay = maxPerDayCount()
+        if maxPerDay != kCTNdUncapped {
+            remaining = min(remaining, maxPerDay - shownTodayCount())
+        }
+
+        let sessionMax = globalSessionMax()
+        if sessionMax != kCTNdUncapped {
+            remaining = min(remaining, sessionMax - Int32(impressionManager.perSessionTotal()))
+        }
+
+        return max(0, remaining)
+    }
+
     // Each of the three checks below returns nil when the campaign still has room. It returns a
     // short sentence when a cap is full. See reasonCampaignIsHeldBack below.
 
