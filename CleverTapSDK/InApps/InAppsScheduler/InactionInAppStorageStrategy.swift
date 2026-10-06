@@ -16,27 +16,26 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
     
     @objc public func prepareForScheduling(inApps: [[String : Any]]) -> Bool {
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Preparing \(inApps.count) in-actions inapps for scheduling")
-        var swiftInApps: [[String: Any]] = []
-        for i in 0..<inApps.count {
-            swiftInApps.append(inApps[i])
-        }
-        var cachedCount = 0
-        for inApp in swiftInApps {
+        var newEntries: [String: [String: Any]] = [:]
+        for inApp in inApps {
             let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
             if !inAppId.isEmpty {
-                self.inActionCache[inAppId] = inApp
-                cachedCount += 1
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cached in-action inapp: \(inAppId)")
+                newEntries[inAppId] = inApp
             }
         }
-        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cached \(cachedCount) in-action inapps in memory")
+        cacheQueue.sync(flags: .barrier) {
+            for (inAppId, inApp) in newEntries {
+                inActionCache[inAppId] = inApp
+            }
+        }
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cached \(newEntries.count) in-action inapps in memory")
         return true
     }
     
     @objc public func retrieveAfterTimer(id: String) -> [String : Any]? {
         var result: [String: Any]?
-        cacheQueue.sync {
-            result = inActionCache[id]
+        cacheQueue.sync(flags: .barrier) {
+            result = inActionCache.removeValue(forKey: id)
         }
         if result != nil {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Retrieved in-action inapps from cache: \(id)")

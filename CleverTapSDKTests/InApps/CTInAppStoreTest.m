@@ -125,6 +125,10 @@
     return [self.store storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
 }
 
+- (NSString *)storageKeyDelayedCS {
+    return [self.store storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY_CS];
+}
+
 #pragma mark Tests
 - (void)testStoreClientSideInApps {
     XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyCS]]);
@@ -283,6 +287,33 @@
     XCTAssertEqualObjects([self.store serverSideInApps], self.inApps);
 }
 #pragma clang diagnostic pop
+
+// Switching away from CS must also drop the delayed CS in-apps. They are read by
+// evaluateDelayedClientSide: on every event, so one left behind can still display
+// while the account is in SS mode. Matches Android, whose SERVER_SIDE_MODE and
+// NO_MODE branches both call removeClientSideDelayedInApps().
+- (void)testSetModeRemovesDelayedClientSideInApps {
+    // CS mode keeps them - only the server-side stores are cleared.
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    [self.store setMode:@"CS"];
+    XCTAssertNotNil([CTPreferences getObjectForKey:[self storageKeyDelayedCS]]);
+
+    // SS mode clears them.
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    [self.store setMode:@"SS"];
+    XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyDelayedCS]]);
+    XCTAssertEqual([[self.store delayedClientSideInApps] count], 0);
+
+    // No mode clears them too.
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    [self.store setMode:nil];
+    XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyDelayedCS]]);
+
+    // An unrecognised mode takes the same branch as no mode.
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    [self.store setMode:@"Invalid"];
+    XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyDelayedCS]]);
+}
 
 - (void)testSetModeRemovesInApps {
     [self.store storeServerSideInApps:self.inApps];

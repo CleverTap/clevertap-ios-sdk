@@ -38,8 +38,4 @@
     return self.type == CTFlattenedEventDataTypeEventProperties ? self.data : nil;
 }
 
-- (BOOL)isNoData {
-    return self.type == CTFlattenedEventDataTypeNoData;
-}
-
 @end

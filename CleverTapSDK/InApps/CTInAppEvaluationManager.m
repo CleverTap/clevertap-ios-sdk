@@ -125,7 +125,7 @@
         NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
         NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
         [eventProperties addEntriesFromDictionary:appFields];
-        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
+        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: eventProperties andLocation:self.location];
         [eventAdapterList addObject:event];
     }];
     [self evaluateServerSide:eventAdapterList withQueueType:CTQueueTypeProfile];
