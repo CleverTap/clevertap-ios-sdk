@@ -203,14 +203,46 @@
     XCTAssertEqualObjects(content.metaData[@"wzrk_data"], @"");
 }
 
-- (void)test_initWithJSON_noMetadata_metaDataIsNil {
+/// The url pair does not depend on server metadata: an item with an iOS url but
+/// no `metadata` still carries the SDK-derived action and data, and nothing else.
+- (void)test_initWithJSON_noMetadataWithIosUrl_metaDataHasOnlyDerivedPair {
     NSDictionary *json = [self contentJSONWithMetadata:nil iosUrl:@"https://example.com/action"];
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    NSDictionary *expected = @{@"wzrk_action": @"url", @"wzrk_data": @"https://example.com/action"};
+    XCTAssertEqualObjects(content.metaData, expected);
+}
+
+- (void)test_initWithJSON_emptyMetadataWithIosUrl_metaDataHasOnlyDerivedPair {
+    NSDictionary *json = [self contentJSONWithMetadata:@{} iosUrl:@"https://example.com/action"];
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    NSDictionary *expected = @{@"wzrk_action": @"url", @"wzrk_data": @"https://example.com/action"};
+    XCTAssertEqualObjects(content.metaData, expected);
+}
+
+- (void)test_initWithJSON_metadataWrongTypeWithIosUrl_metaDataHasOnlyDerivedPair {
+    NSMutableDictionary *json = [[self contentJSONWithMetadata:nil iosUrl:@"https://example.com/action"] mutableCopy];
+    json[@"metadata"] = @"not-a-dictionary";
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    NSDictionary *expected = @{@"wzrk_action": @"url", @"wzrk_data": @"https://example.com/action"};
+    XCTAssertEqualObjects(content.metaData, expected);
+}
+
+/// With neither metadata nor a url there is nothing to attribute, so metaData stays nil
+/// rather than an empty dictionary.
+- (void)test_initWithJSON_noMetadataNoIosUrl_metaDataIsNil {
+    NSDictionary *json = [self contentJSONWithMetadata:nil iosUrl:nil];
     CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
     XCTAssertNil(content.metaData);
 }
 
-- (void)test_initWithJSON_emptyMetadata_metaDataIsNil {
-    NSDictionary *json = [self contentJSONWithMetadata:@{} iosUrl:@"https://example.com/action"];
+- (void)test_initWithJSON_emptyMetadataNoIosUrl_metaDataIsNil {
+    NSDictionary *json = [self contentJSONWithMetadata:@{} iosUrl:nil];
+    CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
+    XCTAssertNil(content.metaData);
+}
+
+- (void)test_initWithJSON_noMetadataWhitespaceOnlyIosUrl_metaDataIsNil {
+    NSDictionary *json = [self contentJSONWithMetadata:nil iosUrl:@"   "];
     CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:json];
     XCTAssertNil(content.metaData);
 }
