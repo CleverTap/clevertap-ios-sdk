@@ -128,6 +128,27 @@ extern NSString *const kSessionId;
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
+// Keys within a single `content_fetch` array item
+#define CLTAP_CONTENT_FETCH_ITEM_EVENT_NAME @"eventName"
+#define CLTAP_CONTENT_FETCH_ITEM_RESPONSE_KEY @"responseKey"
+#define CLTAP_CONTENT_FETCH_ITEM_TGT_ID @"tgtId"
+// SDK-internal marker, never sent or received. Tags a payload built from a content_fetch item's
+// selection rules, which can be evaluated and sorted but must never be displayed — it carries
+// only the rules that decide a winner, no content.
+#define CLTAP_INAPP_SYNTHETIC_CANDIDATE @"__ct_synthetic_candidate"
+// How long an app-launch in-app is held waiting for the content fetch to return a competing
+// candidate. A UX bound, not a correctness one — deliberately far below the content fetch's own
+// limits (CLTAP_REQUEST_TIME_OUT_INTERVAL, plus 5s if it waits for a concurrency slot), since
+// matching those would delay the in-app by up to 15s. A response arriving after this has fired
+// is dropped instead of shown, so a slow fetch cannot produce a second in-app.
+//
+// TODO: 3.0 is a placeholder pending team discussion. It was chosen against an observed ~2s
+// round trip on staging, which is a single data point. The value only trades off how often the
+// personalized in-app wins versus the app-launch one — shorter falls back more often, longer
+// delays display more often — and cannot cause a double in-app either way. Worth deciding with
+// real latency numbers, and whether it should be server-driven or SDK-configurable rather than
+// a compile-time constant.
+#define CLTAP_INAPP_ARBITRATION_TIMEOUT_SECONDS 3.0
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
 #define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
@@ -241,6 +262,50 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
 #define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
 
+// Storage names for CTImpressionManager and CTInAppTriggerManager. These words go inside the
+// preference key. Change a value and every impression and trigger count already saved on a device
+// can no longer be found. They are constants to make that clear. Treat the values as frozen.
+#define CLTAP_PREFS_INAPP_IMPRESSIONS_NAMESPACE @"impressions"
+#define CLTAP_PREFS_INAPP_TRIGGERS_NAMESPACE @"triggers"
+
+#pragma mark Native Display frequency caps
+
+// Response, server to SDK. CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY carries the content and is already
+// handled. These carry the caps.
+#define CLTAP_ND_SS_JSON_RESPONSE_KEY @"adUnit_notifs_ss"
+#define CLTAP_ND_STALE_JSON_RESPONSE_KEY @"adUnit_stale"
+// Campaigns that fired on App Launched. These carry real content, except the entries marked
+// suppressed. Those mean the user is in the control group and there is nothing to show.
+#define CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY @"adUnit_notifs_applaunched"
+// Watch the direction. From the server, ndmc and ndmp are the limits. To the server, ndmp is how
+// many we showed today. In-app does the same thing with imp.
+#define CLTAP_ND_SESSION_MAX_META_KEY @"ndmc"
+#define CLTAP_ND_DAILY_MAX_META_KEY @"ndmp"
+
+// Request, SDK to server.
+#define CLTAP_ND_SHOWN_TODAY_META_KEY @"ndmp"
+#define CLTAP_ND_COUNTS_META_KEY @"ndtlc"
+#define CLTAP_ND_SS_EVAL_META_KEY @"adUnit_eval"
+#define CLTAP_ND_SUPPRESSED_META_KEY @"adUnit_suppressed"
+
+// The t value on the wzrk_fetch event that asks for a fresh Native Display rule bundle. The server
+// answers with adUnit_notifs_ss.
+//
+static const NSInteger kCTNdFetchTypeMeta = 8;
+
+// On disk. Every name here is new, so Native Display never reads or writes a key that is already
+// saved on a device.
+#define CLTAP_PREFS_ND_KEY_SS @"adUnit_notifs_ss"
+#define CLTAP_ND_SS_EVAL_STORAGE_KEY @"adUnit_eval"
+#define CLTAP_ND_SUPPRESSED_STORAGE_KEY @"adUnit_suppressed"
+#define CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY @"nd_counts_per_campaign"
+#define CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY @"ndstc"
+#define CLTAP_PREFS_ND_MAX_PER_DAY_KEY @"ndstmcd"
+#define CLTAP_PREFS_ND_SESSION_MAX_KEY @"ndmc_max"
+#define CLTAP_PREFS_ND_LAST_DATE_KEY @"nd_ict_date"
+#define CLTAP_PREFS_ND_IMPRESSIONS_NAMESPACE @"nd_impressions"
+#define CLTAP_PREFS_ND_TRIGGERS_NAMESPACE @"nd_triggers"
+
 #define CLTAP_PREFS_PREFIX @"WizRocket"
 
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
@@ -281,7 +346,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 // along on the next queued event.
 #define CLTAP_INAPP_ERROR_IMAGE_DISMISS @"image-error-dismiss"
 #define CLTAP_INAPP_ERROR_VIDEO_DISMISS @"video-error-dismiss"
-// wzrk_error codes — MUST stay aligned with Android and the backend decoder.
+// wzrk_error codes. The backend decoder reads these numbers. Changing one here would break it.
 #define CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD 591
 #define CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD 592
 #define CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD @"InApp image failed to load"

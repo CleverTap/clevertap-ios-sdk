@@ -15,8 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTLimitsMatcher : NSObject
 
+/*!
+ @param triggerManager Source of trigger counts for `onEvery` / `onExactly` limits. Normally the
+ live `CTInAppTriggerManager`; a dry run passes an offsetting counter so limits are evaluated
+ against the count the real path would have written, without writing it.
+ */
 - (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId
-  withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(CTInAppTriggerManager *)triggerManager;
+  withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(id<CTTriggerCounting>)triggerManager;
 
 @end
 
