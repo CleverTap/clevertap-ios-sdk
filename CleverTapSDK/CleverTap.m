@@ -5171,7 +5171,6 @@ static BOOL sharedInstanceErrorLogged;
                                 completionHandler:^(NSDictionary *event,
                                                     NSArray<CTValidationResult*> *errors) {
             if (event) {
-                self.wzrkParams = [self ct_filteredWzrkFields:event[CLTAP_EVENT_DATA]];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
