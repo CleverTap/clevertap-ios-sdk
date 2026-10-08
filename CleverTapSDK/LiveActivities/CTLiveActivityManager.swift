@@ -15,6 +15,7 @@ private let kCTLAActivityStoreKey = "CLTAP_LA_ACTIVITY_STORE"
 private let kCTLAStoreActivityName = "activityName"
 private let kCTLAStoreWzrk = "wzrk"
 private let kCTLAStoreStarted = "started"
+private let kCTLAStoreImpressed = "impressed"
 
 // MARK: - Live Activity lifecycle event
 // The four lifecycle stages are sent as a SINGLE event named "Live Activity"; the stage is carried
@@ -290,8 +291,18 @@ final class CTLiveActivityManager: NSObject {
 
     // Convenience: extract the `wzrk` dict from the activity (attributes + current content-state) —
     // no manual dict-building.
+    //
+    // De-duplicates: records at most ONE impression per activity (persisted across launches),
+    // mirroring how "Started" is reported once. This lets the host app call it on every `.active`
+    // transition / relaunch without re-sending impressions. The raw
+    // `recordLiveActivityImpression(wzrk:)` variant is NOT de-duped — the caller owns that.
     func recordLiveActivityImpression<Attributes: ActivityAttributes>(activity: Activity<Attributes>) {
+        guard !isImpressionReported(activityID: activity.id) else {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: impression already recorded for '\(activity.id)'; skipping.")
+            return
+        }
         recordLiveActivityImpression(wzrk: Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state))
+        setImpressionReported(activityID: activity.id)
     }
 
     func recordLiveActivityClicked<Attributes: ActivityAttributes>(activity: Activity<Attributes>) {
@@ -409,8 +420,24 @@ final class CTLiveActivityManager: NSObject {
     private static func extractWzrk<T: Encodable>(from value: T) -> [String: Any] {
         guard let data = try? JSONEncoder().encode(value),
               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
-        if let nested = dict["wzrk"] as? [String: Any] { return nested }
-        return dict.filter { $0.key.hasPrefix("wzrk_") }
+        if let nested = dict["wzrk"] as? [String: Any] { return normalizeWzrkKeys(nested) }
+        return normalizeWzrkKeys(dict.filter { $0.key.hasPrefix("wzrk_") || $0.key.hasPrefix("W$") })
+    }
+
+    /// Normalizes CleverTap campaign keys so events always carry the `wzrk_` form: any key the
+    /// backend sends with the `W$` prefix (e.g. `W$rnv`) is renamed to `wzrk_` + suffix
+    /// (`wzrk_rnv`). This mirrors the push pipeline (`CTEventBuilder` renames `W$` → `wzrk_`), so
+    /// client `ActivityAttributes` structs don't need custom Codable just to re-key one field —
+    /// they can declare the field with its natural `wzrk_` name (mapping the JSON `W$…` via a plain
+    /// `CodingKeys` raw value) and let synthesis do the rest. An existing `wzrk_` key is not
+    /// overwritten.
+    private static func normalizeWzrkKeys(_ dict: [String: Any]) -> [String: Any] {
+        var out = dict.filter { !$0.key.hasPrefix("W$") }
+        for (key, value) in dict where key.hasPrefix("W$") {
+            let renamed = "wzrk_" + key.dropFirst(2)   // "W$rnv" -> "wzrk_rnv"
+            if out[renamed] == nil { out[renamed] = value }
+        }
+        return out
     }
 
     /// Builds the wzrk dict for an event. Fixed fields come from the (immutable) START
@@ -581,6 +608,23 @@ final class CTLiveActivityManager: NSObject {
             store[activityID] = record
             UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
         }
+        lock.unlock()
+    }
+
+    private func isImpressionReported(activityID: String) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return storedActivityMap()[activityID]?[kCTLAStoreImpressed] == "1"
+    }
+
+    private func setImpressionReported(activityID: String) {
+        lock.lock()
+        var store = storedActivityMap()
+        // Upsert the record: an impression may be recorded before the SDK has attached/persisted
+        // this activity, so create a minimal record if absent (merged later by persistTrackedActivity).
+        var record = store[activityID] ?? [:]
+        record[kCTLAStoreImpressed] = "1"
+        store[activityID] = record
+        UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
         lock.unlock()
     }
 

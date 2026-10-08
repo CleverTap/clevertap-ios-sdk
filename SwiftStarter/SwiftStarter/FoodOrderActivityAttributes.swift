@@ -42,37 +42,20 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     //   wzrk_acct_id  – account id; used by the SDK to HARD-VALIDATE the calling instance
     //                   (event is dropped if it records on a different account).
     //   wzrk_activityId / wzrk_activityType – Live Activity ids.
-    //   wzrk_rnv      – "raised not viewed" Bool flag. The backend sends it as `W$rnv`; we decode
-    //                   that (or `wzrk_rnv`) and RE-EMIT it as `wzrk_rnv` in the event, mirroring
-    //                   how push renames the `W$` prefix to `wzrk_`. This needs asymmetric coding
-    //                   (decode `W$rnv`, encode `wzrk_rnv`) since `extractWzrk` re-encodes this
-    //                   struct to build the event payload.
+    //   wzrk_rnv      – "raised not viewed" flag. The backend sends it as `W$rnv`; a plain
+    //                   `CodingKeys` raw value maps that JSON key onto the `wzrk_rnv` property, so
+    //                   Codable synthesis (no custom init) handles it. The SDK normalizes any
+    //                   remaining `W$…` keys to `wzrk_…` when it builds the event payload.
     struct Wzrk: Codable, Hashable {
         var wzrk_activityId: String?
         var wzrk_activityType: Int?
         var wzrk_id: String?       // campaign id — composite string, e.g. "1784798893_20260916"
         var wzrk_acct_id: String?  // account id (multi-instance validation)
-        var wzrk_rnv: Bool?        // decoded from "W$rnv" (or "wzrk_rnv"); encoded as "wzrk_rnv"
+        var wzrk_rnv: Bool?        // JSON key is "W$rnv" (mapped below)
 
-        // Encoding uses these keys → the event payload carries `wzrk_rnv` (push-consistent).
-        private enum CodingKeys: String, CodingKey {
-            case wzrk_activityId, wzrk_activityType, wzrk_id, wzrk_acct_id, wzrk_rnv
-        }
-        // The backend sends the flag with a "W$" prefix; read it on decode.
-        private enum LegacyKeys: String, CodingKey {
-            case wzrk_rnv = "W$rnv"
-        }
-
-        init(from decoder: Decoder) throws {
-            let c = try decoder.container(keyedBy: CodingKeys.self)
-            wzrk_activityId   = try c.decodeIfPresent(String.self, forKey: .wzrk_activityId)
-            wzrk_activityType = try c.decodeIfPresent(Int.self, forKey: .wzrk_activityType)
-            wzrk_id           = try c.decodeIfPresent(String.self, forKey: .wzrk_id)
-            wzrk_acct_id      = try c.decodeIfPresent(String.self, forKey: .wzrk_acct_id)
-            // Prefer the backend's "W$rnv"; fall back to "wzrk_rnv" (already-renamed / round-trip).
-            let legacy = try decoder.container(keyedBy: LegacyKeys.self)
-            wzrk_rnv = try legacy.decodeIfPresent(Bool.self, forKey: .wzrk_rnv)
-                       ?? c.decodeIfPresent(Bool.self, forKey: .wzrk_rnv)
+        enum CodingKeys: String, CodingKey {
+            case wzrk_activityId, wzrk_activityType, wzrk_id, wzrk_acct_id
+            case wzrk_rnv = "W$rnv"   // map the backend's "W$rnv" JSON key onto this property
         }
     }
 
