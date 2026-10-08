@@ -7,7 +7,6 @@
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
-#import "CTUriHelper.h"
 #import "CTInAppUtils.h"
 #import "CTDeviceInfo.h"
 #import "CTPreferences.h"
@@ -107,7 +106,6 @@ static NSArray *sslCertNames;
 #import "NSDictionary+Extensions.h"
 
 #import "CTEncryptionManager.h"
-#import "CTFlattenedEventData.h"
 
 #import <objc/runtime.h>
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
