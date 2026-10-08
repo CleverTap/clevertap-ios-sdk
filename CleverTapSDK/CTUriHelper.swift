@@ -25,8 +25,13 @@ import Foundation
 @objcMembers
 public final class CTUriHelper: NSObject {
 
-    public static func getUrchinFromUri(_ uri: String?, withSourceApp sourceApp: String?) -> [String: Any] {
-        var referrer: [String: Any] = [:]
+    // Returns a fresh NSMutableDictionary (not an immutable [String: Any]) because the caller
+    // -[CleverTap _pushDeepLink:...] adds an "install" key to the result via setValue:forKey:.
+    // The original ObjC implementation returned an NSMutableDictionary (declared as NSDictionary),
+    // and bridging a Swift [String: Any] back to ObjC yields an immutable NSDictionary, which
+    // would raise on mutation. Returning NSMutableDictionary preserves that contract.
+    public static func getUrchinFromUri(_ uri: String?, withSourceApp sourceApp: String?) -> NSMutableDictionary {
+        let referrer = NSMutableDictionary()
 
         // Don't care for null values — they won't be added anyway
         if let sourceApp = sourceApp, !sourceApp.isEmpty, !sourceApp.hasPrefix("fb") {

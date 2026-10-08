@@ -122,4 +122,15 @@ struct CTUriHelperTests {
         #expect(params["flag"] == nil)
         #expect(params["key"] as? String == "value")
     }
+
+    // MARK: - regression: returned referrer must be mutable (CleverTap._pushDeepLink adds "install")
+
+    @Test("getUrchinFromUri returns a mutable dictionary the caller can augment")
+    func getUrchinFromUriReturnsMutableDictionary() {
+        let result = CTUriHelper.getUrchinFromUri("https://example.com/?utm_source=google", withSourceApp: "clevertap")
+        // Mirrors `[referrer setValue:@(install) forKey:@"install"]` in -_pushDeepLink: — must not raise.
+        result["install"] = true
+        #expect(result["install"] as? Bool == true)
+        #expect(result["referrer"] as? String == "clevertap")
+    }
 }
