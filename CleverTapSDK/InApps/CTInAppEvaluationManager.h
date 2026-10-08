@@ -82,6 +82,21 @@ NS_ASSUME_NONNULL_BEGIN
                             syntheticCandidates:(nullable NSArray<NSDictionary *> *)syntheticCandidates;
 
 /*!
+ Throw away an open window without displaying anything.
+
+ A buffered winner belongs to the user who was active when it was evaluated, so it must not
+ survive a switch to a different identity. Closing the window instead would display it, and the
+ in-app display path has no identity check of its own — it would render for the new user.
+
+ Must be called *before* `notifyDelegatesDeviceIdWillChange`, since the content fetch manager
+ drains its pending completions there and each of those closes a window. Calling it explicitly
+ rather than via `CTSwitchUserDelegate` keeps that ordering independent of delegate registration.
+
+ Safe to call with no window open, and idempotent.
+ */
+- (void)discardAppLaunchedArbitration;
+
+/*!
  Report that the content fetch for this launch has settled.
 
  Displays the merged winner if the timeout has not already done so, then ends the window

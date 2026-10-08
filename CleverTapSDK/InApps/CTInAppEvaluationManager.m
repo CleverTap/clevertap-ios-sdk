@@ -401,6 +401,22 @@
     });
 }
 
+- (void)discardAppLaunchedArbitration {
+    CTInAppArbitrationCycle *discarded = nil;
+    @synchronized (self.arbitrationLock) {
+        discarded = self.appLaunchedArbitrationCycle;
+        self.appLaunchedArbitrationCycle = nil;
+    }
+
+    if (!discarded) {
+        return;
+    }
+    // Logged because the in-app the user would otherwise have seen is being dropped. Without this
+    // a campaign simply never appears and there is nothing to explain why.
+    CleverTapLogStaticDebug(@"Discarded App Launched arbitration, %lu buffered candidate(s) dropped because the user is switching",
+                            (unsigned long)discarded.candidates.count);
+}
+
 - (void)appLaunchedArbitrationContentFetchDidComplete {
     // Show the merged winner unless the timeout already did.
     [self closeAppLaunchedArbitration];

@@ -3435,7 +3435,15 @@ static BOOL sharedInstanceErrorLogged;
         
         // clear any events in the queue
         [self clearQueue];
-        
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        // Before the notification below. The content fetch manager drains its pending completions
+        // there, and each of those closes an app-launch arbitration window — which displays the
+        // winner it was holding. That winner was evaluated for the user being switched away from,
+        // and the in-app display path has no identity check, so it would render for the new user.
+        [self.inAppEvaluationManager discardAppLaunchedArbitration];
+#endif
+
         [[self delegateManager] notifyDelegatesDeviceIdWillChange];
         
         // clear ARP and other context for the old user
