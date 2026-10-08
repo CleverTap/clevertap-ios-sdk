@@ -36,6 +36,18 @@
  */
 @property (nullable, nonatomic, copy, readonly) NSArray<CleverTapDisplayUnitContent *> *contents;
 
+/*!
+ @method metaDataForContentAtIndex:
+ @abstract Returns wzrk_* metadata for a content item.
+
+ Includes the wzrk_element_id, wzrk_index, wzrk_c2a, and wzrk_action / wzrk_data when applicable.
+ Returns an empty dictionary for an invalid index or when no item attribution is available.
+ 
+ @param contentIndex Zero-based index into contents.
+ */
+- (NSDictionary<NSString *, id> *_Nonnull)metaDataForContentAtIndex:(NSInteger)contentIndex
+NS_SWIFT_NAME(metaData(forContentAt:));
+
 @end
 
 /*!
@@ -92,6 +104,11 @@
  * mediaIsGif check whether mediaUrl is a gif.
  */
 @property (nonatomic, readonly, assign) BOOL mediaIsGif;
+/*!
+ * metaData contains this item's wzrk_* attribution, including server-provided
+ * metadata and SDK-derived iOS action/data. Returns nil when no metadata is available.
+ */
+@property (nullable, nonatomic, copy, readonly) NSDictionary<NSString *, id> *metaData;
 
 - (instancetype _Nullable )initWithJSON:(NSDictionary *_Nullable)jsonObject;
 
@@ -182,6 +199,28 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  */
 - (void)recordDisplayUnitElementClickedEventForID:(NSString *_Nonnull)unitID
                              additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
+
+/*!
+ @method recordDisplayUnitElementViewedEventForID:additionalProperties:
+
+ @abstract Element-level view attribution for Native Display units.
+
+ Raises the Notification Viewed event for a single child element of a Native Display
+ unit (e.g. one carousel slide coming on screen) instead of the whole unit.
+
+ @c evtData is assembled in two layers (later layers win on key collision):
+ 1. Caller's @c additionalProperties, merged verbatim — should include
+    @c wzrk_element_id and other @c wzrk_* attribution fields injected by
+    the BE into the action's @c metadata object.
+ 2. Cached unit's @c wzrk_* fields layered on top — so server-controlled
+    attribution always wins over same-named caller-supplied keys.
+
+ @param unitID                  the unitID of the Display Unit.
+ @param additionalProperties    optional per-element context (slide
+                                attribution, custom KVs, …).
+ */
+- (void)recordDisplayUnitElementViewedEventForID:(NSString *_Nonnull)unitID
+                            additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
 
 /*!
  @method
