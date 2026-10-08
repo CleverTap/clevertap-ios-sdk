@@ -18,6 +18,9 @@
 #import "CTFlattenedEventData.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppDisplayManager.h"
+#import "CTInAppFCManager.h"
+#import "CTInAppFCManager+Tests.h"
+#import "CleverTap+InAppsResponseHandler.h"
 #import "CleverTapInternal.h"
 #import "CTMultiDelegateManager.h"
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
@@ -2845,6 +2848,66 @@
     NSDictionary *stored = [CTPreferences getObjectForKey:arpKey];
     XCTAssertNil(stored[CLTAP_DISCARDED_EVENT_JSON_KEY]);
     XCTAssertEqualObjects(stored[@"ct_test_arp_key"], @"ct_test_arp_val");
+}
+
+#pragma mark - Global in-app caps vs response source
+
+/*
+ imc/imp are account state and /a1 is what carries it. A content fetch response is one campaign's
+ content, so an absent key there means "no opinion" — treating it as "reset to the default" would
+ silently raise a cap of 1 back to 10.
+ */
+
+- (void)test_globalCaps_appResponseWithKeys_appliesThem {
+    [self.cleverTapInstance handleInAppResponse:@{
+        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @1,
+        CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY: @3
+    } source:CTResponseSourceApp];
+
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager globalSessionMax], 1);
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager maxPerDayCount], 3);
+}
+
+- (void)test_globalCaps_contentFetchWithoutKeys_leavesThemUntouched {
+    [self.cleverTapInstance handleInAppResponse:@{
+        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @1,
+        CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY: @3
+    } source:CTResponseSourceApp];
+
+    // The observed /content payload carries neither key.
+    [self.cleverTapInstance handleInAppResponse:@{} source:CTResponseSourceContentFetch];
+
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager globalSessionMax], 1,
+                   @"a content fetch response must not reset the session cap to the default");
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager maxPerDayCount], 3,
+                   @"a content fetch response must not reset the daily cap to the default");
+}
+
+- (void)test_globalCaps_contentFetchWithOneKey_appliesOnlyThatOne {
+    [self.cleverTapInstance handleInAppResponse:@{
+        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @1,
+        CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY: @3
+    } source:CTResponseSourceApp];
+
+    [self.cleverTapInstance handleInAppResponse:@{
+        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @5
+    } source:CTResponseSourceContentFetch];
+
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager globalSessionMax], 5, @"present key applies");
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager maxPerDayCount], 3, @"absent key is preserved");
+}
+
+- (void)test_globalCaps_appResponseWithoutKeys_stillDefaults {
+    [self.cleverTapInstance handleInAppResponse:@{
+        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @1,
+        CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY: @3
+    } source:CTResponseSourceApp];
+
+    // Longstanding behaviour for /a1, deliberately unchanged here.
+    [self.cleverTapInstance handleInAppResponse:@{} source:CTResponseSourceApp];
+
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager globalSessionMax], 10);
+    XCTAssertEqual([self.cleverTapInstance.inAppFCManager maxPerDayCount], 10);
 }
 
 @end

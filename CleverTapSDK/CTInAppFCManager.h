@@ -28,6 +28,13 @@
 - (BOOL)canShow:(CTInAppNotification *)inapp;
 - (void)didShow:(CTInAppNotification *)inapp;
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
+
+/// Currently stored account cap per session. Lets a caller preserve it when a partial response
+/// carries no opinion on it — see `updateGlobalLimitsPerDay:andPerSession:`.
+- (int)globalSessionMax;
+
+/// Currently stored account cap per day.
+- (int)maxPerDayCount;
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps;
 - (BOOL)hasLifetimeCapacityMaxedOut:(CTInAppNotification *)dictionary;
 - (BOOL)hasDailyCapacityMaxedOut:(CTInAppNotification *)dictionary;
