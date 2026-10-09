@@ -142,12 +142,10 @@ extern NSString *const kSessionId;
 // matching those would delay the in-app by up to 15s. A response arriving after this has fired
 // is dropped instead of shown, so a slow fetch cannot produce a second in-app.
 //
-// TODO: 3.0 is a placeholder pending team discussion. It was chosen against an observed ~2s
-// round trip on staging, which is a single data point. The value only trades off how often the
+// 3.0 clears the observed ~2s round trip with margin. The value only trades off how often the
 // personalized in-app wins versus the app-launch one — shorter falls back more often, longer
-// delays display more often — and cannot cause a double in-app either way. Worth deciding with
-// real latency numbers, and whether it should be server-driven or SDK-configurable rather than
-// a compile-time constant.
+// delays display more often — and cannot cause a double in-app either way. Override
+// appLaunchedArbitrationTimeout on CTInAppEvaluationManager to vary it.
 #define CLTAP_INAPP_ARBITRATION_TIMEOUT_SECONDS 3.0
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"

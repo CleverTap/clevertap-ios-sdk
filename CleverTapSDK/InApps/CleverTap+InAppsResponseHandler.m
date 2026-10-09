@@ -98,14 +98,27 @@
     
     // Parse global limits
     NSNumber *perSession = jsonResp[CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY];
-    if (perSession == nil) {
-        perSession = @10;
-    }
     NSNumber *perDay = jsonResp[CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY];
-    if (perDay == nil) {
-        perDay = @10;
+
+    if (source == CTResponseSourceContentFetch) {
+        // These caps are account state and /a1 is what carries it. A content fetch response is one
+        // campaign's content, so an absent key means "no opinion" rather than "reset to the
+        // default" — defaulting it here would silently raise a cap of 1 back to 10. Each key is
+        // applied only when present, matching how the Native Display caps already behave.
+        if (perSession != nil || perDay != nil) {
+            int resolvedPerDay = perDay != nil ? perDay.intValue : [self.inAppFCManager maxPerDayCount];
+            int resolvedPerSession = perSession != nil ? perSession.intValue : [self.inAppFCManager globalSessionMax];
+            [self.inAppFCManager updateGlobalLimitsPerDay:resolvedPerDay andPerSession:resolvedPerSession];
+        }
+    } else {
+        if (perSession == nil) {
+            perSession = @10;
+        }
+        if (perDay == nil) {
+            perDay = @10;
+        }
+        [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
     }
-    [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
     
 //     Legacy SS in-apps (inapp_notifs -> NORMAL/DELAYED in-app campaigns WITHOUT advance display rules)
     ImmediateAndDelayed *partitionedLegacyInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY]];

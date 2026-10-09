@@ -1290,6 +1290,51 @@
     XCTAssertEqualObjects((@[@100, @600, @700]), [self queuedInAppIds]);
 }
 
+/*!
+ A buffered winner belongs to the user who was active when it was evaluated.
+
+ On a user switch the content fetch manager drains its pending completions, and each of those
+ would close a window and display what it held. The in-app display path has no identity check,
+ so that in-app would render for the newly logged-in user. The window is discarded instead.
+ */
+- (void)testArbitrationDiscardOnUserSwitchDropsBufferedWinner {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager discardAppLaunchedArbitration];
+
+    // The completion still arrives — the fetch was in flight when the switch began — but there is
+    // no longer a window for it to close.
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0,
+                   @"the previous user's in-app must not be displayed after a switch");
+}
+
+- (void)testArbitrationDiscardLeavesLaterLaunchesWorking {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:100 priority:1]]];
+    [self.evaluationManager discardAppLaunchedArbitration];
+
+    // Discarding must not leave anything suppressing — the new user's in-apps display normally.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:800 priority:1]]];
+    XCTAssertEqualObjects(@[@800], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationDiscardIsSafeWithNoWindowAndIdempotent {
+    XCTAssertNoThrow([self.evaluationManager discardAppLaunchedArbitration]);
+
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager discardAppLaunchedArbitration];
+    XCTAssertNoThrow([self.evaluationManager discardAppLaunchedArbitration]);
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:900 priority:1]]];
+    XCTAssertEqualObjects(@[@900], [self queuedInAppIds]);
+}
+
 - (void)testArbitrationCompletionWithNoCandidatesShowsNothing {
     [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
     [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
