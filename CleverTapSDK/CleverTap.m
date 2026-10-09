@@ -2820,20 +2820,21 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
- Drops the Native Display units that have no room left under the account caps.
+ Drops the Native Display units that have no room left under the session caps.
 
- Every unit goes through the check. An account that has no limits set lets them all through. Display
- units that came before this feature behave exactly as they did.
+ Every unit goes through the check. An account that has no limits set lets them all through.
+
+ Only the session caps are applied here. Those are the account cap @c ndmc and the campaign's own
+ cap @c mdc. The daily cap @c ndmp is not applied here. For a regular event the server applied it
+ before it sent the content. For the App-Launched batch it is applied by
+ @c appLaunchedNativeDisplaysWithinGlobalCaps: above. A unit held back here a second time would be a
+ unit that was already allowed once.
 
  @c frequencyLimits and @c occurrenceLimits are not checked again here. The SDK checked them during
  evaluation. It sent the ids that passed in @c adUnit_eval. The server sent content only for those.
- This is the only place @c ndmc and @c ndmp are applied.
  */
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
     if (!self.ndFCManager) return displayUnits;
-
-    // Check the date first. A unit must not be checked against yesterday's daily counts.
-    [self.ndFCManager checkUpdateDailyLimits];
 
     // Read once for the whole response. The value cannot change while this loop runs.
     BOOL accountHasCaps = [self.ndFCManager hasAccountCaps];
@@ -2853,14 +2854,12 @@ static BOOL sharedInstanceErrorLogged;
             [withinCaps addObject:unit];
             continue;
         }
-        // Of the five cap fields, Native Display sends only excludeGlobalFCaps. efc, tlc, tdc and mdc
+        // Of the cap fields the gate reads, Native Display sends only excludeGlobalFCaps. efc and mdc
         // belong to in-app. They are passed unset.
         BOOL excludesGlobalCaps = [self nativeDisplayExcludesGlobalCaps:json forCampaignId:campaignId];
         NSString *heldBackReason = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
                                                              excludeFromCaps:NO
                                                            excludeGlobalCaps:excludesGlobalCaps
-                                                          totalLifetimeCount:-1
-                                                             totalDailyCount:-1
                                                                maxPerSession:-1];
         if (!heldBackReason) {
             [self logNativeDisplayExemptionIfItMattered:campaignId unitJSON:json exempt:excludesGlobalCaps];
@@ -2904,8 +2903,6 @@ static BOOL sharedInstanceErrorLogged;
     NSString *reasonWithoutFlag = [self.ndFCManager reasonCampaignIsHeldBack:campaignId
                                                             excludeFromCaps:NO
                                                           excludeGlobalCaps:NO
-                                                         totalLifetimeCount:-1
-                                                            totalDailyCount:-1
                                                               maxPerSession:-1];
     if (!reasonWithoutFlag) return;
 
@@ -5613,11 +5610,12 @@ static BOOL sharedInstanceErrorLogged;
  Adds one display to the Native Display counts.
 
  Every call counts, including two calls for the same unit in one session. There is no check for
- repeats, on purpose. The app's call is the only sign we have that a unit was shown. The totals go
- to the server. A check for repeats would make those totals too low.
+ repeats, on purpose. The app's call is the only sign we have that a unit was shown. A check for
+ repeats would make the totals too low.
 
- Every unit is counted, whatever limits are set right now. The server needs these totals from every
- unit the app showed. A limit set tomorrow has to start from a real history.
+ A view is always recorded for the session. Two counts are a separate question. They are the ones
+ the SDK sends to the server. Only a campaign inside the frequency caps adds to those. See
+ @c nativeDisplayCountsTowardCaps:forCampaignId: below.
  */
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit {
     if (!self.ndFCManager) return;
@@ -5630,7 +5628,8 @@ static BOOL sharedInstanceErrorLogged;
 
     [self.ndFCManager checkUpdateDailyLimits];
     [self.ndFCManager didShowCampaign:campaignId
-                       storeTimestamp:[self nativeDisplayNeedsTimestamps:displayUnit.json forCampaignId:campaignId]];
+                       storeTimestamp:[self nativeDisplayNeedsTimestamps:displayUnit.json forCampaignId:campaignId]
+                     countsTowardCaps:[self nativeDisplayCountsTowardCaps:displayUnit.json forCampaignId:campaignId]];
     self.appReportedANativeDisplayView = YES;
 }
 
@@ -5676,6 +5675,26 @@ static BOOL sharedInstanceErrorLogged;
     id flag = unitJSON[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS];
     if (flag) return [flag boolValue];
     return [[self nativeDisplayRuleFor:campaignId][CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
+}
+
+/**
+ Whether a view of this unit is added to the two counts the SDK sends to the server.
+
+ Those counts are @c ndmp for the account and @c ndtlc for the campaign. The server reads them as the
+ number of views a cap has already used up. It then decides what to send next. A view that no cap
+ applies to must not use up one of those. Otherwise a campaign that does have a cap gets less room
+ than it was given.
+
+ Two things have to be true. The campaign has to take part in Native Display frequency caps.
+ @c isNdFcapEnabled says whether it does. The campaign must also not be an exception to the account
+ caps. @c excludeGlobalFCaps says whether it is.
+
+ The flag is read from the unit's own content. The server puts it on every campaign it sends. A unit
+ that arrives without it is not part of this feature, so the answer is no.
+ */
+- (BOOL)nativeDisplayCountsTowardCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId {
+    if (![unitJSON[CLTAP_ND_IS_FCAP_ENABLED] boolValue]) return NO;
+    return ![self nativeDisplayExcludesGlobalCaps:unitJSON forCampaignId:campaignId];
 }
 
 - (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {

@@ -20,13 +20,21 @@ private let kCTNdUncapped: Int32 = -1
 
 /// Frequency caps for Native Display. The Native Display version of `CTInAppFCManager`.
 ///
-/// It handles the caps that work by counting how many times a campaign was shown. Each campaign has
-/// a lifetime cap (`tlc`), a daily cap (`tdc`) and a session cap (`mdc`). The account has two more,
-/// `ndmp` for the day and `ndmc` for the session.
+/// It holds the counts that say how many times a campaign was shown. Each campaign has a count for
+/// today and a count since install. Those two go to the server as `ndtlc`. The account has one more
+/// count, for how many units were shown today. That one goes to the server as `ndmp`. Session
+/// impressions are held in memory by `CTImpressionManager`.
 ///
-/// Two flags can skip caps. They skip different amounts. `efc` skips every cap.
-/// `excludeGlobalFCaps` skips only the two account caps. The campaign still has to obey `tlc`,
-/// `tdc` and `mdc`. In-app treats both flags the same. Native Display does not.
+/// At delivery time `canShowCampaign` applies the **session** caps and nothing else. Those are the
+/// account cap `ndmc` and the campaign's own cap `mdc`. The daily and lifetime caps are not applied
+/// here. For a regular event the server already applied them before it sent the content. For the
+/// App-Launched batch the account budget is applied by the trim in `CleverTap.m`. See
+/// `globalCapRemaining` below. Applying any of them a second time here would hold back a unit that
+/// was already allowed once.
+///
+/// `excludeGlobalFCaps` marks a campaign as an exception to the two account caps. The campaign's own
+/// `mdc` still applies to it. `efc` marks a campaign as an exception to every cap. In-app treats
+/// both flags the same. Native Display does not.
 ///
 /// `frequencyLimits` and `occurrenceLimits` are not checked here. The SDK checks them earlier. It
 /// then sends the campaigns that pass in `adUnit_eval`. The server sends content only for those.
@@ -230,8 +238,8 @@ final class CTNdFCManager: NSObject {
         return max(0, remaining)
     }
 
-    // Each of the three checks below returns nil when the campaign still has room. It returns a
-    // short sentence when a cap is full. See reasonCampaignIsHeldBack below.
+    // The check below returns nil when the campaign still has room. It returns a short sentence
+    // when a cap is full. See reasonCampaignIsHeldBack below.
 
     private func fullSessionCap(for campaignId: String,
                                 maxPerSession: Int32,
@@ -257,64 +265,28 @@ final class CTNdFCManager: NSObject {
         return nil
     }
 
-    private func fullLifetimeCap(for campaignId: String, totalLifetimeCount: Int32) -> String? {
-        if totalLifetimeCount == kCTNdUncapped { return nil }
-        let shownEver = lifetimeCount(forCampaign: campaignId)
-        if shownEver >= totalLifetimeCount {
-            return "Its own lifetime cap tlc is full at \(shownEver) of \(totalLifetimeCount)"
-        }
-        return nil
-    }
-
-    private func fullDailyCap(for campaignId: String,
-                              totalDailyCount: Int32,
-                              excludeGlobalCaps: Bool) -> String? {
-        // 1. Has the account hit its daily cap? This one is account-wide. excludeGlobalFCaps skips it.
-        if !excludeGlobalCaps {
-            let maxPerDayCount = maxPerDayCount()
-            if maxPerDayCount != kCTNdUncapped {
-                let accountShownToday = shownTodayCount()
-                if accountShownToday >= maxPerDayCount {
-                    return "The account daily cap ndmp is full at \(accountShownToday) of \(maxPerDayCount)"
-                }
-            }
-        }
-
-        // 2. Has this campaign hit its own daily cap? excludeGlobalFCaps does not skip this one.
-        if totalDailyCount == kCTNdUncapped { return nil }
-        let shownToday = todayCount(forCampaign: campaignId)
-        if shownToday >= totalDailyCount {
-            return "Its own daily cap tdc is full at \(shownToday) of \(totalDailyCount)"
-        }
-        return nil
-    }
-
-    /// Whether this campaign can be shown right now, under all the counting caps.
+    /// Whether this campaign can be shown right now, under the session caps.
     ///
     /// - Parameters:
     ///   - campaignId: the `ti`. See `campaignId(from:)`.
     ///   - excludeFromCaps: `efc`. Skips every cap.
-    ///   - excludeGlobalCaps: `excludeGlobalFCaps`. Skips only the two account caps. See the class
-    ///     doc above for how the two flags differ.
-    ///   - totalLifetimeCount: `tlc`, or -1 for no limit.
-    ///   - totalDailyCount: `tdc`, or -1 for no limit.
+    ///   - excludeGlobalCaps: `excludeGlobalFCaps`. Skips only the account cap. The campaign's own
+    ///     `mdc` still applies. See the class doc above for how the two flags differ.
     ///   - maxPerSession: `mdc`, or -1 for no limit.
     ///
-    /// - Note: Native Display never sends `efc`, `tlc`, `tdc` or `mdc`. Those four belong to in-app.
-    ///   A Native Display campaign puts its own cap in `frequencyLimits` or `occurrenceLimits`. The
-    ///   gate in `CleverTap.m` passes these four parameters unset.
-    @objc(canShowCampaign:excludeFromCaps:excludeGlobalCaps:totalLifetimeCount:totalDailyCount:maxPerSession:)
+    /// - Note: Native Display never sends `efc` or `mdc`. Those two belong to in-app. A Native
+    ///   Display campaign puts its own cap in `frequencyLimits` or `occurrenceLimits`. The gate in
+    ///   `CleverTap.m` passes these two parameters unset.
+    ///
+    /// - Note: The daily and lifetime caps are not checked here. See the class doc above for why.
+    @objc(canShowCampaign:excludeFromCaps:excludeGlobalCaps:maxPerSession:)
     func canShowCampaign(_ campaignId: String,
                          excludeFromCaps: Bool,
                          excludeGlobalCaps: Bool,
-                         totalLifetimeCount: Int32,
-                         totalDailyCount: Int32,
                          maxPerSession: Int32) -> Bool {
         return reasonCampaignIsHeldBack(campaignId,
                                         excludeFromCaps: excludeFromCaps,
                                         excludeGlobalCaps: excludeGlobalCaps,
-                                        totalLifetimeCount: totalLifetimeCount,
-                                        totalDailyCount: totalDailyCount,
                                         maxPerSession: maxPerSession) == nil
     }
 
@@ -325,32 +297,20 @@ final class CTNdFCManager: NSObject {
     /// log line. Do not parse it. A caller that only needs a yes or no should use `canShowCampaign`.
     ///
     /// The parameters mean what they mean in `canShowCampaign`.
-    @objc(reasonCampaignIsHeldBack:excludeFromCaps:excludeGlobalCaps:totalLifetimeCount:totalDailyCount:maxPerSession:)
+    @objc(reasonCampaignIsHeldBack:excludeFromCaps:excludeGlobalCaps:maxPerSession:)
     func reasonCampaignIsHeldBack(_ campaignId: String,
                                   excludeFromCaps: Bool,
                                   excludeGlobalCaps: Bool,
-                                  totalLifetimeCount: Int32,
-                                  totalDailyCount: Int32,
                                   maxPerSession: Int32) -> String? {
         if campaignId.isEmpty { return nil }
 
         // efc skips every cap. It can be answered here. excludeGlobalFCaps skips less. It is passed
-        // down to each check instead.
+        // down to the check instead.
         if excludeFromCaps { return nil }
 
-        if let reason = fullSessionCap(for: campaignId,
-                                       maxPerSession: maxPerSession,
-                                       excludeGlobalCaps: excludeGlobalCaps) {
-            return reason
-        }
-
-        if let reason = fullLifetimeCap(for: campaignId, totalLifetimeCount: totalLifetimeCount) {
-            return reason
-        }
-
-        return fullDailyCap(for: campaignId,
-                            totalDailyCount: totalDailyCount,
-                            excludeGlobalCaps: excludeGlobalCaps)
+        return fullSessionCap(for: campaignId,
+                              maxPerSession: maxPerSession,
+                              excludeGlobalCaps: excludeGlobalCaps)
     }
 
     /// Records one display: the impression, the campaign's daily and lifetime counts, and the day
@@ -359,26 +319,36 @@ final class CTNdFCManager: NSObject {
     /// - Parameter storeTimestamp: whether to save the impression time on disk. Pass `true` only for
     ///   a campaign that has `frequencyLimits` or `occurrenceLimits`. See `CTImpressionManager`
     ///   `recordImpression:storeTimestamp:` for why.
-    @objc(didShowCampaign:storeTimestamp:)
-    func didShowCampaign(_ campaignId: String, storeTimestamp: Bool) {
+    /// - Parameter countsTowardCaps: whether to add this view to the two counts the SDK sends to the
+    ///   server. See `nativeDisplayCountsTowardCaps:forCampaignId:` in `CleverTap.m`, which is where
+    ///   the answer is worked out.
+    ///
+    /// The session impression is recorded either way. The session caps and the advanced
+    /// `frequencyLimits` are the SDK's own work, and they apply to every unit. Only the two counts
+    /// the server reads are held back. `CTInAppFCManager` counts every view into every total. In-app
+    /// can do that because its counts never leave the device.
+    @objc(didShowCampaign:storeTimestamp:countsTowardCaps:)
+    func didShowCampaign(_ campaignId: String, storeTimestamp: Bool, countsTowardCaps: Bool) {
         if campaignId.isEmpty { return }
 
         // Session counts always go up. The time is saved only when asked for.
         impressionManager.recordImpression(campaignId, storeTimestamp: storeTimestamp)
 
-        // Add to the total shown today.
-        incrementShownToday()
+        if countsTowardCaps {
+            // Add to the total shown today.
+            incrementShownToday()
 
-        // Add to this campaign's own daily and lifetime counts.
-        lock.lock()
-        // The two values are today's count then the lifetime count.
-        if let counts = campaignCounts[campaignId] {
-            campaignCounts[campaignId] = [counts[0] + 1, counts[1] + 1]
-        } else {
-            campaignCounts[campaignId] = [1, 1]
+            // Add to this campaign's own daily and lifetime counts.
+            lock.lock()
+            // The two values are today's count then the lifetime count.
+            if let counts = campaignCounts[campaignId] {
+                campaignCounts[campaignId] = [counts[0] + 1, counts[1] + 1]
+            } else {
+                campaignCounts[campaignId] = [1, 1]
+            }
+            saveCampaignCounts()
+            lock.unlock()
         }
-        saveCampaignCounts()
-        lock.unlock()
 
         // The app is the only source of these counts. No count changes until the app calls
         // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived. It also
@@ -388,8 +358,13 @@ final class CTNdFCManager: NSObject {
         let campaignSinceInstall = lifetimeCount(forCampaign: campaignId)
         let accountThisSession = impressionManager.perSessionTotal()
         let accountToday = shownTodayCount()
+        // Says which of the two happened. The numbers below do not move for a campaign that is
+        // outside the caps. Without this line that looks like a lost view report.
+        let countedPart = countsTowardCaps
+            ? "It was added to the counts the server reads."
+            : "It was not added to the counts the server reads. This campaign is outside the Native Display frequency caps."
         log("""
-            \(self): Counted a view of Native Display campaign \(campaignId). \
+            \(self): Counted a view of Native Display campaign \(campaignId). \(countedPart) \
             This campaign has \(campaignThisSession) view(s) this session, \(campaignToday) today, \
             \(campaignSinceInstall) since install. \
             The whole account has \(accountThisSession) view(s) this session, \(accountToday) today. \

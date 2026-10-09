@@ -44,14 +44,12 @@ final class CTNdFCManagerTests {
         return fcManager.canShowCampaign(campaignId,
                                          excludeFromCaps: false,
                                          excludeGlobalCaps: false,
-                                         totalLifetimeCount: -1,
-                                         totalDailyCount: -1,
                                          maxPerSession: -1)
     }
 
     private func show(_ campaignId: String, times: Int) {
         for _ in 0..<times {
-            fcManager.didShowCampaign(campaignId, storeTimestamp: true)
+            fcManager.didShowCampaign(campaignId, storeTimestamp: true, countsTowardCaps: true)
         }
     }
 
@@ -77,7 +75,7 @@ final class CTNdFCManagerTests {
         #expect(fcManager.hasAccountCaps() == false)
     }
 
-    @Test("The account limits apply to a unit that carries no cap settings")
+    @Test("The account session limit applies to a unit that carries no cap settings")
     func theAccountLimitsApplyToAUnitThatCarriesNoCapSettings() {
         // This is the bug the marker check caused. The content the server sends for Native Display
         // carries no tlc, tdc, mdc or efc. The old code read that as "not capped" and skipped the
@@ -103,7 +101,7 @@ final class CTNdFCManagerTests {
 
     @Test("excludeFromCaps skips every cap")
     func excludeFromCapsSkipsEveryCap() {
-        // Every cap set as tight as it goes. Both account caps already used up.
+        // Every cap set as tight as it goes. The account session cap is already used up.
         fcManager.updateGlobalLimits(perDay: 1, andPerSession: 1)
         show(kOtherCampaignId, times: 1)
         show(kCampaignId, times: 1)
@@ -111,62 +109,18 @@ final class CTNdFCManagerTests {
         #expect(fcManager.canShowCampaign(kCampaignId,
                                           excludeFromCaps: true,
                                           excludeGlobalCaps: false,
-                                          totalLifetimeCount: 1,
-                                          totalDailyCount: 1,
                                           maxPerSession: 1))
-    }
-
-    @Test("excludeGlobalCaps skips the account daily max but not the campaign's own caps")
-    func excludeGlobalCapsSkipsTheAccountDailyMaxButNotTheCampaignsOwnCaps() {
-        // The two flags skip different amounts. In-app treats them as one flag. This must not. Both
-        // halves of the test start the same way. Only the flag changes.
-        fcManager.updateGlobalLimits(perDay: 1, andPerSession: -1)
-        show(kOtherCampaignId, times: 1)
-
-        // The account daily cap is used up. Without the flag the campaign cannot show.
-        #expect(canShow(kCampaignId) == false)
-
-        // With the flag it can. That cap belongs to the account.
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: true,
-                                          totalLifetimeCount: -1,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1))
-
-        // But its own lifetime cap still applies. This is the check both existing versions fail. They
-        // treat this flag as if it were efc.
-        show(kCampaignId, times: 1)
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: true,
-                                          totalLifetimeCount: 1,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1) == false)
-    }
-
-    @Test("excludeGlobalCaps still respects totalDailyCount")
-    func excludeGlobalCapsStillRespectsTotalDailyCount() {
-        fcManager.updateGlobalLimits(perDay: -1, andPerSession: -1)
-        show(kCampaignId, times: 2)
-
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: true,
-                                          totalLifetimeCount: -1,
-                                          totalDailyCount: 2,
-                                          maxPerSession: -1) == false)
     }
 
     @Test("excludeGlobalCaps still respects maxPerSession")
     func excludeGlobalCapsStillRespectsMaxPerSession() {
+        // The two flags skip different amounts. In-app treats them as one flag. This must not.
+        // excludeGlobalFCaps skips the account cap. The campaign's own mdc still applies.
         show(kCampaignId, times: 1)
 
         #expect(fcManager.canShowCampaign(kCampaignId,
                                           excludeFromCaps: false,
                                           excludeGlobalCaps: true,
-                                          totalLifetimeCount: -1,
-                                          totalDailyCount: -1,
                                           maxPerSession: 1) == false)
     }
 
@@ -179,29 +133,10 @@ final class CTNdFCManagerTests {
         #expect(fcManager.canShowCampaign(kCampaignId,
                                           excludeFromCaps: false,
                                           excludeGlobalCaps: true,
-                                          totalLifetimeCount: -1,
-                                          totalDailyCount: -1,
                                           maxPerSession: -1))
     }
 
     // MARK: - The counting caps
-
-    @Test("totalLifetimeCount blocks once reached")
-    func totalLifetimeCountBlocksOnceReached() {
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: false,
-                                          totalLifetimeCount: 2,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1))
-        show(kCampaignId, times: 2)
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: false,
-                                          totalLifetimeCount: 2,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1) == false)
-    }
 
     @Test("Minus one means no limit")
     func minusOneMeansNoLimit() {
@@ -219,13 +154,20 @@ final class CTNdFCManagerTests {
         #expect(canShow(kCampaignId))
     }
 
-    @Test("The account daily max blocks every campaign")
-    func theAccountDailyMaxBlocksEveryCampaign() {
+    @Test("The account daily max does not block a campaign here")
+    func theAccountDailyMaxDoesNotBlockACampaignHere() {
+        // The daily cap ndmp is full. This check still says yes. The daily cap is applied in two
+        // other places. For a regular event the server applies it before it sends the content. For
+        // the App-Launched batch the trim in CleverTap.m applies it. A third check here would hold
+        // back a unit that one of those two already allowed.
         fcManager.updateGlobalLimits(perDay: 2, andPerSession: -1)
         show(kOtherCampaignId, times: 2)
+        #expect(fcManager.shownTodayCount() == 2)
 
-        // Used up by a different campaign. That is the whole point of an account cap.
-        #expect(canShow(kCampaignId) == false)
+        #expect(canShow(kCampaignId))
+
+        // The count is still read for the App-Launched trim. That path has no room left.
+        #expect(fcManager.globalCapRemaining() == 0)
     }
 
     // MARK: - What happens when we cannot check
@@ -241,7 +183,7 @@ final class CTNdFCManagerTests {
 
     @Test("didShowCampaign counts today, lifetime and the day total")
     func didShowCountsTodayLifetimeAndTheDayTotal() {
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: true)
 
         #expect(fcManager.todayCount(forCampaign: kCampaignId) == 1)
         #expect(fcManager.lifetimeCount(forCampaign: kCampaignId) == 1)
@@ -253,8 +195,8 @@ final class CTNdFCManagerTests {
     func twoViewedCallsForTheSameUnitCountTwice() {
         // This is on purpose, not a bug. One call from the app is one impression. The SDK does not
         // remove repeats. It cannot tell a real second view from the same view reported twice.
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true)
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: true)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: true)
 
         #expect(fcManager.todayCount(forCampaign: kCampaignId) == 2)
         #expect(fcManager.lifetimeCount(forCampaign: kCampaignId) == 2)
@@ -264,8 +206,34 @@ final class CTNdFCManagerTests {
 
     @Test("didShowCampaign ignores an empty campaign id")
     func didShowIgnoresAnEmptyCampaignId() {
-        fcManager.didShowCampaign("", storeTimestamp: true)
+        fcManager.didShowCampaign("", storeTimestamp: true, countsTowardCaps: true)
         #expect(fcManager.shownTodayCount() == 0)
+    }
+
+    @Test("A view that counts toward no cap leaves the two server counts alone")
+    func aViewThatCountsTowardNoCapLeavesTheTwoServerCountsAlone() {
+        // The server reads ndmp and ndtlc as the room a cap has already used up. A campaign that no
+        // cap applies to must not use up any of that room. Otherwise a campaign that does have a cap
+        // is given less than it was promised.
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: false)
+
+        #expect(fcManager.todayCount(forCampaign: kCampaignId) == 0)
+        #expect(fcManager.lifetimeCount(forCampaign: kCampaignId) == 0)
+        #expect(fcManager.shownTodayCount() == 0)
+    }
+
+    @Test("A view that counts toward no cap is still an impression for this session")
+    func aViewThatCountsTowardNoCapIsStillAnImpressionForThisSession() {
+        // The session caps and the advanced frequencyLimits are the SDK's own work. They apply to
+        // every unit, whether or not the server counts it.
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: false)
+
+        #expect(fcManager.impressionManager.getImpressions(kCampaignId).count == 1)
+        #expect(fcManager.impressionManager.perSession(kCampaignId) == 1)
+
+        // And the account session cap sees it too.
+        fcManager.updateGlobalLimits(perDay: -1, andPerSession: 1)
+        #expect(canShow(kOtherCampaignId) == false)
     }
 
     // MARK: - Which displays get their time saved
@@ -274,7 +242,7 @@ final class CTNdFCManagerTests {
     func aCampaignWithNoLimitsGetsNoSavedTimestamp() {
         // Only frequencyLimits and occurrenceLimits ever read saved times. Saving one for a campaign
         // with neither would grow a list nobody reads. The app can report as many views as it likes.
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false, countsTowardCaps: true)
 
         #expect(fcManager.impressionManager.getImpressions(kCampaignId).count == 0)
 
@@ -288,19 +256,17 @@ final class CTNdFCManagerTests {
 
     @Test("A campaign with limits gets a saved timestamp")
     func aCampaignWithLimitsGetsASavedTimestamp() {
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: true, countsTowardCaps: true)
         #expect(fcManager.impressionManager.getImpressions(kCampaignId).count == 1)
     }
 
     @Test("Session caps still work without saved timestamps")
     func sessionCapsStillWorkWithoutSavedTimestamps() {
         // The session counts live in memory. Saved times are off here. mdc must still hold.
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false)
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false, countsTowardCaps: true)
         #expect(fcManager.canShowCampaign(kCampaignId,
                                           excludeFromCaps: false,
                                           excludeGlobalCaps: false,
-                                          totalLifetimeCount: -1,
-                                          totalDailyCount: -1,
                                           maxPerSession: 1) == false)
     }
 
@@ -315,20 +281,6 @@ final class CTNdFCManagerTests {
         #expect(fcManager.todayCount(forCampaign: kCampaignId) == 0)
         #expect(fcManager.lifetimeCount(forCampaign: kCampaignId) == 3)
         #expect(fcManager.shownTodayCount() == 0)
-    }
-
-    @Test("A lifetime cap survives the daily reset")
-    func aLifetimeCapSurvivesTheDailyReset() {
-        // The whole reason lifetime counts are kept when the day changes.
-        show(kCampaignId, times: 1)
-        fcManager.resetDailyCounters("20990101")
-
-        #expect(fcManager.canShowCampaign(kCampaignId,
-                                          excludeFromCaps: false,
-                                          excludeGlobalCaps: false,
-                                          totalLifetimeCount: 1,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1) == false)
     }
 
     @Test("checkUpdateDailyLimits does nothing twice in a day")
@@ -454,8 +406,6 @@ final class CTNdFCManagerTests {
         #expect(fcManager.canShowCampaign(campaignId,
                                           excludeFromCaps: false,
                                           excludeGlobalCaps: false,
-                                          totalLifetimeCount: 0,
-                                          totalDailyCount: 0,
                                           maxPerSession: 0))
     }
 
@@ -490,7 +440,7 @@ final class CTNdFCManagerTests {
         #expect(canShow(campaignId))
 
         // 3. Count.
-        fcManager.didShowCampaign(campaignId, storeTimestamp: true)
+        fcManager.didShowCampaign(campaignId, storeTimestamp: true, countsTowardCaps: true)
 
         // All three stores saved under the campaign id.
         #expect(helper.triggerManager.getTriggers(kCampaignId) == 1)
@@ -507,15 +457,13 @@ final class CTNdFCManagerTests {
     @Test("A cap counted under the campaign id is reached across sends")
     func aCapCountedUnderTheCampaignIdIsReachedAcrossSends() {
         // What the test above means in practice. Two sends of one campaign have the same ti but
-        // different wzrk_ids. A lifetime cap of 1 has to stop the second send.
-        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false)
+        // different wzrk_ids. A session cap of 1 has to stop the second send.
+        fcManager.didShowCampaign(kCampaignId, storeTimestamp: false, countsTowardCaps: true)
 
         #expect(fcManager.canShowCampaign(kCampaignId,
                                           excludeFromCaps: false,
                                           excludeGlobalCaps: false,
-                                          totalLifetimeCount: 1,
-                                          totalDailyCount: -1,
-                                          maxPerSession: -1) == false)
+                                          maxPerSession: 1) == false)
     }
 
     // MARK: - Only one helper builds the id

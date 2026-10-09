@@ -281,6 +281,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 // many we showed today. In-app does the same thing with imp.
 #define CLTAP_ND_SESSION_MAX_META_KEY @"ndmc"
 #define CLTAP_ND_DAILY_MAX_META_KEY @"ndmp"
+// Says whether this campaign takes part in Native Display frequency caps. The server puts it on
+// every campaign it sends, on the content and on the rule. A missing flag means no. A campaign that
+// says no is still shown. Its views are not added to the counts the SDK sends back.
+#define CLTAP_ND_IS_FCAP_ENABLED @"isNdFcapEnabled"
 
 // Request, SDK to server.
 #define CLTAP_ND_SHOWN_TODAY_META_KEY @"ndmp"
