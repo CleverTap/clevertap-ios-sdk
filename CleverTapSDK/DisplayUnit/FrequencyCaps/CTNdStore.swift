@@ -32,10 +32,12 @@ import Foundation
 /// The server always sends the full current list, not just what changed. An empty array means there
 /// are no rules any more. It does not mean nothing changed.
 ///
-/// The class is internal on purpose. `@objc` is what puts it in the generated header, so
-/// Objective-C inside the SDK still sees it. Clients that write `import CleverTapSDK` do not.
+/// The class is `public` because Objective-C inside the SDK calls it. When the SDK is built as a
+/// CocoaPods framework, the generated Objective-C header carries public Swift classes only. An
+/// internal class is left out of that header, even when it is marked `@objc`.
+@objc
 @objcMembers
-final class CTNdStore: NSObject {
+public final class CTNdStore: NSObject {
 
     private let config: CleverTapInstanceConfig
     private let accountId: String
@@ -55,7 +57,7 @@ final class CTNdStore: NSObject {
     private let delegateObserver = CTNdDelegateObserver()
 
     @objc(initWithConfig:delegateManager:deviceId:)
-    init(config: CleverTapInstanceConfig,
+    public init(config: CleverTapInstanceConfig,
          delegateManager: CTMultiDelegateManager,
          deviceId: String) {
         self.config = config
@@ -74,7 +76,7 @@ final class CTNdStore: NSObject {
     // MARK: - Server-Side Native Displays
 
     /// The saved rules, or an empty array if there are none. Never nil.
-    func serverSideNativeDisplays() -> [Any] {
+    public func serverSideNativeDisplays() -> [Any] {
         lock.lock()
         defer { lock.unlock() }
 
@@ -89,7 +91,7 @@ final class CTNdStore: NSObject {
     }
 
     /// Replaces the saved rules. A nil argument does nothing. Pass an empty array to clear them.
-    func storeServerSideNativeDisplays(_ serverSideNativeDisplays: [Any]?) {
+    public func storeServerSideNativeDisplays(_ serverSideNativeDisplays: [Any]?) {
         guard let serverSideNativeDisplays else { return }
 
         lock.lock()

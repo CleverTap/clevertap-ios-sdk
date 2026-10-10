@@ -41,10 +41,12 @@ private let kCTNdUncapped: Int32 = -1
 /// `CTInAppFCManager` does check them a second time. This is the one place the two differ on
 /// purpose.
 ///
-/// The class is internal on purpose. `@objc` is what puts it in the generated header, so
-/// Objective-C inside the SDK still sees it. Clients that write `import CleverTapSDK` do not.
+/// The class is `public` because Objective-C inside the SDK calls it. When the SDK is built as a
+/// CocoaPods framework, the generated Objective-C header carries public Swift classes only. An
+/// internal class is left out of that header, even when it is marked `@objc`.
+@objc
 @objcMembers
-final class CTNdFCManager: NSObject {
+public final class CTNdFCManager: NSObject {
 
     let config: CleverTapInstanceConfig
 
@@ -72,7 +74,7 @@ final class CTNdFCManager: NSObject {
     private let delegateObserver = CTNdDelegateObserver()
 
     @objc(initWithConfig:delegateManager:deviceId:impressionManager:triggerManager:)
-    init(config: CleverTapInstanceConfig,
+    public init(config: CleverTapInstanceConfig,
          delegateManager: CTMultiDelegateManager,
          deviceId: String,
          impressionManager: CTImpressionManager,
@@ -134,7 +136,7 @@ final class CTNdFCManager: NSObject {
         return "\(config.accountId):\(suffix):\(deviceId)"
     }
 
-    override var description: String {
+    public override var description: String {
         lock.lock()
         defer { lock.unlock() }
 
@@ -156,7 +158,7 @@ final class CTNdFCManager: NSObject {
     /// account limit of any kind. Only the log line that warns about missing view reports reads
     /// this. The caps themselves do not need it. `canShowCampaign` already lets an unset limit
     /// through.
-    func hasAccountCaps() -> Bool {
+    public func hasAccountCaps() -> Bool {
         return globalSessionMax() != kCTNdUncapped || maxPerDayCount() != kCTNdUncapped
     }
 
@@ -169,7 +171,7 @@ final class CTNdFCManager: NSObject {
     /// The argument is `Any` and not a dictionary on purpose. It carries whatever the server sent.
     /// A value of another shape gives an empty string.
     @objc(campaignIdFrom:)
-    static func campaignId(from unit: Any?) -> String {
+    public static func campaignId(from unit: Any?) -> String {
         guard let unit = unit as? [AnyHashable: Any] else { return "" }
 
         let campaignId = unit[CLTAP_INAPP_ID]
@@ -182,7 +184,7 @@ final class CTNdFCManager: NSObject {
     // MARK: - Session, daily and global limits
 
     /// Resets the daily counts if the date has changed. Lifetime counts are not touched.
-    func checkUpdateDailyLimits() {
+    public func checkUpdateDailyLimits() {
         let today = todaysFormattedDate()
         if shouldResetDailyCounters(today) {
             resetDailyCounters(today)
@@ -222,7 +224,7 @@ final class CTNdFCManager: NSObject {
     /// same for every caller until that happens. A caller that hands over several units in one go
     /// must subtract one per unit itself. See `appLaunchedNativeDisplaysWithinGlobalCaps:` in
     /// `CleverTap.m`.
-    func globalCapRemaining() -> Int32 {
+    public func globalCapRemaining() -> Int32 {
         var remaining = Int32.max
 
         let maxPerDay = maxPerDayCount()
@@ -280,7 +282,7 @@ final class CTNdFCManager: NSObject {
     ///
     /// - Note: The daily and lifetime caps are not checked here. See the class doc above for why.
     @objc(canShowCampaign:excludeFromCaps:excludeGlobalCaps:maxPerSession:)
-    func canShowCampaign(_ campaignId: String,
+    public func canShowCampaign(_ campaignId: String,
                          excludeFromCaps: Bool,
                          excludeGlobalCaps: Bool,
                          maxPerSession: Int32) -> Bool {
@@ -298,7 +300,7 @@ final class CTNdFCManager: NSObject {
     ///
     /// The parameters mean what they mean in `canShowCampaign`.
     @objc(reasonCampaignIsHeldBack:excludeFromCaps:excludeGlobalCaps:maxPerSession:)
-    func reasonCampaignIsHeldBack(_ campaignId: String,
+    public func reasonCampaignIsHeldBack(_ campaignId: String,
                                   excludeFromCaps: Bool,
                                   excludeGlobalCaps: Bool,
                                   maxPerSession: Int32) -> String? {
@@ -328,7 +330,7 @@ final class CTNdFCManager: NSObject {
     /// the server reads are held back. `CTInAppFCManager` counts every view into every total. In-app
     /// can do that because its counts never leave the device.
     @objc(didShowCampaign:storeTimestamp:countsTowardCaps:)
-    func didShowCampaign(_ campaignId: String, storeTimestamp: Bool, countsTowardCaps: Bool) {
+    public func didShowCampaign(_ campaignId: String, storeTimestamp: Bool, countsTowardCaps: Bool) {
         if campaignId.isEmpty { return }
 
         // Session counts always go up. The time is saved only when asked for.
@@ -375,7 +377,7 @@ final class CTNdFCManager: NSObject {
 
     /// Saves the account limits the server sends with each response. Pass -1 for no limit.
     @objc(updateGlobalLimitsPerDay:andPerSession:)
-    func updateGlobalLimits(perDay: Int32, andPerSession perSession: Int32) {
+    public func updateGlobalLimits(perDay: Int32, andPerSession perSession: Int32) {
         CTPreferences.put(Int(perDay), forKey: storageKey(withSuffix: CLTAP_PREFS_ND_MAX_PER_DAY_KEY))
         CTPreferences.put(Int(perSession), forKey: storageKey(withSuffix: CLTAP_PREFS_ND_SESSION_MAX_KEY))
 
@@ -389,7 +391,7 @@ final class CTNdFCManager: NSObject {
     /// The argument is `Any` and not an array on purpose. It carries whatever the server sent. A
     /// value of another shape is ignored.
     @objc(removeStaleCampaignCounts:)
-    func removeStaleCampaignCounts(_ staleCampaigns: Any?) {
+    public func removeStaleCampaignCounts(_ staleCampaigns: Any?) {
         guard let staleCampaigns = staleCampaigns as? [Any] else { return }
 
         lock.lock()
@@ -411,7 +413,7 @@ final class CTNdFCManager: NSObject {
     // MARK: - Counts
 
     @objc(todayCountForCampaign:)
-    func todayCount(forCampaign campaignId: String) -> Int32 {
+    public func todayCount(forCampaign campaignId: String) -> Int32 {
         lock.lock()
         defer { lock.unlock() }
 
@@ -420,7 +422,7 @@ final class CTNdFCManager: NSObject {
     }
 
     @objc(lifetimeCountForCampaign:)
-    func lifetimeCount(forCampaign campaignId: String) -> Int32 {
+    public func lifetimeCount(forCampaign campaignId: String) -> Int32 {
         lock.lock()
         defer { lock.unlock() }
 

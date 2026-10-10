@@ -38,8 +38,9 @@ private let kCTNdSkipKeysUserAttributeEvaluation: Set<String> = ["cc", "tz", "Ca
 ///
 /// Native Display is server side only. Nothing here decides what to show. It only reports what the
 /// user qualifies for.
+@objc
 @objcMembers
-final class CTNdEvaluationManager: NSObject {
+public final class CTNdEvaluationManager: NSObject {
 
     /// Passed to each event so location based triggers can be matched. Set by `CleverTap`.
     ///
@@ -54,7 +55,7 @@ final class CTNdEvaluationManager: NSObject {
 
     /// Sets `location` from two doubles. Called by `CleverTap`. See the note on `location`.
     @objc(setLocationWithLatitude:longitude:)
-    func setLocation(latitude: Double, longitude: Double) {
+    public func setLocation(latitude: Double, longitude: Double) {
         location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
@@ -98,7 +99,7 @@ final class CTNdEvaluationManager: NSObject {
     // MARK: - Init
 
     @objc(initWithAccountId:deviceId:delegateManager:impressionManager:triggerManager:ndStore:localDataStore:)
-    init(accountId: String,
+    public init(accountId: String,
          deviceId: String,
          delegateManager: CTMultiDelegateManager,
          impressionManager: CTImpressionManager,
@@ -147,7 +148,7 @@ final class CTNdEvaluationManager: NSObject {
     // MARK: - Evaluation entry points
 
     @objc(evaluateOnEvent:withProps:)
-    func evaluate(onEvent eventName: String, withProps properties: [AnyHashable: Any]?) {
+    public func evaluate(onEvent eventName: String, withProps properties: [AnyHashable: Any]?) {
         if eventName == CLTAP_APP_LAUNCHED_EVENT {
             // App Launched is not evaluated for Native Display. We keep its properties anyway.
             // Profile change events are matched against them too.
@@ -162,7 +163,7 @@ final class CTNdEvaluationManager: NSObject {
     }
 
     @objc(evaluateOnChargedEvent:andItems:)
-    func evaluate(onChargedEvent chargeDetails: [AnyHashable: Any], andItems items: [Any]?) {
+    public func evaluate(onChargedEvent chargeDetails: [AnyHashable: Any], andItems items: [Any]?) {
         let event = CTEventAdapter(eventName: CLTAP_CHARGED_EVENT,
                                    eventProperties: chargeDetails,
                                    location: location,
@@ -171,7 +172,7 @@ final class CTNdEvaluationManager: NSObject {
     }
 
     @objc(evaluateOnUserAttributeChange:)
-    func evaluate(onUserAttributeChange profile: [String: [AnyHashable: Any]]) {
+    public func evaluate(onUserAttributeChange profile: [String: [AnyHashable: Any]]) {
         let appFields = appLaunchedProperties
         var events: [CTEventAdapter] = []
 
@@ -269,7 +270,7 @@ final class CTNdEvaluationManager: NSObject {
     /// the only place those limits are applied.
     ///
     /// An entry with no campaign id passes through. An entry with no limits passes through.
-    func retainAppLaunchedWithinLimits(_ content: [[AnyHashable: Any]]) -> [[AnyHashable: Any]] {
+    public func retainAppLaunchedWithinLimits(_ content: [[AnyHashable: Any]]) -> [[AnyHashable: Any]] {
         if content.isEmpty { return content }
 
         return content.filter { entry in
@@ -314,7 +315,7 @@ final class CTNdEvaluationManager: NSObject {
     /// The parameter is `Any?` so that a caller passing something other than a dictionary is handled
     /// the same way the Objective-C version handled it.
     @objc(recordSuppressedNativeDisplay:)
-    func recordSuppressedNativeDisplay(_ suppressedUnit: Any?) {
+    public func recordSuppressedNativeDisplay(_ suppressedUnit: Any?) {
         guard let suppressedUnit = suppressedUnit as? [AnyHashable: Any] else { return }
 
         guard let wzrkId = suppressedUnit[CLTAP_NOTIFICATION_ID_TAG] as? String, !wzrkId.isEmpty else {
@@ -463,7 +464,7 @@ final class CTNdEvaluationManager: NSObject {
         }
     }
 
-    override var description: String {
+    public override var description: String {
         return "\(type(of: self)):\(accountId):\(deviceId)"
     }
 }
