@@ -70,6 +70,9 @@ final class CTLiveActivityManager: NSObject {
         self.cleverTap = cleverTap
         self.dataQueue = cleverTap as? CTLiveActivityDataQueue
         super.init()
+        if dataQueue == nil {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.info.rawValue, message: "CTLiveActivityManager: CleverTap instance does not conform to CTLiveActivityDataQueue; no Live Activity token or event will be sent")
+        }
         dataQueue?.registerLiveActivitySwitchUserDelegate(self)
     }
 
@@ -82,6 +85,16 @@ final class CTLiveActivityManager: NSObject {
         activityType: Activity<Attributes>.Type,
         name: String
     ) {
+        // Each of the two settings below stops the token from arriving.
+        // ActivityKit does not report either one as an error. The token stream stays silent.
+        // Check these two first when a client reports that Live Activities never start.
+        if Bundle.main.object(forInfoDictionaryKey: "NSSupportsLiveActivities") as? Bool != true {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.info.rawValue, message: "CTLiveActivityManager: NSSupportsLiveActivities is missing or false in Info.plist; no push-to-start token will arrive for type '\(name)'")
+        }
+        if !ActivityAuthorizationInfo().areActivitiesEnabled {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.info.rawValue, message: "CTLiveActivityManager: Live Activities are turned off for this app in iOS Settings; no push-to-start token will arrive for type '\(name)'")
+        }
+
         let ptsKey = "__pts__\(name)"
         let ptsTask = Task { [weak self] in
             for await token in Activity<Attributes>.pushToStartTokenUpdates {
@@ -199,6 +212,8 @@ final class CTLiveActivityManager: NSObject {
         // Send the initial token if iOS already has one and we haven't sent it before.
         if !alreadyHadToken, let token = activity.pushToken {
             sendActivityToken(token, liveActivityId: liveActivityId, wzrk: startWzrk)
+        } else if !alreadyHadToken {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: attached to activity '\(liveActivityId)' but iOS has no update token for it yet; waiting for pushTokenUpdates")
         }
 
         let task = Task { [weak self] in
@@ -419,7 +434,10 @@ final class CTLiveActivityManager: NSObject {
     /// `wzrk` object if present, else flat `wzrk_*` keys.
     private static func extractWzrk<T: Encodable>(from value: T) -> [String: Any] {
         guard let data = try? JSONEncoder().encode(value),
-              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: could not read campaign fields from '\(T.self)'; it did not encode to a JSON object")
+            return [:]
+        }
         if let nested = dict["wzrk"] as? [String: Any] { return normalizeWzrkKeys(nested) }
         return normalizeWzrkKeys(dict.filter { $0.key.hasPrefix("wzrk_") || $0.key.hasPrefix("W$") })
     }
@@ -450,6 +468,9 @@ final class CTLiveActivityManager: NSObject {
                                                           contentState: Attributes.ContentState) -> [String: Any] {
         var wzrk = extractWzrk(from: attributes)
         for (key, value) in extractWzrk(from: contentState) { wzrk[key] = value }  // content-state wins
+        if wzrk.isEmpty {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.info.rawValue, message: "CTLiveActivityManager: no wzrk_ fields found on '\(Attributes.self)' or its content state; Live Activity events for it will have no campaign attribution")
+        }
         return wzrk
     }
 
