@@ -54,7 +54,12 @@
         return @{};
     }
     NSDictionary *metaData = _contents[contentIndex].metaData;
-    return metaData ? metaData : @{};
+    if (!metaData) {
+        CleverTapLogStaticDebug(@"DisplayUnit: No metadata for content index %ld of unit %@, event will have no item attribution",
+                                (long)contentIndex, _unitID);
+        return @{};
+    }
+    return metaData;
 }
 
 @end

@@ -21,6 +21,9 @@
             NSMutableDictionary *metaData = [NSMutableDictionary dictionary];
             if ([serverMetaData isKindOfClass:[NSDictionary class]]) {
                 [metaData addEntriesFromDictionary:serverMetaData];
+            } else if (serverMetaData) {
+                CleverTapLogStaticDebug(@"DisplayUnit: Expected dictionary for metadata, got %@, event will have no item attribution",
+                                        NSStringFromClass([serverMetaData class]));
             }
             NSString *rawUrl = [_actionUrl isKindOfClass:[NSString class]] ? _actionUrl : nil;
             NSString *actionUrl = [rawUrl stringByTrimmingCharactersInSet:

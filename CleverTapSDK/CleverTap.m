@@ -5082,6 +5082,10 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
+    if (!self.displayUnitCache) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: Failed to get Display Unit for ID %@, nothing found in the cache", self, unitID);
+        return nil;
+    }
     return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
@@ -5128,6 +5132,9 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
                              additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    if (!displayUnit) {
+        CleverTapLogInfo(self.config.logLevel, @"%@: DisplayUnit: No Display Unit found for ID %@, Clicked event will have no campaign attribution", self, unitID);
+    }
     // Build params: additionalProperties first (which should carry wzrk_element_id
     // and other wzrk_* attribution fields from BE-injected action metadata).
     // buildDisplayViewStateEvent: then layers the cached unit wzrk_* on top so
@@ -5158,6 +5165,9 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)recordDisplayUnitElementViewedEventForID:(NSString *)unitID additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    if (!displayUnit) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: No Display Unit found for ID %@, Viewed event will have no campaign attribution", self, unitID);
+    }
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
     if (sanitized) {
@@ -5189,11 +5199,26 @@ static BOOL sharedInstanceErrorLogged;
 - (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
     if (props.count == 0) return nil;
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
+    // Only the key is collected. The value may hold user data, so it is never logged.
+    NSMutableArray<NSString *> *droppedKeys = [NSMutableArray array];
     for (NSString *key in props) {
-        if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
+        if (![key isKindOfClass:[NSString class]]) {
+            [droppedKeys addObject:[NSString stringWithFormat:@"<key of type %@>", NSStringFromClass([key class])]];
+            continue;
+        }
+        if (key.length == 0) {
+            [droppedKeys addObject:@"<empty key>"];
+            continue;
+        }
         id value = props[key];
-        if (value == nil || value == [NSNull null]) continue;
+        if (value == nil || value == [NSNull null]) {
+            [droppedKeys addObject:key];
+            continue;
+        }
         out[key] = value;
+    }
+    if (droppedKeys.count > 0) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: Property dropped - invalid key or null value: %@", self, [droppedKeys componentsJoinedByString:@", "]);
     }
     return out.count > 0 ? [out copy] : nil;
 }
