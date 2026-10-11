@@ -1339,8 +1339,14 @@ static BOOL sharedInstanceErrorLogged;
 // MARK: - Live Activities (iOS only; excluded from tvOS)
 #if !TARGET_OS_TV
 - (void)pushLiveActivityData:(NSDictionary *)data {
-    if ([CTUIUtils runningInsideAppExtension]) return;
-    if (!data || data.count == 0) return;
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogInfo(self.config.logLevel, @"%@: Live Activity token data ignored - it was sent from inside an app extension. Call from the main app.", self);
+        return;
+    }
+    if (!data || data.count == 0) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Live Activity token data is empty; nothing was sent to the server", self);
+        return;
+    }
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"data"] = data;
     [self queueEvent:event withType:CleverTapEventTypeData];
@@ -1364,7 +1370,10 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)pushLiveActivityEventNamed:(NSString *)eventName data:(NSDictionary *)data {
-    if ([CTUIUtils runningInsideAppExtension]) return;
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogInfo(self.config.logLevel, @"%@: Live Activity event ignored - it was recorded from inside an app extension. Call from the main app.", self);
+        return;
+    }
     if (eventName.length == 0) return;
     if (![self ct_liveActivityWzrkTargetsThisInstance:data]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -1375,7 +1384,10 @@ static BOOL sharedInstanceErrorLogged;
 
 // Live Activity impression — identical shape/queue to a push "Notification Viewed" event.
 - (void)pushLiveActivityViewedEventWithData:(NSDictionary *)wzrk {
-    if ([CTUIUtils runningInsideAppExtension]) return;
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogInfo(self.config.logLevel, @"%@: Live Activity impression ignored - it was recorded from inside an app extension. Call from the main app.", self);
+        return;
+    }
     if (![self ct_liveActivityWzrkTargetsThisInstance:wzrk]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
@@ -1385,7 +1397,10 @@ static BOOL sharedInstanceErrorLogged;
 
 // Live Activity click — identical shape/queue to a push "Notification Clicked" event.
 - (void)pushLiveActivityClickedEventWithData:(NSDictionary *)wzrk {
-    if ([CTUIUtils runningInsideAppExtension]) return;
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogInfo(self.config.logLevel, @"%@: Live Activity click ignored - it was recorded from inside an app extension. Call from the main app.", self);
+        return;
+    }
     if (![self ct_liveActivityWzrkTargetsThisInstance:wzrk]) return;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_CLICKED_EVENT_NAME;

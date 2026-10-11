@@ -477,7 +477,10 @@ final class CTLiveActivityManager: NSObject {
     private static func wzrkJSON(_ wzrk: [String: Any]) -> String? {
         guard JSONSerialization.isValidJSONObject(wzrk),
               let data = try? JSONSerialization.data(withJSONObject: wzrk),
-              let str = String(data: data, encoding: .utf8) else { return nil }
+              let str = String(data: data, encoding: .utf8) else {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: campaign fields could not be stored because they are not valid JSON; after an app restart this activity will report with no attribution")
+            return nil
+        }
         return str
     }
 
@@ -558,6 +561,9 @@ final class CTLiveActivityManager: NSObject {
             let first = await group.next() ?? nil
             group.cancelAll()
             return first
+        }
+        if settled == nil {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: no final content arrived for activity '\(activity.id)' within 1s; the terminal event may carry the previous milestone")
         }
         return settled ?? Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
     }
