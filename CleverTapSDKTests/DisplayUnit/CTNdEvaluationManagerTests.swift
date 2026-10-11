@@ -65,15 +65,17 @@ final class CTNdEvaluationManagerTests {
 
     // MARK: - Entries that set no limits
 
-    @Test("An entry with no limits arrives every time")
+    @Test("An entry with no limits arrives every time, and its trigger is still counted")
     func anEntryWithNoLimitsArrivesEveryTime() {
-        // Most App-Launched campaigns set no limits. Counting a trigger for them would cost a write
-        // on every launch. Nothing would ever read it.
+        // Most App-Launched campaigns set no limits. The trigger is counted for them all the same.
+        // The count is a lifetime total of the launches this campaign matched. A limit added to the
+        // campaign later reads that total. A count that skipped the launches before the edit would
+        // make onEvery and onExactly match at the wrong time.
         let entry = entry(ti: kCampaignId)
 
         #expect(appLaunched([entry]) == [kCampaignId])
         #expect(appLaunched([entry]) == [kCampaignId])
-        #expect(triggerCount(kCampaignId) == 0)
+        #expect(triggerCount(kCampaignId) == 2)
     }
 
     @Test("Empty limit lists count as no limits")
@@ -84,7 +86,7 @@ final class CTNdEvaluationManagerTests {
         ])
 
         #expect(appLaunched([entry]) == [kCampaignId])
-        #expect(triggerCount(kCampaignId) == 0)
+        #expect(triggerCount(kCampaignId) == 1)
     }
 
     @Test("An entry with no ti arrives, and nothing is counted for it")
@@ -99,6 +101,71 @@ final class CTNdEvaluationManagerTests {
 
         #expect(evaluationManager.retainAppLaunchedWithinLimits([noTi]).count == 1)
         #expect(triggerCount("") == 0)
+    }
+
+    // MARK: - Matching the triggers against the launch
+
+    @Test("An entry whose triggers do not match this launch is dropped")
+    func anEntryWhoseTriggersDoNotMatchIsDropped() {
+        // The server sends this content before the launch happens. It cannot know what the launch
+        // will look like. A campaign aimed at one app version must not arrive on every other one.
+        let entry = entry(ti: kCampaignId, extras: [
+            CLTAP_INAPP_TRIGGERS: [[
+                "eventName": CLTAP_APP_LAUNCHED_EVENT,
+                "eventProperties": [["propertyName": "appVersion", "operator": 1, "propertyValue": "5.2"]]
+            ]]
+        ])
+
+        evaluationManager.evaluate(onEvent: CLTAP_APP_LAUNCHED_EVENT, withProps: ["appVersion": "4.0"])
+
+        #expect(appLaunched([entry]) == [])
+        // The trigger did not match. Nothing is counted for a launch the campaign did not qualify
+        // for. onEvery reads this count.
+        #expect(triggerCount(kCampaignId) == 0)
+    }
+
+    @Test("An entry whose triggers match this launch arrives")
+    func anEntryWhoseTriggersMatchArrives() {
+        let entry = entry(ti: kCampaignId, extras: [
+            CLTAP_INAPP_TRIGGERS: [[
+                "eventName": CLTAP_APP_LAUNCHED_EVENT,
+                "eventProperties": [["propertyName": "appVersion", "operator": 1, "propertyValue": "5.2"]]
+            ]]
+        ])
+
+        evaluationManager.evaluate(onEvent: CLTAP_APP_LAUNCHED_EVENT, withProps: ["appVersion": "5.2"])
+
+        #expect(appLaunched([entry]) == [kCampaignId])
+        #expect(triggerCount(kCampaignId) == 1)
+    }
+
+    @Test("An entry with no triggers arrives, the launch itself is the trigger")
+    func anEntryWithNoTriggersArrives() {
+        // The matcher reads an empty list as no match. An entry without triggers must not go through
+        // it. Most App-Launched campaigns are this shape.
+        #expect(appLaunched([entry(ti: kCampaignId)]) == [kCampaignId])
+    }
+
+    @Test("The triggers are matched before the limits are read")
+    func theTriggersAreMatchedBeforeTheLimitsAreRead() {
+        // onEvery reads the trigger count. A launch the campaign did not qualify for must not move
+        // that count. The campaign below qualifies on the second launch only. onEvery 2 then lets it
+        // through on that same launch, because that is its first match.
+        let entry = entry(ti: kCampaignId, extras: [
+            CLTAP_INAPP_TRIGGERS: [[
+                "eventName": CLTAP_APP_LAUNCHED_EVENT,
+                "eventProperties": [["propertyName": "appVersion", "operator": 1, "propertyValue": "5.2"]]
+            ]],
+            CLTAP_INAPP_OCCURRENCE_LIMITS: [["type": "onEvery", "limit": 1]]
+        ])
+
+        evaluationManager.evaluate(onEvent: CLTAP_APP_LAUNCHED_EVENT, withProps: ["appVersion": "4.0"])
+        #expect(appLaunched([entry]) == [])
+        #expect(triggerCount(kCampaignId) == 0)
+
+        evaluationManager.evaluate(onEvent: CLTAP_APP_LAUNCHED_EVENT, withProps: ["appVersion": "5.2"])
+        #expect(appLaunched([entry]) == [kCampaignId])
+        #expect(triggerCount(kCampaignId) == 1)
     }
 
     // MARK: - Limits counted in triggers

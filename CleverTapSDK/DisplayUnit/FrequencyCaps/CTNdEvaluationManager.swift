@@ -263,29 +263,54 @@ public final class CTNdEvaluationManager: NSObject {
         }
     }
 
-    /// Returns the App-Launched entries that are still inside their own limits.
+    /// Returns the App-Launched entries that are still eligible.
     ///
     /// App-Launched campaigns are not listed in `adUnit_notifs_ss`. Each entry carries its own
-    /// `frequencyLimits` and `occurrenceLimits`. The SDK never reports them in `adUnit_eval`. This is
-    /// the only place those limits are applied.
+    /// `whenTriggers`, `frequencyLimits` and `occurrenceLimits`. The SDK never reports them in
+    /// `adUnit_eval`. This is the only place those rules are applied.
     ///
-    /// An entry with no campaign id passes through. An entry with no limits passes through.
+    /// The server sends this content before the launch happens. A condition that is only known at the
+    /// moment of the launch has to be checked here. `firstTimeOnly` is one. The user location is
+    /// another. The app sets that at run time.
+    ///
+    /// The steps are in the same order as the event path in `evaluate(_:)` above. `whenTriggers` is
+    /// matched first. The trigger count goes up on a match. `whenLimits` is read last. `onEvery` and
+    /// `onExactly` read that count.
+    ///
+    /// An entry with no campaign id passes through. An entry with no `whenTriggers` passes that step.
+    /// The launch itself is the trigger for it.
     public func retainAppLaunchedWithinLimits(_ content: [[AnyHashable: Any]]) -> [[AnyHashable: Any]] {
         if content.isEmpty { return content }
+
+        // The same event the in-app side builds for its App Launched pass. The properties were kept
+        // when the App Launched event was recorded. See `evaluate(onEvent:withProps:)` above.
+        let event = CTEventAdapter(eventName: CLTAP_APP_LAUNCHED_EVENT,
+                                   eventProperties: appLaunchedProperties,
+                                   andLocation: location)
 
         return content.filter { entry in
             // Same helper the cap manager uses. Triggers and impressions must use one id. Two
             // helpers could drift apart. One would then write under a key the other never reads.
             let campaignId = CTNdFCManager.campaignId(from: entry)
+            if campaignId.isEmpty { return true }
+
+            // An empty list is not passed to the matcher. The matcher reads an empty list as no
+            // match. An entry without triggers has to reach the limits below.
+            let whenTriggers = entry[CLTAP_INAPP_TRIGGERS] as? [Any] ?? []
+            if !whenTriggers.isEmpty,
+               !triggersMatcher.matchEvent(whenTriggers: whenTriggers, event: event) {
+                log("App-Launched Native Display campaign \(campaignId) arrived, but its triggers did not match this launch. Triggers: \(whenTriggers)")
+                return false
+            }
+
+            // The campaign matched the trigger. Its trigger count goes up whether the limits pass or
+            // not. occurrenceLimits are counted in triggers. They need this.
+            triggerManager.incrementTrigger(campaignId)
 
             var whenLimits: [Any] = []
             whenLimits.append(contentsOf: entry[CLTAP_INAPP_FC_LIMITS] as? [Any] ?? [])
             whenLimits.append(contentsOf: entry[CLTAP_INAPP_OCCURRENCE_LIMITS] as? [Any] ?? [])
-            if campaignId.isEmpty || whenLimits.isEmpty { return true }
-
-            // The server sent this entry. That counts as a trigger match. The count goes up whether
-            // the limits pass or not. occurrenceLimits are counted in triggers. They need this.
-            triggerManager.incrementTrigger(campaignId)
+            if whenLimits.isEmpty { return true }
 
             let withinLimits = limitsMatcher.match(whenLimits: whenLimits,
                                                    forCampaignId: campaignId,

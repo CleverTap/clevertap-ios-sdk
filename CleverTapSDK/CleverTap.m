@@ -2604,16 +2604,17 @@ static BOOL sharedInstanceErrorLogged;
 
     // Caps first, on every response, even one that arrives during a user switch. They belong to the
     // account and not to a user. They should stay up to date either way. The content step below
-    // also reads what this writes. The rules and the control group acknowledgements are a different
-    // case.
-    // saveNativeDisplayRulesAndCaps: stops before those two during a user switch.
+    // also reads what this writes. The rules are a different case.
+    // saveNativeDisplayRulesAndCaps: stops before them during a user switch.
     //
     // Every key read in there is read only when it is present. A response that carries none of them
     // leaves all of it untouched. There is no need to ask which endpoint the response came from.
     [self saveNativeDisplayRulesAndCaps:jsonResp];
 
-    // Only the content is held back during a user switch. The thing to avoid is showing the old
-    // user's display units to the new one.
+    // The content step is held back during a user switch. The thing to avoid is showing the old
+    // user's display units to the new one. The control group acknowledgements are raised in that
+    // same step. They are held back too. An acknowledgement for the old user would otherwise go out
+    // on the new user's next batch.
     if (self.isUserSwitching) {
         // Logged only when there was content to hold back. A response with nothing but caps must
         // not look like it lost something.
@@ -2646,12 +2647,11 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndFCManager removeStaleCampaignCounts:staleIds];
         }
 
-        // The rules and the control group acknowledgements below belong to a user. A user switch
-        // stops here. The store key holds the device id. The device id has already changed by this
-        // point. Saving the rules would put the old user's rules under the new user's key. A control
-        // group acknowledgement would go out on the new user's next batch.
+        // The rules below belong to a user. A user switch stops here. The store key holds the device
+        // id. The device id has already changed by this point. Saving the rules would put the old
+        // user's rules under the new user's key.
         if (self.isUserSwitching) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display rules and control group acknowledgements in this response were skipped because the user is being switched. The account caps in it were still saved. The next response after the switch brings the rules for the new user.", self);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display rules in this response were skipped because the user is being switched. The account caps in it were still saved. The next response after the switch brings the rules for the new user.", self);
             return;
         }
 
@@ -2664,14 +2664,8 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogInternal(self.config.logLevel, @"%@: Stored %lu Native Display rules", self, (unsigned long)serverSideNativeDisplays.count);
         }
 
-        // Control group users get a stub instead of content. Telling the server we saw it is what
-        // stops it coming again. Only App Launched needs this. For any other event the server
-        // handles the control group itself and sends nothing.
-        for (NSDictionary *entry in [self nativeDisplayAppLaunchedEntries:jsonResp]) {
-            if ([entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
-                [self.ndEvaluationManager recordSuppressedNativeDisplay:entry];
-            }
-        }
+        // The control group acknowledgements are raised in the content step. See
+        // acknowledgeSuppressedNativeDisplays: below.
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to read the Native Display caps: %@", self, e.debugDescription);
     }
@@ -2685,18 +2679,9 @@ static BOOL sharedInstanceErrorLogged;
     // This response says nothing at all about Native Display. The cache is left as it is.
     if (!hasDisplayUnits && appLaunchedJSON.count == 0) return;
 
-    NSMutableArray<CleverTapDisplayUnit *> *displayUnits = [NSMutableArray new];
-    if (hasDisplayUnits) {
-        [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
-    }
-    // Suppressed stubs carry no content. They are dropped here. They were already replied to in
-    // the step above.
-    NSMutableArray *appLaunchedWithContent = [NSMutableArray new];
-    for (NSDictionary *entry in appLaunchedJSON) {
-        if (![entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
-            [appLaunchedWithContent addObject:entry];
-        }
-    }
+    NSArray *appLaunchedWithContent = [self appLaunchedNativeDisplaysWithContent:appLaunchedJSON];
+    NSArray *controlGroupStubs = [self appLaunchedNativeDisplayControlGroupStubs:appLaunchedJSON];
+
     // The first question to ask when a campaign does not appear is whether the server sent it at
     // all. Every other Native Display count in the log is taken after a filter has run. This one is
     // taken before any of them.
@@ -2704,7 +2689,28 @@ static BOOL sharedInstanceErrorLogged;
                       self,
                       (unsigned long)(hasDisplayUnits ? displayUnitJSON.count : 0), CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY,
                       (unsigned long)appLaunchedJSON.count, CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY,
-                      (unsigned long)(appLaunchedJSON.count - appLaunchedWithContent.count));
+                      (unsigned long)controlGroupStubs.count);
+
+    // This runs before the check below. A response of nothing but stubs still has to acknowledge
+    // them.
+    [self acknowledgeSuppressedNativeDisplays:controlGroupStubs];
+
+    // Only a response that brought content reaches the cache. A response of nothing but control
+    // group stubs says nothing about what to show. The stubs were acknowledged above. The cache
+    // keeps what it holds. A write here would clear the units that an earlier response in this
+    // session delivered.
+    //
+    // A response that did bring content writes the cache even when every unit in it was later held
+    // back by a cap. The cache must not keep serving a unit that is no longer allowed.
+    if (!hasDisplayUnits && appLaunchedWithContent.count == 0) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: This Native Display response carried no content, the cache was left as it is", self);
+        return;
+    }
+
+    NSMutableArray<CleverTapDisplayUnit *> *displayUnits = [NSMutableArray new];
+    if (hasDisplayUnits) {
+        [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
+    }
 
     NSArray *appLaunchedWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:appLaunchedWithContent];
     NSArray *appLaunchedWithinGlobalCaps = [self appLaunchedNativeDisplaysWithinGlobalCaps:appLaunchedWithinLimits];
@@ -2756,6 +2762,61 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
+ The App-Launched entries that carry content.
+
+ A control group user gets a stub in place of the content. @c suppressed marks it. Only the entries
+ that are not marked can be shown.
+ */
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplaysWithContent:(NSArray<NSDictionary *> *)entries {
+    NSMutableArray<NSDictionary *> *withContent = [NSMutableArray new];
+    for (NSDictionary *entry in entries) {
+        if (![entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
+            [withContent addObject:entry];
+        }
+    }
+    return withContent;
+}
+
+/// The App-Launched entries that are control group stubs. The other half of the split that
+/// @c appLaunchedNativeDisplaysWithContent: above makes.
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplayControlGroupStubs:(NSArray<NSDictionary *> *)entries {
+    NSMutableArray<NSDictionary *> *stubs = [NSMutableArray new];
+    for (NSDictionary *entry in entries) {
+        if ([entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
+            [stubs addObject:entry];
+        }
+    }
+    return stubs;
+}
+
+/**
+ Tells the server about the control group stubs that would have been shown.
+
+ A control group user gets a stub in place of the content. The acknowledgement is what stops the
+ server from sending that stub again. Only App Launched needs this. For any other event the server
+ handles the control group on its side and sends nothing.
+
+ A stub is acknowledged only when it is still inside its own limits. The two halves of a control
+ group test have to be counted at the same moment. The half that sees the campaign is counted when
+ the campaign is shown. A campaign is shown only when its limits pass. A stub that has reached its
+ limits would not have been shown. Counting it would make the half that sees nothing look larger
+ than it is.
+
+ The account caps are not applied here. A stub shows nothing. It takes no room from the campaigns
+ that do.
+
+ @c appLaunchedNativeDisplaysWithinLimits: drops every entry when the limit check fails. No stub is
+ acknowledged in that case. A stub the server hears nothing about is sent again later.
+ */
+- (void)acknowledgeSuppressedNativeDisplays:(NSArray<NSDictionary *> *)stubs {
+    if (stubs.count == 0 || !self.ndEvaluationManager) return;
+
+    for (NSDictionary *stub in [self appLaunchedNativeDisplaysWithinLimits:stubs]) {
+        [self.ndEvaluationManager recordSuppressedNativeDisplay:stub];
+    }
+}
+
+/**
  Drops the App-Launched entries that have used up their own limits.
 
  App-Launched campaigns are not listed in @c adUnit_notifs_ss. Each entry carries its own
@@ -2792,8 +2853,10 @@ static BOOL sharedInstanceErrorLogged;
 
  Entries are taken in the order the server sent them. That order is the campaign priority.
 
- A campaign with @c excludeGlobalFCaps is handed over and uses up none of the room. The two account
- caps do not apply to it.
+ Two kinds of entry are handed over without using up any of the room. The first is an entry that does
+ not take part in the caps. A view of it never reaches the counts the server reads. A campaign that
+ does get counted would lose that slot for nothing. The second is a campaign with
+ @c excludeGlobalFCaps. The two account caps do not apply to it.
  */
 - (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries {
     if (entries.count == 0 || !self.ndFCManager) return entries;
@@ -2805,7 +2868,8 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableArray *withinGlobalCaps = [NSMutableArray new];
     for (NSDictionary *entry in entries) {
         NSString *campaignId = [CTNdFCManager campaignIdFrom:entry];
-        if ([self nativeDisplayExcludesGlobalCaps:entry forCampaignId:campaignId]) {
+        if (![self nativeDisplayTakesPartInCaps:entry]
+            || [self nativeDisplayExcludesGlobalCaps:entry forCampaignId:campaignId]) {
             [withinGlobalCaps addObject:entry];
             continue;
         }
@@ -2822,7 +2886,8 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Drops the Native Display units that have no room left under the session caps.
 
- Every unit goes through the check. An account that has no limits set lets them all through.
+ Only a unit that takes part in the caps is checked. See @c nativeDisplayTakesPartInCaps: below. The
+ rest are handed over as they are. An account that has no limits set lets them all through.
 
  Only the session caps are applied here. Those are the account cap @c ndmc and the campaign's own
  cap @c mdc. The daily cap @c ndmp is not applied here. For a regular event the server applied it
@@ -2843,9 +2908,20 @@ static BOOL sharedInstanceErrorLogged;
     // The warning below is about missing view reports. The app cannot report a view of a unit it
     // never received.
     NSUInteger capManagedDeliveredCount = 0;
+    // Counts the units that were handed over without a check. The summary line below separates them
+    // from the units that were checked and passed.
+    NSUInteger outsideCapsCount = 0;
     NSMutableArray<CleverTapDisplayUnit *> *withinCaps = [NSMutableArray new];
     for (CleverTapDisplayUnit *unit in displayUnits) {
         NSDictionary *json = unit.json;
+        if (![self nativeDisplayTakesPartInCaps:json]) {
+            // This unit is outside the feature. No count moves for it when it is viewed. Holding it
+            // back against a cap it can never fill would take room from a campaign that does fill
+            // one.
+            [withinCaps addObject:unit];
+            outsideCapsCount++;
+            continue;
+        }
         NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
         if (campaignId.length == 0) {
             // No id means nothing to store a count under. Showing it is the safer mistake. Holding
@@ -2875,11 +2951,12 @@ static BOOL sharedInstanceErrorLogged;
     // A unit that passes the caps leaves no other trace. Without this line a working gate and a
     // gate that never ran look the same in the logs.
     if (displayUnits.count > 0) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display caps checked on %lu unit(s). %lu passed. %lu held back.",
+        CleverTapLogDebug(self.config.logLevel, @"%@: Native Display caps checked on %lu unit(s). %lu passed. %lu held back. %lu more were handed over without a check. Those do not take part in the caps.",
                           self,
-                          (unsigned long)displayUnits.count,
-                          (unsigned long)withinCaps.count,
-                          (unsigned long)(displayUnits.count - withinCaps.count));
+                          (unsigned long)(displayUnits.count - outsideCapsCount),
+                          (unsigned long)(withinCaps.count - outsideCapsCount),
+                          (unsigned long)(displayUnits.count - withinCaps.count),
+                          (unsigned long)outsideCapsCount);
     }
 
     [self warnIfNativeDisplayViewsAreNeverReported:capManagedDeliveredCount];
@@ -5686,6 +5763,24 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
+ Whether this unit takes part in the Native Display frequency caps.
+
+ @c isNdFcapEnabled says whether it does. A unit that arrives without the flag is not part of this
+ feature. It is still shown. No cap is applied to it. No count moves for it.
+
+ Three places ask this question. The delivery gate asks before it applies the session caps. The
+ App-Launched trim asks before it spends a slot of the daily budget. The counting step asks before it
+ adds a view to the counts the server reads. One helper keeps the three answers the same. Three
+ separate reads could give different answers. A unit would then be capped in one place and ignored
+ in another.
+
+ The flag is read from the unit's own content. The server puts it there on every campaign it sends.
+ */
+- (BOOL)nativeDisplayTakesPartInCaps:(NSDictionary *)unitJSON {
+    return [unitJSON[CLTAP_ND_IS_FCAP_ENABLED] boolValue];
+}
+
+/**
  Whether a view of this unit is added to the two counts the SDK sends to the server.
 
  Those counts are @c ndmp for the account and @c ndtlc for the campaign. The server reads them as the
@@ -5693,15 +5788,11 @@ static BOOL sharedInstanceErrorLogged;
  applies to must not use up one of those. Otherwise a campaign that does have a cap gets less room
  than it was given.
 
- Two things have to be true. The campaign has to take part in Native Display frequency caps.
- @c isNdFcapEnabled says whether it does. The campaign must also not be an exception to the account
- caps. @c excludeGlobalFCaps says whether it is.
-
- The flag is read from the unit's own content. The server puts it on every campaign it sends. A unit
- that arrives without it is not part of this feature, so the answer is no.
+ Two things have to be true. The unit has to take part in the caps. The campaign must also not be an
+ exception to the account caps. @c excludeGlobalFCaps says whether it is.
  */
 - (BOOL)nativeDisplayCountsTowardCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId {
-    if (![unitJSON[CLTAP_ND_IS_FCAP_ENABLED] boolValue]) return NO;
+    if (![self nativeDisplayTakesPartInCaps:unitJSON]) return NO;
     return ![self nativeDisplayExcludesGlobalCaps:unitJSON forCampaignId:campaignId];
 }
 

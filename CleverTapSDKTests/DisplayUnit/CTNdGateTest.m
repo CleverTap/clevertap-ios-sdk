@@ -38,6 +38,9 @@
 - (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
 - (NSArray *)appLaunchedNativeDisplaysWithinLimits:(NSArray *)entries;
 - (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries;
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplaysWithContent:(NSArray<NSDictionary *> *)entries;
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplayControlGroupStubs:(NSArray<NSDictionary *> *)entries;
+- (void)acknowledgeSuppressedNativeDisplays:(NSArray<NSDictionary *> *)stubs;
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit;
 - (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback;
 - (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp;
@@ -149,7 +152,32 @@ static NSString *const kOtherCampaignId = @"70002";
     return ids;
 }
 
-#pragma mark Every unit goes through the gate
+#pragma mark Which units go through the gate
+
+- (void)testAUnitOutsideTheCapsIsNotCheckedAtTheGate {
+    // No count moves when this unit is viewed. A cap it can never fill must not hold it back. The
+    // room would otherwise be lost to a campaign that does fill one.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[[self unitWithTi:kCampaignId
+                                                           extras:@{ CLTAP_ND_IS_FCAP_ENABLED: @NO }]]]);
+}
+
+- (void)testAUnitWithoutTheFlagIsNotCheckedAtTheGate {
+    // A missing flag means the same as a flag of NO. The session cap below is full.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *noFlag = [[CleverTapDisplayUnit alloc] initWithJSON:@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        @"type": @"simple"
+    }];
+
+    XCTAssertEqual(1, [[self.cleverTap nativeDisplayUnitsStillAllowedToShow:@[noFlag]] count]);
+}
 
 - (void)testAUnitCarryingNoCapFieldsIsStillHeldBackByTheAccountCap {
     // The bug the marker check caused. This time it is checked at the gate. Native Display content
@@ -243,6 +271,73 @@ static NSString *const kOtherCampaignId = @"70002";
     XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]);
 }
 
+#pragma mark Splitting the App-Launched batch
+
+- (void)testTheBatchIsSplitIntoContentAndControlGroupStubs {
+    // Every entry lands on exactly one side. The content side decides whether the cache is written.
+    // The stub side decides what is acknowledged.
+    NSDictionary *content = [self entryWithTi:kCampaignId extras:@{}];
+    NSDictionary *stub = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_IS_SUPPRESSED: @YES }];
+    NSArray *batch = @[content, stub];
+
+    XCTAssertEqualObjects(@[content], [self.cleverTap appLaunchedNativeDisplaysWithContent:batch]);
+    XCTAssertEqualObjects(@[stub], [self.cleverTap appLaunchedNativeDisplayControlGroupStubs:batch]);
+}
+
+- (void)testAnEntryWithoutTheSuppressedFlagCountsAsContent {
+    // Only a control group user receives the flag. Every other entry arrives without it.
+    NSArray *batch = @[[self entryWithTi:kCampaignId extras:@{}]];
+
+    XCTAssertEqual(1, [[self.cleverTap appLaunchedNativeDisplaysWithContent:batch] count]);
+    XCTAssertEqual(0, [[self.cleverTap appLaunchedNativeDisplayControlGroupStubs:batch] count]);
+}
+
+#pragma mark Acknowledging the control group stubs
+
+- (void)testAStubInsideItsLimitsIsAcknowledged {
+    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(1, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testAStubOverItsLimitsIsNotAcknowledged {
+    // The campaign would not have been shown to a user outside the control group. The two halves of
+    // the test have to be counted at the same moment. Acknowledging this stub would make the half
+    // that sees nothing look larger than it is.
+    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }]]];
+
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testTheAccountCapsDoNotStopAnAcknowledgement {
+    // A stub shows nothing. It takes no room from the campaigns that do. The session cap below is
+    // full, and the stub is still acknowledged.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(1, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testThereIsNoAcknowledgementWithoutAnEvaluator {
+    // The send test path builds no Native Display evaluator. There is nothing to acknowledge there.
+    self.cleverTap.ndEvaluationManager = nil;
+
+    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
 #pragma mark Cutting the App-Launched set down to the account caps
 
 // The gate below reads counts that only change when the app reports a view. No view is reported
@@ -306,6 +401,21 @@ static NSString *const kOtherCampaignId = @"70002";
     NSArray *expected = @[kCampaignId, @"70003"];
     XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
         [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testAnEntryOutsideTheCapsComesThroughAndUsesUpNoRoom {
+    // A view of this entry never reaches the counts the server reads. Spending a slot on it would
+    // take that slot from an entry that does get counted. Room for one, so the entry after it still
+    // comes through.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{ CLTAP_ND_IS_FCAP_ENABLED: @NO }],
         [self entryWithTi:@"70003" extras:@{}],
         [self entryWithTi:@"70004" extras:@{}]
     ]]));
