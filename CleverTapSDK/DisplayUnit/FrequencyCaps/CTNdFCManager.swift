@@ -353,8 +353,8 @@ public final class CTNdFCManager: NSObject {
         }
 
         // The app is the only source of these counts. No count changes until the app calls
-        // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived. It also
-        // prints the ndtlc and ndmp values the next request will carry.
+        // recordDisplayUnitViewedEventForID:. This line is the proof that the call arrived. The
+        // numbers it prints are the ones the next request carries. They go out as ndtlc and ndmp.
         let campaignThisSession = impressionManager.perSession(campaignId)
         let campaignToday = todayCount(forCampaign: campaignId)
         let campaignSinceInstall = lifetimeCount(forCampaign: campaignId)
@@ -370,9 +370,13 @@ public final class CTNdFCManager: NSObject {
             This campaign has \(campaignThisSession) view(s) this session, \(campaignToday) today, \
             \(campaignSinceInstall) since install. \
             The whole account has \(accountThisSession) view(s) this session, \(accountToday) today. \
-            The next request carries ndtlc ["\(campaignId)", \(campaignToday), \(campaignSinceInstall)] \
-            for this campaign. The next request carries ndmp \(accountToday) for the account.
+            The next request to the server carries these counts.
             """)
+    }
+
+    /// Prints a limit for a reader of the log. The server sends -1 for no limit.
+    private func limitText(_ limit: Int32) -> String {
+        return limit < 0 ? "no limit" : "\(limit)"
     }
 
     /// Saves the account limits the server sends with each response. Pass -1 for no limit.
@@ -381,9 +385,9 @@ public final class CTNdFCManager: NSObject {
         CTPreferences.put(Int(perDay), forKey: storageKey(withSuffix: CLTAP_PREFS_ND_MAX_PER_DAY_KEY))
         CTPreferences.put(Int(perSession), forKey: storageKey(withSuffix: CLTAP_PREFS_ND_SESSION_MAX_KEY))
 
-        // Which caps the account has is the first question to ask when Native Display stops
+        // Which limits the account has is the first question to ask when Native Display stops
         // appearing.
-        log("\(self): Native Display account caps set by the server. ndmc allows \(perSession) per session. ndmp allows \(perDay) per day. -1 means no limit.")
+        log("\(self): The server set the Native Display limits for this account. Per session: \(limitText(perSession)). Per day: \(limitText(perDay)).")
     }
 
     /// Deletes the counts, impressions and triggers for campaigns the server says are gone.
