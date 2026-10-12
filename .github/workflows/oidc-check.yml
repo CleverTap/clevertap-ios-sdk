@@ -15,7 +15,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::062484260092:role/System-GithubOidcS3Sync-C-GithubActionsS3SyncIAMRol-Im3zys2rZMOA
-          aws-region: eu-west-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Show caller identity
         run: aws sts get-caller-identity
+
+      - name: Upload hello world
+        env:
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        run: |
+          printf 'hello world\n' > hello-world.txt
+          aws s3 cp hello-world.txt "s3://${S3_BUCKET_NAME}/oidc-test/hello-world.txt"
