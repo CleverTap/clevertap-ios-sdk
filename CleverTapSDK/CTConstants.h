@@ -269,6 +269,14 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 
 #pragma mark Native Display frequency caps
 
+// Every Native Display log line starts with this prefix. A tester can filter the console on it and
+// see only the Native Display lines. Use the macros below, not CleverTapLogDebug, for any new line
+// about Native Display.
+#define CLTAP_ND_LOG_PREFIX @"[Display Unit]"
+#define CleverTapLogNDDebug(level, fmt, ...) CleverTapLogDebug(level, CLTAP_ND_LOG_PREFIX @" " fmt, ##__VA_ARGS__)
+#define CleverTapLogNDInternal(level, fmt, ...) CleverTapLogInternal(level, CLTAP_ND_LOG_PREFIX @" " fmt, ##__VA_ARGS__)
+#define CleverTapLogNDStaticDebug(fmt, ...) CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" " fmt, ##__VA_ARGS__)
+
 // Response, server to SDK. CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY carries the content and is already
 // handled. These carry the caps.
 #define CLTAP_ND_SS_JSON_RESPONSE_KEY @"adUnit_notifs_ss"

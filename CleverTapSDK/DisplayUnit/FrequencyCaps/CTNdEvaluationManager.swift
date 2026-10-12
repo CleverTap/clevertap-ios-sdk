@@ -481,11 +481,12 @@ public final class CTNdEvaluationManager: NSObject {
     // MARK: - Logging
 
     /// Matches the CleverTapLogStaticDebug macro. That macro reads the level from CTLogger, because
-    /// this class holds no config object.
+    /// this class holds no config object. The prefix is added here. Every line this class writes
+    /// then carries it.
     private func log(_ message: String) {
         let level = CTLogger.getDebugLevel()
         if level > 0 {
-            CTLogger.logWithLevel(level, type: CTLogType.debug.rawValue, message: message)
+            CTLogger.logWithLevel(level, type: CTLogType.debug.rawValue, message: "\(CLTAP_ND_LOG_PREFIX) \(message)")
         }
     }
 

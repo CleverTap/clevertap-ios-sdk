@@ -10,7 +10,9 @@
 #import "CleverTap+DisplayUnit.h"
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
+#import "CTDeviceInfo.h"
 #import "CTImpressionManager.h"
+#import "CTTriggerCondition.h"
 // CTNdStore and CTNdFCManager are written in Swift. This is the generated header that declares them
 // to Objective-C. It also carries the members CTNdFCManager+Tests.h used to expose. An internal
 // member of an @objcMembers Swift class lands in that header, so the test can reach it without a
@@ -32,7 +34,13 @@
 @property (nonatomic, strong) CTNdEvaluationManager *ndEvaluationManager;
 @property (atomic, assign) BOOL sentCappedNativeDisplaysToApp;
 @property (atomic, assign) BOOL appReportedANativeDisplayView;
+/// Only the tests that raise an event set these two. @c generateAppFields reads both.
+@property (nonatomic, strong, readwrite) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 
+- (void)evaluateOnEvent:(NSDictionary *)event
+               withType:(CleverTapEventType)eventType
+     flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits;
 - (BOOL)nativeDisplayExcludesGlobalCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
 - (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
@@ -817,6 +825,94 @@ static NSString *const kOtherCampaignId = @"70002";
 
     XCTAssertEqual(0, [self.helper.ndFCManager lifetimeCountForCampaign:kCampaignId]);
     XCTAssertEqual(1, [self.helper.ndFCManager lifetimeCountForCampaign:kOtherCampaignId]);
+}
+
+#pragma mark Matching a custom event against the device and app properties
+
+/// Gives the instance a config and a device. @c generateAppFields reads the device for the app
+/// version, the OS version, the make and the model. A bare instance has no device. Every one of
+/// those values would be missing.
+- (void)useARealDevice {
+    self.cleverTap.config = self.helper.config;
+    self.cleverTap.deviceInfo = [[CTDeviceInfo alloc] initWithConfig:self.helper.config
+                                                      andCleverTapID:self.helper.deviceId];
+}
+
+/// Stores one rule. It fires on the named event, when the named property has the given value.
+- (void)storeRuleFiringOn:(NSString *)eventName
+                 property:(NSString *)propertyName
+                   equals:(id)propertyValue {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        CLTAP_INAPP_TRIGGERS: @[@{
+            @"eventName": eventName,
+            @"eventProperties": @[@{
+                @"propertyName": propertyName,
+                @"operator": @(CTTriggerOperatorEquals),
+                @"propertyValue": propertyValue
+            }]
+        }]
+    }]];
+}
+
+/// Raises a custom event the same way @c queueEvent does.
+- (void)raiseEvent:(NSString *)eventName withProperties:(NSDictionary *)properties {
+    [self.cleverTap evaluateOnEvent:@{ CLTAP_EVENT_NAME: eventName, CLTAP_EVENT_DATA: properties }
+                           withType:CleverTapEventTypeRaised
+                 flattenedEventData:[CTFlattenedEventData eventProperties:properties]];
+}
+
+/// The campaigns found eligible so far. The SDK sends these ids to the server.
+- (NSArray *)eligibleCampaigns {
+    return self.helper.evaluationManager.evaluatedServerSideNativeDisplayIds;
+}
+
+- (void)testACustomEventIsMatchedAgainstTheAppFields {
+    // A trigger can name a device or app property, such as the OS version. That value is not part
+    // of the event. It is added to the event properties before the rules are read. Without it a
+    // rule like the one below never matches. The campaign is then never reported as eligible.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed"
+                   property:CLTAP_OS_VERSION
+                     equals:self.cleverTap.deviceInfo.osVersion];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testACustomEventIsStillMatchedAgainstItsOwnProperties {
+    // The app fields are added to the event properties. They must not push the event's own
+    // properties out.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:@"Category" equals:@"shoes"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testAnEventPropertyWinsOverAnAppFieldOfTheSameName {
+    // The app fields go in first. The event properties go in last. The value below is not the real
+    // OS version, so the rule matches only if the event's own value is the one that was read.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:CLTAP_OS_VERSION equals:@"99.9"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ CLTAP_OS_VERSION: @"99.9" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testACampaignIsNotEligibleWhenTheAppFieldHasAnotherValue {
+    // The opposite of the first test. It shows that the first test passes because the value
+    // matched, and not because every rule matches.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:CLTAP_OS_VERSION equals:@"99.9"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqual(0, [[self eligibleCampaigns] count]);
 }
 
 @end

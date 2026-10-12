@@ -302,7 +302,7 @@ static CTDataValidator *_eventDataValidator;
         event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
-        CleverTapLogStaticDebug(@"Failed to build the Native Display %@ event. The event is not raised. Reason: %@", clicked ? @"Clicked" : @"Viewed", e.reason);
+        CleverTapLogNDStaticDebug(@"Failed to build the Native Display %@ event. The event is not raised. Reason: %@", clicked ? @"Clicked" : @"Viewed", e.reason);
         completion(nil, nil);
     }
 }

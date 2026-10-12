@@ -143,10 +143,11 @@ public final class CTNdFCManager: NSObject {
         return "\(type(of: self)):\(config.accountId):\(deviceId)"
     }
 
+    /// The prefix is added here. Every line this class writes then carries it.
     private func log(_ message: String) {
         CTLogger.logWithLevel(Int32(config.logLevel.rawValue),
                               type: CTLogType.debug.rawValue,
-                              message: message)
+                              message: "\(CLTAP_ND_LOG_PREFIX) \(message)")
     }
 
     // MARK: - Which accounts have caps
