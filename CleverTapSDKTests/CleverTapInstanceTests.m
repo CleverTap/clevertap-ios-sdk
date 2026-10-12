@@ -15,7 +15,6 @@
 #import "CleverTap+Tests.h"
 #import <OCMock/OCMock.h>
 #import "CTConstants.h"
-#import "CTFlattenedEventData.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CleverTapInternal.h"
