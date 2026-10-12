@@ -47,4 +47,19 @@
     return self;
 }
 
+- (NSDictionary<NSString *, id> *)metaDataForContentAtIndex:(NSInteger)contentIndex {
+    if (contentIndex < 0 || contentIndex >= (NSInteger)_contents.count) {
+        CleverTapLogStaticDebug(@"DisplayUnit: content index %ld out of range for unit %@",
+                                (long)contentIndex, _unitID);
+        return @{};
+    }
+    NSDictionary *metaData = _contents[contentIndex].metaData;
+    if (!metaData) {
+        CleverTapLogStaticDebug(@"DisplayUnit: No metadata for content index %ld of unit %@, event will have no item attribution",
+                                (long)contentIndex, _unitID);
+        return @{};
+    }
+    return metaData;
+}
+
 @end

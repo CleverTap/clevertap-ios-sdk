@@ -8,7 +8,11 @@
 #import <XCTest/XCTest.h>
 #import "CTTriggerAdapter.h"
 #import "CTTriggerCondition.h"
-#import "CTTriggerRadius.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTTriggerAdapterTest : XCTestCase
 @end
