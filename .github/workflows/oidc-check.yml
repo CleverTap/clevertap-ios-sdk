@@ -1,0 +1,21 @@
+name: OIDC check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume iOS SDK upload role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::062484260092:role/System-GithubOidcS3Sync-C-GithubActionsS3SyncIAMRol-Im3zys2rZMOA
+          aws-region: eu-west-1
+
+      - name: Show caller identity
+        run: aws sts get-caller-identity
