@@ -66,8 +66,10 @@ static CTDataValidator *_eventDataValidator;
     }
     NSString *cleanedEventName = nameResult.cleanedData;
     if (nameResult.outcome == CTValidationOutcomeWarning) {
-        CleverTapLogStaticDebug(@"%@: Event name modified - %@", self, nameResult.errorDesc);
-        [errors addObject:nameResult];
+        for (CTValidationResult *warning in nameResult.subResults) {
+            CleverTapLogStaticDebug(@"%@: Event name modified - %@", self, warning.errorDesc);
+        }
+        [errors addObjectsFromArray:nameResult.subResults];
     }
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -93,6 +95,7 @@ static CTDataValidator *_eventDataValidator;
         completion(event, errors);
     }
     @catch (NSException *e) {
+        CleverTapLogStaticDebug(@"%@: Failed to build the event '%@'. The event is not raised. Reason: %@", self, eventName, e.reason);
         completion(nil, errors);
     }
 }
@@ -105,6 +108,7 @@ static CTDataValidator *_eventDataValidator;
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
     
     if (chargeDetails == nil || items == nil) {
+        CleverTapLogStaticDebug(@"%@: The Charged event is not raised because %@ is missing. Both the details and the items are required.", self, chargeDetails == nil ? @"the details" : @"the items");
         completion(nil, errors);
         return;
     }
@@ -140,6 +144,8 @@ static CTDataValidator *_eventDataValidator;
             if (![itemResult shouldDrop]) {
                 NSDictionary *itemDetails = itemResult.cleanedData;
                 [jsonItemsArray addObject:itemDetails];
+            } else {
+                CleverTapLogStaticDebug(@"%@: One item of the Charged event is not included. Reason: %@", self, itemResult.errorDesc);
             }
         }
         evtData[CLTAP_CHARGED_EVENT_ITEMS] = jsonItemsArray;
@@ -147,6 +153,7 @@ static CTDataValidator *_eventDataValidator;
         chargedEvent[CLTAP_EVENT_DATA] = evtData;
         completion(chargedEvent, errors);
     } @catch (NSException *e) {
+        CleverTapLogStaticDebug(@"%@: Failed to build the Charged event. The event is not raised. Reason: %@", self, e.reason);
         completion(nil, errors);
     }
 }
@@ -295,6 +302,7 @@ static CTDataValidator *_eventDataValidator;
         event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
+        CleverTapLogStaticDebug(@"Failed to build the Native Display %@ event. The event is not raised. Reason: %@", clicked ? @"Clicked" : @"Viewed", e.reason);
         completion(nil, nil);
     }
 }

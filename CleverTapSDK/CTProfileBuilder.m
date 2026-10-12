@@ -7,7 +7,6 @@
 #import "CTUtils.h"
 #import "CTPropertyKeyValidator.h"
 #import "CTDataValidator.h"
-#import "CTFlattenedEventData.h"
 
 @implementation CTProfileBuilder
 static CTPropertyKeyValidator *_profileKeyValidator;

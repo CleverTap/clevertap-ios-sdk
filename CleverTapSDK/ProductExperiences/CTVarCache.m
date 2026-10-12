@@ -2,8 +2,12 @@
 #import "CTUtils.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
-#import "ContentMerger.h"
 #import "CTEncryptionManager.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTVarCache()
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *valuesFromClient;

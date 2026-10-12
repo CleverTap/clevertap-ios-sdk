@@ -559,4 +559,83 @@
     XCTAssertNil(evtData[@"wzrk_element_id"]);
 }
 
+#pragma mark - Display Unit element-view params merging
+
+/// The element-level viewed path (`-recordDisplayUnitElementViewedEventForID:`)
+/// builds with `clicked:NO`, so it must raise Notification Viewed while merging
+/// per-slide attribution exactly as the clicked path does.
+- (void)testBuildDisplayViewStateEvent_viewed_raisesViewedEventWithMergedParams {
+    NSDictionary *unitJson = @{
+        @"wzrk_id": @"1234",
+        @"wzrk_pivot": @"wzrk_default"
+    };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+    NSDictionary *params = @{
+        @"wzrk_element_id": @"1907971814",
+        @"wzrk_index": @"0"
+    };
+    
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:NO
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:params
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+    
+    XCTAssertEqualObjects(captured[CLTAP_EVENT_NAME], CLTAP_NOTIFICATION_VIEWED_EVENT_NAME);
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    XCTAssertEqualObjects(evtData[@"wzrk_element_id"], @"1907971814");
+    XCTAssertEqualObjects(evtData[@"wzrk_index"], @"0");
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"1234");
+    XCTAssertEqualObjects(evtData[@"wzrk_pivot"], @"wzrk_default");
+}
+
+#pragma mark - Warnings reported for the event name
+
+- (void)test_build_withNormalizedEventName_reportsTheChangeNotACount {
+    // The results pushed for an event name are what ends up in wzrk_error, so they
+    // must carry the real message. The aggregate they come from only holds a count.
+    [CTEventBuilder build:@"Product \"viewed" withEventActions:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertEqualObjects(event[CLTAP_EVENT_NAME], @"Product viewed");
+        XCTAssertEqual(errors.count, 1);
+
+        CTValidationResult *warning = errors.firstObject;
+        XCTAssertEqual(warning.errorCode, CTValidationErrorInvalidCharacters);
+        XCTAssertTrue([warning.errorDesc containsString:@"was normalized to"],
+                      @"expected the actual change, got '%@'", warning.errorDesc);
+        XCTAssertFalse([warning.errorDesc containsString:@"validation warnings"],
+                       @"the count aggregate must not be reported");
+    }];
+}
+
+- (void)test_build_withTruncatedEventName_reportsBothChanges {
+    NSString *longName = [@"" stringByPaddingToLength:1025 withString:@"a" startingAtIndex:0];
+
+    [CTEventBuilder build:longName withEventActions:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertEqual(((NSString *)event[CLTAP_EVENT_NAME]).length, 1024U);
+        XCTAssertEqual(errors.count, 2);
+
+        NSMutableString *allMessages = [NSMutableString string];
+        for (CTValidationResult *warning in errors) {
+            XCTAssertFalse([warning.errorDesc containsString:@"validation warnings"],
+                           @"the count aggregate must not be reported");
+            [allMessages appendString:warning.errorDesc];
+        }
+        XCTAssertTrue([allMessages containsString:@"exceeds the limit"]);
+        XCTAssertTrue([allMessages containsString:@"was normalized to"]);
+    }];
+}
+
+- (void)test_build_withCleanEventName_reportsNoWarnings {
+    [CTEventBuilder build:@"Product viewed" withEventActions:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertEqualObjects(event[CLTAP_EVENT_NAME], @"Product viewed");
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
 @end
