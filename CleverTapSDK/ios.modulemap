@@ -34,6 +34,7 @@ framework module CleverTapSDK {
     header "CleverTap+PushPermission.h"
     header "CTJsonTemplateProducer.h"
     header "CTInAppStore.h"
+    header "CTLiveActivityDataQueue.h"
 
     // Internal headers required by CTSessionManager.swift and by the Swift files in
     // DisplayUnit/FrequencyCaps.
