@@ -1,6 +1,9 @@
 name: OIDC check
 
 on:
+  push:
+    branches:
+      - task/oidc-identity-check
   workflow_dispatch:
 
 permissions:
