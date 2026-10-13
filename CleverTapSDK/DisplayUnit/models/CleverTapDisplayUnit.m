@@ -40,7 +40,7 @@
             _contents = contentList;
             
         } @catch (NSException *e) {
-            CleverTapLogStaticDebug(@"Error intitializing CleverTapDisplayUnit: %@", e.reason);
+            CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" Error intitializing CleverTapDisplayUnit: %@", e.reason);
             return nil;
         }
     }
@@ -49,14 +49,14 @@
 
 - (NSDictionary<NSString *, id> *)metaDataForContentAtIndex:(NSInteger)contentIndex {
     if (contentIndex < 0 || contentIndex >= (NSInteger)_contents.count) {
-        CleverTapLogStaticDebug(@"DisplayUnit: content index %ld out of range for unit %@",
+        CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" Content index %ld out of range for unit %@",
                                 (long)contentIndex, _unitID);
         return @{};
     }
     NSDictionary *metaData = _contents[contentIndex].metaData;
     if (!metaData) {
-        CleverTapLogStaticDebug(@"DisplayUnit: No metadata for content index %ld of unit %@, event will have no item attribution",
-                                (long)contentIndex, _unitID);
+//        CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" No metadata for content index %ld of unit %@, event will have no item attribution",
+//                                (long)contentIndex, _unitID);
         return @{};
     }
     return metaData;

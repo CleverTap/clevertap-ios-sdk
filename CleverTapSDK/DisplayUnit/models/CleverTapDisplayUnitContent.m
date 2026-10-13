@@ -22,7 +22,7 @@
             if ([serverMetaData isKindOfClass:[NSDictionary class]]) {
                 [metaData addEntriesFromDictionary:serverMetaData];
             } else if (serverMetaData) {
-                CleverTapLogStaticDebug(@"DisplayUnit: Expected dictionary for metadata, got %@, event will have no item attribution",
+                CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" Expected dictionary for metadata, got %@, event will have no item attribution",
                                         NSStringFromClass([serverMetaData class]));
             }
             NSString *rawUrl = [_actionUrl isKindOfClass:[NSString class]] ? _actionUrl : nil;
@@ -57,7 +57,7 @@
                 }
             }
         } @catch (NSException *e) {
-            CleverTapLogStaticDebug(@"Error intitializing CleverTapDisplayUnitContent: %@", e.reason);
+            CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" Error intitializing CleverTapDisplayUnitContent: %@", e.reason);
             return nil;
         }
     }

@@ -229,4 +229,115 @@ final class CTNdEvaluationManagerTests {
     func anEmptyListComesBackEmpty() {
         #expect(evaluationManager.retainAppLaunchedWithinLimits([]).isEmpty)
     }
+
+    // MARK: - Picking the top priority band
+
+    /// One entry at the given priority. A nil priority leaves the key out, the way the server does
+    /// when the campaign was saved without one.
+    private func banded(_ ti: String, _ priority: Int?) -> [AnyHashable: Any] {
+        guard let priority else { return entry(ti: ti) }
+        return entry(ti: ti, extras: [CLTAP_INAPP_PRIORITY: NSNumber(value: priority)])
+    }
+
+    private func ids(_ entries: [[AnyHashable: Any]]) -> [String] {
+        return entries.map { CTNdFCManager.campaignId(from: $0) }
+    }
+
+    @Test("Only the highest band is delivered")
+    func onlyTheHighestBandIsDelivered() {
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70001", 3), banded("70002", 10), banded("70003", 5)],
+            stubs: [])
+
+        #expect(ids(selection.winners) == ["70002"])
+        #expect(selection.controlGroupAcknowledgements.isEmpty)
+    }
+
+    @Test("Every entry in the highest band is delivered")
+    func everyEntryInTheHighestBandIsDelivered() {
+        // Two campaigns can hold the same priority. Neither one beats the other. Both arrive. Only
+        // the band below them is dropped.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70001", 10), banded("70002", 5), banded("70003", 10)],
+            stubs: [])
+
+        #expect(ids(selection.winners) == ["70001", "70003"])
+    }
+
+    @Test("A missing priority reads as one")
+    func aMissingPriorityReadsAsOne() {
+        // In-app uses the same default. An entry without the key must not beat an entry that set a
+        // real priority.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70001", nil), banded("70002", 2)],
+            stubs: [])
+
+        #expect(ids(selection.winners) == ["70002"])
+    }
+
+    @Test("Two entries in one band are ordered by ti, oldest first")
+    func twoEntriesInOneBandAreOrderedByTiOldestFirst() {
+        // A campaign id is an epoch timestamp. The smaller value is the older campaign. It goes
+        // first. The order only shows when the account caps have room for one of the two.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("1791823174", 4), banded("1791788032", 4)],
+            stubs: [])
+
+        #expect(ids(selection.winners) == ["1791788032", "1791823174"])
+    }
+
+    @Test("A band holding only stubs does not end the walk")
+    func aBandHoldingOnlyStubsDoesNotEndTheWalk() {
+        // The user is in the control group for the top campaign. Nothing can be shown from that
+        // band. The next band down is then read. Its content arrives.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70002", 5)],
+            stubs: [banded("70001", 10)])
+
+        #expect(ids(selection.winners) == ["70002"])
+        // The stub is still acknowledged. The campaign would have been shown to a user outside its
+        // control group.
+        #expect(ids(selection.controlGroupAcknowledgements) == ["70001"])
+    }
+
+    @Test("A stub below the winning band is not acknowledged")
+    func aStubBelowTheWinningBandIsNotAcknowledged() {
+        // The walk stops at the winning band. A campaign below it never had a turn. It would not
+        // have been shown to a user outside its control group either. There is nothing to report.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70001", 10)],
+            stubs: [banded("70002", 3)])
+
+        #expect(ids(selection.winners) == ["70001"])
+        #expect(selection.controlGroupAcknowledgements.isEmpty)
+    }
+
+    @Test("A stub inside the winning band is acknowledged")
+    func aStubInsideTheWinningBandIsAcknowledged() {
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [banded("70001", 10)],
+            stubs: [banded("70002", 10)])
+
+        #expect(ids(selection.winners) == ["70001"])
+        #expect(ids(selection.controlGroupAcknowledgements) == ["70002"])
+    }
+
+    @Test("A response of nothing but stubs acknowledges them all")
+    func aResponseOfNothingButStubsAcknowledgesThemAll() {
+        // No band holds content. The walk reaches the end. Every stub is acknowledged.
+        let selection = evaluationManager.selectTopPriorityBand(
+            content: [],
+            stubs: [banded("70001", 10), banded("70002", 3)])
+
+        #expect(selection.winners.isEmpty)
+        #expect(ids(selection.controlGroupAcknowledgements) == ["70001", "70002"])
+    }
+
+    @Test("Two empty lists come back empty")
+    func twoEmptyListsComeBackEmpty() {
+        let selection = evaluationManager.selectTopPriorityBand(content: [], stubs: [])
+
+        #expect(selection.winners.isEmpty)
+        #expect(selection.controlGroupAcknowledgements.isEmpty)
+    }
 }

@@ -31,7 +31,7 @@
     @synchronized (self) {
         NSArray *units = self.displayUnits;
         if (units.count == 0) {
-            CleverTapLogStaticDebug(@"DisplayUnit: Failed to return Display Units, nothing found in the cache");
+            CleverTapLogStaticDebug(CLTAP_ND_LOG_PREFIX @" Failed to return Display Units, nothing found in the cache");
             return nil;
         }
         return units;

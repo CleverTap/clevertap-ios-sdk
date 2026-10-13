@@ -48,7 +48,8 @@
 - (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries;
 - (NSArray<NSDictionary *> *)appLaunchedNativeDisplaysWithContent:(NSArray<NSDictionary *> *)entries;
 - (NSArray<NSDictionary *> *)appLaunchedNativeDisplayControlGroupStubs:(NSArray<NSDictionary *> *)entries;
-- (void)acknowledgeSuppressedNativeDisplays:(NSArray<NSDictionary *> *)stubs;
+- (NSArray *)appLaunchedNativeDisplaysToDeliver:(NSArray<NSDictionary *> *)entriesWithContent
+                              controlGroupStubs:(NSArray<NSDictionary *> *)stubs;
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit;
 - (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback;
 - (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp;
@@ -303,7 +304,7 @@ static NSString *const kOtherCampaignId = @"70002";
 #pragma mark Acknowledging the control group stubs
 
 - (void)testAStubInsideItsLimitsIsAcknowledged {
-    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
         CLTAP_INAPP_IS_SUPPRESSED: @YES
     }]]];
 
@@ -314,11 +315,27 @@ static NSString *const kOtherCampaignId = @"70002";
     // The campaign would not have been shown to a user outside the control group. The two halves of
     // the test have to be counted at the same moment. Acknowledging this stub would make the half
     // that sees nothing look larger than it is.
-    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
         CLTAP_INAPP_IS_SUPPRESSED: @YES,
         CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
     }]]];
 
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testAStubBelowTheWinningPriorityIsNotAcknowledged {
+    // The comparison stopped at the content entry. The stub's campaign never had a turn. It would
+    // not have been shown to a user outside its control group either.
+    NSDictionary *content = [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *stub = [self entryWithTi:kOtherCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_INAPP_PRIORITY: @3
+    }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[content]
+                                                          controlGroupStubs:@[stub]];
+
+    XCTAssertEqualObjects(@[content], delivered);
     XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
 }
 
@@ -328,7 +345,7 @@ static NSString *const kOtherCampaignId = @"70002";
     [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
     [self show:kOtherCampaignId times:1];
 
-    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
         CLTAP_INAPP_IS_SUPPRESSED: @YES
     }]]];
 
@@ -339,11 +356,41 @@ static NSString *const kOtherCampaignId = @"70002";
     // The send test path builds no Native Display evaluator. There is nothing to acknowledge there.
     self.cleverTap.ndEvaluationManager = nil;
 
-    [self.cleverTap acknowledgeSuppressedNativeDisplays:@[[self entryWithTi:kCampaignId extras:@{
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
         CLTAP_INAPP_IS_SUPPRESSED: @YES
     }]]];
 
     XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+#pragma mark Comparing the App-Launched campaigns on priority
+
+- (void)testOnlyTheHighestPriorityAppLaunchedCampaignsAreDelivered {
+    // The server sends every App-Launched candidate. It cannot pick between them. It does not know
+    // when the launch will happen. The device picks here.
+    NSDictionary *top = [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *alsoTop = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *lower = [self entryWithTi:@"70003" extras:@{ CLTAP_INAPP_PRIORITY: @3 }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[top, lower, alsoTop]
+                                                          controlGroupStubs:@[]];
+
+    XCTAssertEqualObjects((@[top, alsoTop]), delivered);
+}
+
+- (void)testAnEntryOverItsLimitsDoesNotTakeTheHighestPriority {
+    // The limits are read before the comparison. This entry would not be shown. The entry below it
+    // is delivered in its place.
+    NSDictionary *overLimits = [self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_PRIORITY: @10,
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }];
+    NSDictionary *lower = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @3 }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[overLimits, lower]
+                                                          controlGroupStubs:@[]];
+
+    XCTAssertEqualObjects(@[lower], delivered);
 }
 
 #pragma mark Cutting the App-Launched set down to the account caps

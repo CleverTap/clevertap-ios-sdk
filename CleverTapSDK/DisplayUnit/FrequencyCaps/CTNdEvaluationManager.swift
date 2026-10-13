@@ -326,6 +326,111 @@ public final class CTNdEvaluationManager: NSObject {
         }
     }
 
+    // MARK: - App-Launched priority arbitration
+
+    /// Picks the App-Launched entries to deliver. Every entry in the highest priority band wins.
+    ///
+    /// Campaigns that answer the same event compete with each other. The server does that comparison
+    /// for every other event. It cannot do it for App Launched. It does not know when the launch will
+    /// happen. It does not know the counts held on the device. So it sends every candidate and the
+    /// device compares them here.
+    ///
+    /// A band is one priority value. Bands are read from the highest value down. The first band that
+    /// holds content wins. Every entry in that band is delivered, so two campaigns at priority 10 are
+    /// both delivered. Every band below it is dropped.
+    ///
+    /// Both lists must already be checked against `whenTriggers` and `whenLimits`. See
+    /// `retainAppLaunchedWithinLimits(_:)`. An entry that failed those checks would not be shown. It
+    /// must not take the top band from an entry that would be.
+    ///
+    /// A control group stub in a band that is reached is acknowledged. Reaching that band means the
+    /// campaign would have been shown to a user outside the control group. A band that holds nothing
+    /// but stubs does not end the walk. Nothing is delivered from it. Its stubs are still
+    /// acknowledged. The walk carries on to the next band.
+    ///
+    /// - Parameters:
+    ///   - content: the entries that carry content.
+    ///   - stubs: the control group entries. They carry no content.
+    @objc(selectTopPriorityBandWithContent:stubs:)
+    public func selectTopPriorityBand(content: [[AnyHashable: Any]],
+                                      stubs: [[AnyHashable: Any]]) -> CTNdAppLaunchedSelection {
+        if content.isEmpty && stubs.isEmpty {
+            return CTNdAppLaunchedSelection(winners: [], controlGroupAcknowledgements: [])
+        }
+
+        // The flag marks an entry that carries content. A stub reads as false. Both kinds take part
+        // in the order. A stub holds a priority like any other entry.
+        let candidates = content.map { ($0, true) } + stubs.map { ($0, false) }
+        let sorted = candidates.enumerated().sorted { left, right in
+            let leftPriority = Self.priority(of: left.element.0)
+            let rightPriority = Self.priority(of: right.element.0)
+            if leftPriority != rightPriority { return leftPriority > rightPriority }
+
+            // The campaign id breaks a tie on priority. It is compared as text. A campaign id is an
+            // epoch timestamp, and every one of them has the same number of digits. Text order and
+            // number order are the same for values of one length. The smaller value is the older
+            // campaign. The older campaign goes first.
+            let leftId = CTNdFCManager.campaignId(from: left.element.0)
+            let rightId = CTNdFCManager.campaignId(from: right.element.0)
+            if leftId != rightId { return leftId < rightId }
+
+            // Two entries can match on both values. The position they arrived in then decides. Swift
+            // does not promise to keep the order of equal elements. This line keeps the result the
+            // same on every run.
+            return left.offset < right.offset
+        }.map { $0.element }
+
+        var winners: [[AnyHashable: Any]] = []
+        var acknowledgements: [[AnyHashable: Any]] = []
+        var droppedIds: [String] = []
+        var winningPriority = 0
+        var index = 0
+
+        while index < sorted.count {
+            let bandPriority = Self.priority(of: sorted[index].0)
+            var bandContent: [[AnyHashable: Any]] = []
+
+            while index < sorted.count, Self.priority(of: sorted[index].0) == bandPriority {
+                let (entry, hasContent) = sorted[index]
+                if hasContent {
+                    bandContent.append(entry)
+                } else {
+                    acknowledgements.append(entry)
+                }
+                index += 1
+            }
+
+            if !bandContent.isEmpty {
+                winners = bandContent
+                winningPriority = bandPriority
+                break
+            }
+        }
+
+        // Everything left over sits below the winning band. Those entries are dropped.
+        while index < sorted.count {
+            let (entry, hasContent) = sorted[index]
+            if hasContent { droppedIds.append(CTNdFCManager.campaignId(from: entry)) }
+            index += 1
+        }
+
+        if !droppedIds.isEmpty {
+            log("App-Launched Native Display delivered \(winners.count) campaign(s) at priority \(winningPriority). \(droppedIds.count) campaign(s) at a lower priority were held back: \(droppedIds.joined(separator: ", ")). Campaigns that answer the same event compete on priority.")
+        }
+
+        return CTNdAppLaunchedSelection(winners: winners, controlGroupAcknowledgements: acknowledgements)
+    }
+
+    /// The priority of one entry. A missing value reads as 1. In-app uses the same default.
+    ///
+    /// The server sends this as a number. A string that holds a number is read too.
+    private static func priority(of entry: [AnyHashable: Any]) -> Int {
+        let raw = entry[CLTAP_INAPP_PRIORITY]
+        if let number = raw as? NSNumber { return number.intValue }
+        if let text = raw as? String, let value = Int(text) { return value }
+        return 1
+    }
+
     // MARK: - Control group acknowledgements
 
     /// Records that a campaign was not shown because the user is in its control group.
@@ -492,5 +597,25 @@ public final class CTNdEvaluationManager: NSObject {
 
     public override var description: String {
         return "\(type(of: self)):\(accountId):\(deviceId)"
+    }
+}
+
+/// What `selectTopPriorityBand(content:stubs:)` decided.
+///
+/// The two lists are separate because they are used in different ways. A winner is shown to the
+/// user. An acknowledgement is only reported to the server.
+@objc(CTNdAppLaunchedSelection)
+public final class CTNdAppLaunchedSelection: NSObject {
+    /// The entries to deliver. They all hold the same priority.
+    @objc public let winners: [[AnyHashable: Any]]
+
+    /// The control group stubs to acknowledge. They sit in the winning band, or in a band above it
+    /// that held nothing else.
+    @objc public let controlGroupAcknowledgements: [[AnyHashable: Any]]
+
+    init(winners: [[AnyHashable: Any]], controlGroupAcknowledgements: [[AnyHashable: Any]]) {
+        self.winners = winners
+        self.controlGroupAcknowledgements = controlGroupAcknowledgements
+        super.init()
     }
 }

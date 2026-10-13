@@ -2320,7 +2320,7 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndEvaluationManager evaluateOnEvent:ndEventName withProps:ndEventData];
         }
     } @catch (NSException *e) {
-        CleverTapLogNDInternal(self.config.logLevel, @"%@: Native Display evaluation failed: %@", self, e.debugDescription);
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display evaluation failed: %@", self, e.debugDescription);
     }
 #endif
 }
@@ -2722,7 +2722,7 @@ static BOOL sharedInstanceErrorLogged;
         // Logged only when there was content to hold back. A response with nothing but caps must
         // not look like it lost something.
         if (jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY] || jsonResp[CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY]) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
+            CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Display Units response will not be handled due to user switch", self);
         }
         return;
     }
@@ -2754,7 +2754,7 @@ static BOOL sharedInstanceErrorLogged;
         // id. The device id has already changed by this point. Saving the rules would put the old
         // user's rules under the new user's key.
         if (self.isUserSwitching) {
-            CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display rules in this response were skipped because the user is being switched. The account caps in it were still saved. The next response after the switch brings the rules for the new user.", self);
+            CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display rules in this response were skipped because the user is being switched. The account caps in it were still saved. The next response after the switch brings the rules for the new user.", self);
             return;
         }
 
@@ -2764,13 +2764,13 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *serverSideNativeDisplays = jsonResp[CLTAP_ND_SS_JSON_RESPONSE_KEY];
         if ([serverSideNativeDisplays isKindOfClass:[NSArray class]]) {
             [self.ndStore storeServerSideNativeDisplays:serverSideNativeDisplays];
-            CleverTapLogNDInternal(self.config.logLevel, @"%@: Stored %lu Native Display rules", self, (unsigned long)serverSideNativeDisplays.count);
+            CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Stored %lu Native Display rules", self, (unsigned long)serverSideNativeDisplays.count);
         }
 
         // The control group acknowledgements are raised in the content step. See
-        // acknowledgeSuppressedNativeDisplays: below.
+        // appLaunchedNativeDisplaysToDeliver:controlGroupStubs: below.
     } @catch (NSException *e) {
-        CleverTapLogNDInternal(self.config.logLevel, @"%@: Failed to read the Native Display caps: %@", self, e.debugDescription);
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to read the Native Display caps: %@", self, e.debugDescription);
     }
 }
 
@@ -2788,15 +2788,16 @@ static BOOL sharedInstanceErrorLogged;
     // The first question to ask when a campaign does not appear is whether the server sent it at
     // all. Every other Native Display count in the log is taken after a filter has run. This one is
     // taken before any of them.
-    CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display response carried %lu unit(s) in %@ and %lu in %@. %lu of the App-Launched ones are control group stubs and hold no content.",
+    CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display response carried %lu unit(s) in %@ and %lu in %@. %lu of the App-Launched ones are control group stubs and hold no content.",
                       self,
                       (unsigned long)(hasDisplayUnits ? displayUnitJSON.count : 0), CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY,
                       (unsigned long)appLaunchedJSON.count, CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY,
                       (unsigned long)controlGroupStubs.count);
 
     // This runs before the check below. A response of nothing but stubs still has to acknowledge
-    // them.
-    [self acknowledgeSuppressedNativeDisplays:controlGroupStubs];
+    // them. The acknowledgements are a side effect of the call.
+    NSArray *appLaunchedToDeliver = [self appLaunchedNativeDisplaysToDeliver:appLaunchedWithContent
+                                                          controlGroupStubs:controlGroupStubs];
 
     // Only a response that brought content reaches the cache. A response of nothing but control
     // group stubs says nothing about what to show. The stubs were acknowledged above. The cache
@@ -2806,7 +2807,7 @@ static BOOL sharedInstanceErrorLogged;
     // A response that did bring content writes the cache even when every unit in it was later held
     // back by a cap. The cache must not keep serving a unit that is no longer allowed.
     if (!hasDisplayUnits && appLaunchedWithContent.count == 0) {
-        CleverTapLogNDInternal(self.config.logLevel, @"%@: This Native Display response carried no content, the cache was left as it is", self);
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: This Native Display response carried no content, the cache was left as it is", self);
         return;
     }
 
@@ -2815,9 +2816,7 @@ static BOOL sharedInstanceErrorLogged;
         [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
     }
 
-    NSArray *appLaunchedWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:appLaunchedWithContent];
-    NSArray *appLaunchedWithinGlobalCaps = [self appLaunchedNativeDisplaysWithinGlobalCaps:appLaunchedWithinLimits];
-    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithinGlobalCaps]];
+    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedToDeliver]];
 
     NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
@@ -2858,7 +2857,7 @@ static BOOL sharedInstanceErrorLogged;
                 // An empty list is written too. This response did carry Native Display units. None
                 // of them came through. The cache has to lose what it still holds. Otherwise
                 // getAllDisplayUnits returns a unit that is no longer allowed.
-                CleverTapLogNDInternal(strongSelf.config.logLevel, @"%@: No Native Display unit came through, the cache was cleared", strongSelf);
+                CleverTapLogInternal(strongSelf.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: No Native Display unit came through, the cache was cleared", strongSelf);
             }
         }];
     }];
@@ -2893,30 +2892,62 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
- Tells the server about the control group stubs that would have been shown.
+ The App-Launched entries to hand to the app. Acknowledges the control group stubs on the way.
+
+ Three steps run here, in this order.
+
+ First each list loses the entries that have used up their own limits. See
+ @c appLaunchedNativeDisplaysWithinLimits: below. Both lists are checked, not only the content one. A
+ stub takes part in the comparison in the next step.
+
+ Then the entries compete on priority. Campaigns that answer the same event compete with each other.
+ The server does that comparison for every other event. It cannot do it for App Launched. It does not
+ know when the launch will happen. So it sends every candidate and the device compares them. Only the
+ entries that hold the highest priority are handed over. See @c selectTopPriorityBandWithContent:
+ @c stubs: for how a tie and a control group stub are handled.
+
+ Last the account caps cut the winners down to the room they have left.
 
  A control group user gets a stub in place of the content. The acknowledgement is what stops the
  server from sending that stub again. Only App Launched needs this. For any other event the server
  handles the control group on its side and sends nothing.
 
- A stub is acknowledged only when it is still inside its own limits. The two halves of a control
- group test have to be counted at the same moment. The half that sees the campaign is counted when
- the campaign is shown. A campaign is shown only when its limits pass. A stub that has reached its
- limits would not have been shown. Counting it would make the half that sees nothing look larger
- than it is.
+ A stub is acknowledged only when it is still inside its own limits, and only when the priority
+ comparison reached it. The two halves of a control group test have to be counted at the same moment.
+ The half that sees the campaign is counted when the campaign is shown. A campaign is shown only when
+ it passes both of those steps. A stub that would not have been shown must not be counted. Counting
+ it would make the half that sees nothing look larger than it is.
 
- The account caps are not applied here. A stub shows nothing. It takes no room from the campaigns
- that do.
+ The account caps do not stop an acknowledgement. A stub shows nothing. It takes no room from the
+ campaigns that do.
 
- @c appLaunchedNativeDisplaysWithinLimits: drops every entry when the limit check fails. No stub is
- acknowledged in that case. A stub the server hears nothing about is sent again later.
+ The evaluator is missing on the send test path. No entry is acknowledged there, and no comparison is
+ made. The content passes through to the account caps.
+
+ A failure drops every App-Launched entry and acknowledges nothing. A stub the server hears nothing
+ about is sent again later. The failure is caught here, so content in @c adUnit_notifs still arrives.
  */
-- (void)acknowledgeSuppressedNativeDisplays:(NSArray<NSDictionary *> *)stubs {
-    if (stubs.count == 0 || !self.ndEvaluationManager) return;
+- (NSArray *)appLaunchedNativeDisplaysToDeliver:(NSArray<NSDictionary *> *)entriesWithContent
+                              controlGroupStubs:(NSArray<NSDictionary *> *)stubs {
+    NSArray *contentWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:entriesWithContent];
+    if (!self.ndEvaluationManager) {
+        return [self appLaunchedNativeDisplaysWithinGlobalCaps:contentWithinLimits];
+    }
+    NSArray *stubsWithinLimits = [self appLaunchedNativeDisplaysWithinLimits:stubs];
 
-    for (NSDictionary *stub in [self appLaunchedNativeDisplaysWithinLimits:stubs]) {
+    CTNdAppLaunchedSelection *selection = nil;
+    @try {
+        selection = [self.ndEvaluationManager selectTopPriorityBandWithContent:contentWithinLimits
+                                                                        stubs:stubsWithinLimits];
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to compare the App-Launched Native Display campaigns on priority, so those units were dropped: %@", self, e.debugDescription);
+        return @[];
+    }
+
+    for (NSDictionary *stub in selection.controlGroupAcknowledgements) {
         [self.ndEvaluationManager recordSuppressedNativeDisplay:stub];
     }
+    return [self appLaunchedNativeDisplaysWithinGlobalCaps:selection.winners];
 }
 
 /**
@@ -2925,6 +2956,11 @@ static BOOL sharedInstanceErrorLogged;
  App-Launched campaigns are not listed in @c adUnit_notifs_ss. Each entry carries its own
  @c frequencyLimits and @c occurrenceLimits. The SDK never reports them in @c adUnit_eval. This is
  the only place those limits are applied.
+
+ This runs on the content entries and on the control group stubs. Both lists then take part in the
+ priority comparison. See @c appLaunchedNativeDisplaysToDeliver:controlGroupStubs: above. An entry
+ that is over its limits would not be shown. It must not take the highest priority from an entry that
+ would be.
 
  The evaluator is missing on the send test path. That path applies no limits. The entries pass
  through.
@@ -2937,7 +2973,7 @@ static BOOL sharedInstanceErrorLogged;
     @try {
         return [self.ndEvaluationManager retainAppLaunchedWithinLimits:entries];
     } @catch (NSException *e) {
-        CleverTapLogNDInternal(self.config.logLevel, @"%@: Failed to check the App-Launched Native Display limits, so those units were dropped: %@", self, e.debugDescription);
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to check the App-Launched Native Display limits, so those units were dropped: %@", self, e.debugDescription);
         return @[];
     }
 }
@@ -2954,7 +2990,9 @@ static BOOL sharedInstanceErrorLogged;
  in that response sees the same counts there. A set of three would all pass with room for one. The
  running total kept here is what stops a single response from going over.
 
- Entries are taken in the order the server sent them. That order is the campaign priority.
+ Every entry that reaches this point holds the same priority. See
+ @c appLaunchedNativeDisplaysToDeliver:controlGroupStubs: above. The order they arrive in decides
+ which of them gets the last slot. That order is the campaign id, oldest first.
 
  Two kinds of entry are handed over without using up any of the room. The first is an entry that does
  not take part in the caps. A view of it never reaches the counts the server reads. A campaign that
@@ -2981,7 +3019,7 @@ static BOOL sharedInstanceErrorLogged;
             remaining--;
             continue;
         }
-        CleverTapLogNDDebug(self.config.logLevel, @"%@: App-Launched Native Display campaign %@ was dropped. The account caps have no room left for it in this response.", self, campaignId);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: App-Launched Native Display campaign %@ was dropped. The account caps have no room left for it in this response.", self, campaignId);
     }
     return withinGlobalCaps;
 }
@@ -3032,7 +3070,7 @@ static BOOL sharedInstanceErrorLogged;
         if (campaignId.length == 0) {
             // No id means nothing to store a count under. Showing it is the safer mistake. Holding
             // it back would hide a campaign for a reason nobody can see.
-            CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display unit %@ has no ti, so its caps cannot be checked", self, unit.unitID);
+            CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display unit %@ has no ti, so its caps cannot be checked", self, unit.unitID);
             [withinCaps addObject:unit];
             [noCampaignIdLabels addObject:[self nativeDisplayLabelFor:unit]];
             continue;
@@ -3053,7 +3091,7 @@ static BOOL sharedInstanceErrorLogged;
             }
         } else {
             [heldBackIds addObject:campaignId];
-            CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display campaign %@ held back by its frequency caps. %@.", self, campaignId, heldBackReason);
+            CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display campaign %@ held back by its frequency caps. %@.", self, campaignId, heldBackReason);
         }
     }
 
@@ -3103,7 +3141,7 @@ static BOOL sharedInstanceErrorLogged;
          (unsigned long)noCampaignIdLabels.count,
          [self nativeDisplayLabelListText:noCampaignIdLabels]];
     }
-    CleverTapLogNDDebug(self.config.logLevel, @"%@: %@", self, summary);
+    CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: %@", self, summary);
 }
 
 /// Writes a list of ids for the summary line. An empty list adds nothing to that line.
@@ -3151,7 +3189,7 @@ static BOOL sharedInstanceErrorLogged;
     NSString *source = unitJSON[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil
         ? @"the unit content"
         : [NSString stringWithFormat:@"the campaign's rule in %@", CLTAP_ND_SS_JSON_RESPONSE_KEY];
-    CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display campaign %@ was let through by %@, read from %@. Without that flag it would have been held back. %@.",
+    CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display campaign %@ was let through by %@, read from %@. Without that flag it would have been held back. %@.",
                       self, campaignId, CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS, source, reasonWithoutFlag);
 }
 
@@ -3171,7 +3209,7 @@ static BOOL sharedInstanceErrorLogged;
     if (capManagedDeliveredCount == 0) return;
 
     if (self.sentCappedNativeDisplaysToApp && !self.appReportedANativeDisplayView) {
-        CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display units with frequency caps have been delivered more than once and none has been reported as viewed. The caps cannot work until the app calls recordDisplayUnitViewedEventForID: for every unit it shows.", self);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display units with frequency caps have been delivered more than once and none has been reported as viewed. The caps cannot work until the app calls recordDisplayUnitViewedEventForID: for every unit it shows.", self);
     }
     self.sentCappedNativeDisplaysToApp = YES;
 }
@@ -5723,11 +5761,11 @@ static BOOL sharedInstanceErrorLogged;
     // initializeNativeDisplaySupport in initWithConfig:andCleverTapID:. Native Display is not set
     // up in either case. Nothing would hold the reply.
     if (_config.analyticsOnly || [CTUIUtils runningInsideAppExtension]) {
-        CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display metadata fetch skipped. This instance does not run Native Display.", self);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display metadata fetch skipped. This instance does not run Native Display.", self);
         return;
     }
 
-    CleverTapLogNDDebug(self.config.logLevel, @"%@: Fetching Native Display metadata with wzrk_fetch t %ld", self, (long)kCTNdFetchTypeMeta);
+    CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Fetching Native Display metadata with wzrk_fetch t %ld", self, (long)kCTNdFetchTypeMeta);
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT,
                        CLTAP_EVENT_DATA: @{@"t": @(kCTNdFetchTypeMeta)}}
             withType:CleverTapEventTypeFetch];
@@ -5776,13 +5814,13 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)setDisplayUnitDelegate:(id<CleverTapDisplayUnitDelegate>)delegate {
     if ([CTUIUtils runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: setDisplayUnitDelegate is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: setDisplayUnitDelegate is a no-op in an app extension.", self);
         return;
     }
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapDisplayUnitDelegate)]) {
         _displayUnitDelegate = delegate;
     } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Display Unit Delegate does not conform to the CleverTapDisplayUnitDelegate protocol", self);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: CleverTap Display Unit Delegate does not conform to the CleverTapDisplayUnitDelegate protocol", self);
     }
 }
 
@@ -5799,7 +5837,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!notification || [notification count] <= 0 || !notification[@"wzrk_adunit"]) return NO;
     
     @try {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Received display unit from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_adunit"];
 
@@ -5822,16 +5860,16 @@ static BOOL sharedInstanceErrorLogged;
                         }
                     }];
                 } @catch (NSException *e) {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
+                    CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
                 }
             });
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the display unit as JSON", self);
+            CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to parse the display unit as JSON", self);
             return YES;
         }
         
     } @catch (NSException *e) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
         return YES;
     }
     
@@ -5844,7 +5882,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
     if (!self.displayUnitCache) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: DisplayUnit: Failed to get all Display Units", self);
+        CleverTapLogInternal(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to get all Display Units", self);
         return nil;
     }
     return [self.displayUnitCache getAllDisplayUnits];
@@ -5852,7 +5890,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
     if (!self.displayUnitCache) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: Failed to get Display Unit for ID %@, nothing found in the cache", self, unitID);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Failed to get Display Unit for ID %@, nothing found in the cache", self, unitID);
         return nil;
     }
     return [self.displayUnitCache getDisplayUnitForID:unitID];
@@ -5872,9 +5910,16 @@ static BOOL sharedInstanceErrorLogged;
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit {
     if (!self.ndFCManager) return;
 
+    if (!displayUnit) {
+        // The app reported a view for an ID the cache no longer holds. A later response can drop a
+        // unit from the cache. The app may still hold the old ID on screen.
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: A view was reported for a Native Display unit that is not in the cache. The view was not counted.", self);
+        return;
+    }
+
     NSString *campaignId = [CTNdFCManager campaignIdFrom:displayUnit.json];
     if (campaignId.length == 0) {
-        CleverTapLogNDDebug(self.config.logLevel, @"%@: Native Display unit %@ has no ti, so it cannot be counted", self, displayUnit.unitID);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Native Display unit %@ has no ti, so it cannot be counted", self, displayUnit.unitID);
         return;
     }
 
@@ -6014,7 +6059,7 @@ static BOOL sharedInstanceErrorLogged;
                              additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
     if (!displayUnit) {
-        CleverTapLogInfo(self.config.logLevel, @"%@: DisplayUnit: No Display Unit found for ID %@, Clicked event will have no campaign attribution", self, unitID);
+        CleverTapLogInfo(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: No Display Unit found for ID %@, Clicked event will have no campaign attribution", self, unitID);
     }
     // Build params: additionalProperties first (which should carry wzrk_element_id
     // and other wzrk_* attribution fields from BE-injected action metadata).
@@ -6047,7 +6092,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordDisplayUnitElementViewedEventForID:(NSString *)unitID additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
     if (!displayUnit) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: No Display Unit found for ID %@, Viewed event will have no campaign attribution", self, unitID);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: No Display Unit found for ID %@, Viewed event will have no campaign attribution", self, unitID);
     }
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
@@ -6099,7 +6144,7 @@ static BOOL sharedInstanceErrorLogged;
         out[key] = value;
     }
     if (droppedKeys.count > 0) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: DisplayUnit: Property dropped - invalid key or null value: %@", self, [droppedKeys componentsJoinedByString:@", "]);
+        CleverTapLogDebug(self.config.logLevel, CLTAP_ND_LOG_PREFIX @" %@: Property dropped - invalid key or null value: %@", self, [droppedKeys componentsJoinedByString:@", "]);
     }
     return out.count > 0 ? [out copy] : nil;
 }
