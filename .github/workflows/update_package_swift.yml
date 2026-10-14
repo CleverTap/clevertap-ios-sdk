@@ -12,6 +12,7 @@ on:
       - develop
 
 permissions:
+  id-token: write
   contents: write
 
 jobs:
@@ -103,11 +104,14 @@ jobs:
           echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
           echo "🔢 Checksum computed: $CHECKSUM"
 
+      - name: Assume iOS SDK upload role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::062484260092:role/System-GithubOidcS3Sync-C-GithubActionsS3SyncIAMRol-Im3zys2rZMOA
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Upload to S3
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
           VERSION=$(cat sdk-version.txt)
@@ -171,12 +175,16 @@ jobs:
           git push origin develop
           echo "✅ Package.swift changes committed and pushed successfully"
 
+      - name: Assume iOS SDK upload role for invalidation
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::062484260092:role/System-GithubOidcS3Sync-C-GithubActionsS3SyncIAMRol-Im3zys2rZMOA
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Invalidate CloudFront Cache
         if: always()
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
           CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DIST_ID }}
         run: |
           echo "Triggering CloudFront invalidation..."
