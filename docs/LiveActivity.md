@@ -16,17 +16,18 @@ This guide covers everything you need to integrate the feature.
 ## Table of contents
 
 1. [Requirements](#1-requirements)
-2. [Step 1 — Enable Live Activities capability](#step-1--enable-live-activities-capability)
-3. [Step 2 — Define your ActivityAttributes](#step-2--define-your-activityattributes)
-4. [Step 3 — Build the Widget (Live Activity UI)](#step-3--build-the-widget-live-activity-ui)
-5. [Step 4 — Register Push‑to‑Start](#step-4--register-push-to-start)
-6. [Step 5 — Record impressions](#step-5--record-impressions)
-7. [Step 6 — Record clicks (deep links)](#step-6--record-clicks-deep-links)
-8. [Lifecycle events reference](#lifecycle-events-reference)
-9. [The `wzrk` attribution object](#the-wzrk-attribution-object)
-10. [Multi‑instance (multiple CleverTap accounts)](#multi-instance-multiple-cleventap-accounts)
-11. [onUserLogin behaviour](#onuserlogin-behaviour)
-12. [Platform limitations](#platform-limitations)
+2. [Step 1 — Add a Widget Extension target](#step-1--add-a-widget-extension-target)
+3. [Step 2 — Enable capabilities (Push Notifications + Live Activities)](#step-2--enable-capabilities-push-notifications--live-activities)
+4. [Step 3 — Define your ActivityAttributes](#step-3--define-your-activityattributes)
+5. [Step 4 — Build the Widget (Live Activity UI)](#step-4--build-the-widget-live-activity-ui)
+6. [Step 5 — Register Push‑to‑Start](#step-5--register-pushtostart)
+7. [Step 6 — Record impressions](#step-6--record-impressions)
+8. [Step 7 — Record clicks (deep links)](#step-7--record-clicks-deep-links)
+9. [Lifecycle events reference](#lifecycle-events-reference)
+10. [The `wzrk` attribution object](#the-wzrk-attribution-object)
+11. [Multi‑instance (multiple CleverTap accounts)](#multiinstance-multiple-clevertap-accounts)
+12. [onUserLogin behaviour](#onuserlogin-behaviour)
+13. [Platform limitations](#platform-limitations)
 
 ---
 
@@ -37,15 +38,74 @@ This guide covers everything you need to integrate the feature.
 | iOS (Push‑to‑Start Live Activities) | **17.2+** |
 | CleverTap iOS SDK | **7.9.0+** |
 | Xcode | 15+ |
-| A **Widget Extension** target | required (renders the activity UI) |
+| A **Widget Extension** target | required (renders the activity UI) — see [Step 1](#step-1--add-a-widget-extension-target) |
+| **Push Notifications** capability | required (activities are driven over APNs) — see [Step 2](#step-2--enable-capabilities-push-notifications--live-activities) |
 
 > Live Activities **do not run in the Simulator** — test on a physical device.
 
 ---
 
-## Step 1 — Enable Live Activities capability
+## Step 1 — Add a Widget Extension target
 
-Add these keys to your **app target's** `Info.plist`:
+A Live Activity's UI is rendered by a **Widget Extension**, not by your app — so if your project
+doesn't have one yet, create it first.
+
+In Xcode: **File → New → Target… → Widget Extension**. Name it (e.g. `FoodOrderWidget`), and
+**tick "Include Live Activity"** before finishing. That checkbox is what generates the
+`ActivityConfiguration` scaffold you'll fill in later — without it you get a plain home‑screen
+widget. Accept the prompt to activate the new scheme.
+
+Xcode then creates the extension target, embeds it in your app, and adds
+`NSSupportsLiveActivities` to the **app target's** `Info.plist`.
+
+Check these on the new target before moving on:
+
+| Setting | Value |
+|---------|-------|
+| **Minimum Deployment** | **iOS 16.2+** (the sample uses 16.2; Push‑to‑Start itself needs a 17.2 device) |
+| **Bundle Identifier** | must be a child of your app's — e.g. app `com.example.app` → widget `com.example.app.FoodOrderWidget` (Xcode does this for you) |
+| `NSExtensionPointIdentifier` | `com.apple.widgetkit-extension` in the extension's `Info.plist` |
+
+> **Do not add the CleverTap SDK to the widget extension.** Every CleverTap call in this guide is
+> made from the **app** target. The extension only needs ActivityKit, WidgetKit and SwiftUI — the
+> one file the two targets share is your `ActivityAttributes` (see
+> [Step 3](#step-3--define-your-activityattributes)), which is why that struct must not import
+> `CleverTapSDK`.
+
+---
+
+## Step 2 — Enable capabilities (Push Notifications + Live Activities)
+
+### Push Notifications capability — required
+
+CleverTap starts, updates and ends Live Activities over **APNs**, and both token streams the SDK
+listens to (`pushToStartTokenUpdates` and `pushTokenUpdates`) are APNs tokens. Without the
+entitlement iOS never issues them: no token reaches CleverTap, and **no activity ever starts** —
+with no error raised.
+
+On your **app target** → *Signing & Capabilities* → **+ Capability** → **Push Notifications**.
+Xcode adds the entitlement:
+
+```xml
+<!-- YourApp.entitlements -->
+<key>aps-environment</key>
+<string>development</string>   <!-- Xcode switches this to "production" for release builds -->
+```
+
+Also ensure the App ID used by your provisioning profile has **Push Notifications** enabled in the
+Apple Developer portal.
+
+> Add this to the **app target only** — the Widget Extension does not need it.
+>
+> This is *separate* from the notification permission prompt. Live Activities do not depend on the
+> user accepting `UNUserNotificationCenter` authorization; they have their own switch
+> (**Settings → [your app] → Live Activities**), which the SDK reports via
+> `ActivityAuthorizationInfo().areActivitiesEnabled`. The capability is still mandatory either way.
+
+### Live Activities Info.plist keys
+
+Add these keys to your **app target's** `Info.plist` (if you checked *Include Live Activity* in
+Step 1, Xcode has already added `NSSupportsLiveActivities` — verify it, and add the second key):
 
 ```xml
 <key>NSSupportsLiveActivities</key>
@@ -63,10 +123,12 @@ Add these keys to your **app target's** `Info.plist`:
 
 ---
 
-## Step 2 — Define your ActivityAttributes
+## Step 3 — Define your ActivityAttributes
 
 Create a struct conforming to `ActivityAttributes`. **Share this file with both the app target and
-the widget extension target** (check both in File Inspector → Target Membership).
+the widget extension target** — select the file, open the File Inspector (⌥⌘1) and tick **both**
+targets under *Target Membership*. Both sides must compile the *same* type, or the widget cannot
+render the activity your app registered for.
 
 Two rules make CleverTap attribution work:
 
@@ -107,13 +169,10 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     struct Wzrk: Codable, Hashable {
         var wzrk_activityId: String?    // your activity id
         var wzrk_activityType: Int?
-        var wzrk_id: String?            // campaign id — a composite STRING, e.g. "17847_20260916"
-        var wzrk_acct_id: String?       // account id (used for multi‑instance validation)
+        var wzrk_id: String?            // campaign id
+        var wzrk_acct_id: String?       // account id
         var wzrk_rnv: Bool?             // JSON key is "W$rnv" (mapped below)
 
-        // A plain CodingKeys raw value maps the backend's "W$rnv" JSON key onto the wzrk_rnv
-        // property — no custom init/encode needed. The SDK normalizes any remaining "W$…" keys
-        // to "wzrk_…" when it builds the event payload (mirrors how push renames the prefix).
         enum CodingKeys: String, CodingKey {
             case wzrk_activityId, wzrk_activityType, wzrk_id, wzrk_acct_id
             case wzrk_rnv = "W$rnv"
@@ -124,20 +183,29 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
 
 > ⚠️ **Type correctness is critical.** `ActivityAttributes` is `Codable`; if a declared field's type
 > doesn't match the JSON the backend sends (e.g. you declare `wzrk_id: Int` but the backend sends
-> the string `"17847_20260916"`), the **entire** attributes decode throws and the activity **fails
-> to start**. Declare `wzrk_id` as `String`. Any `wzrk_*` key you want in the recorded events must
-> be declared here — undeclared keys are silently dropped on decode.
+> the string, the **entire** attributes decode throws and the activity **fails
+> to start**. Declare `wzrk_id` as `String`.
 
 ---
 
-## Step 3 — Build the Widget (Live Activity UI)
+## Step 4 — Build the Widget (Live Activity UI)
 
-In your **Widget Extension**, add an `ActivityConfiguration` for your attributes. Set a
+In the Widget Extension you created in [Step 1](#step-1--add-a-widget-extension-target), add an
+`ActivityConfiguration` for your attributes (replacing the stub Xcode generated). Set a
 `widgetURL` on **both** the Lock Screen view and the Dynamic Island so a tap can be recorded as a
-click (see [Step 6](#step-6--record-clicks-deep-links)).
+click (see [Step 7](#step-7--record-clicks-deep-links)).
+
+> 📝 **Build the Live Activity UI to suit your app.** The layout, copy and styling are entirely
+> yours — CleverTap does not impose or render any UI. The snippet below is a **sample for a food
+> order** activity; use it as a shape to follow, not a template to copy. Only two things in this
+> step are CleverTap requirements:
+>
+> 1. `widgetURL` set on **both** the Lock Screen and the Dynamic Island, so taps can be recorded
+>    as clicks.
+> 2. the deep link built with `URLComponents`, so a `wzrk_activityId` containing reserved
+>    characters survives the round trip.
 
 ```swift
-import ActivityKit
 import WidgetKit
 import SwiftUI
 
@@ -147,10 +215,13 @@ struct FoodOrderLiveActivityWidget: Widget {
         ActivityConfiguration(for: FoodOrderActivityAttributes.self) { context in
             // Lock Screen / banner
             FoodOrderLockScreenView(attributes: context.attributes, state: context.state)
-                .widgetURL(Self.clickURL(for: context.attributes))   // ← required on Lock Screen
+                .widgetURL(Self.clickURL(for: context.attributes))
         } dynamicIsland: { context in
             DynamicIsland {
-                // expanded regions …
+                // Your Dynamic Island expanded UI goes here.
+                DynamicIslandExpandedRegion(.center) {
+                    Text(context.state.status)
+                }
             } compactLeading: {
                 Image(systemName: "bag.fill")
             } compactTrailing: {
@@ -158,7 +229,7 @@ struct FoodOrderLiveActivityWidget: Widget {
             } minimal: {
                 Image(systemName: "bag.fill")
             }
-            .widgetURL(Self.clickURL(for: context.attributes))       // ← required on Dynamic Island
+            .widgetURL(Self.clickURL(for: context.attributes))
         }
     }
 
@@ -181,9 +252,90 @@ struct FoodOrderLiveActivityWidget: Widget {
 > `widgetURL` must be set on **each surface separately** — setting it only on the Dynamic Island
 > means Lock Screen taps are not delivered to your app.
 
+### The Lock Screen view
+
+`FoodOrderLockScreenView` above is your own SwiftUI view — ActivityKit hands it the static
+`attributes` and the current `ContentState`, and re‑renders it on every update push. Nothing here
+is CleverTap‑specific; lay it out however you like:
+
+```swift
+@available(iOS 17.2, *)
+struct FoodOrderLockScreenView: View {
+    let attributes: FoodOrderActivityAttributes
+    let state: FoodOrderActivityAttributes.ContentState
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .top) {
+                Image(systemName: "fork.knife.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.orange)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(attributes.restaurantName).font(.headline)
+                    Text(attributes.orderSummary)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text("ETA").font(.caption2).foregroundColor(.secondary)
+                    Text("\(state.estimatedDelivery) min")
+                        .font(.caption)
+                        .monospacedDigit()
+                        .fontWeight(.semibold)
+                }
+            }
+
+            Text(state.status)
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            ProgressView(value: Double(state.progressStep), total: 3.0)
+                .tint(.orange)
+        }
+    }
+}
+```
+
+> Read **only** `attributes` and `state` here. A Live Activity view is rendered by the widget
+> extension in a separate process — it cannot reach your app's memory, and it gets no network or
+> CleverTap access.
+
+`SwiftStarter/FoodOrderWidget/FoodOrderLiveActivityWidget.swift` has a richer version of this view
+(a four‑stage progress track instead of the single `ProgressView`) plus the fully populated
+`DynamicIsland` regions the snippet above abbreviates.
+
+### Make the widget the extension's entry point
+
+A `Widget` on its own is never loaded. The extension's `@main` must be a `WidgetBundle` listing
+it — Xcode generates this file with the target, so just make sure your Live Activity widget
+appears in the body:
+
+```swift
+import WidgetKit
+import SwiftUI
+
+@main
+struct FoodOrderWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        if #available(iOS 17.2, *) {
+            FoodOrderLiveActivityWidget()
+        }
+    }
+}
+```
+
+> The `if #available` is required because the widget is annotated `@available(iOS 17.2, *)`;
+> without it the bundle won't compile. (The sample uses `16.2` throughout — the Live Activity
+> *UI* only needs 16.2, it's Push‑to‑Start that requires 17.2.)
+>
+> If the backend starts an activity and you see the `Started` event, but nothing renders on the
+> Lock Screen, a missing or mismatched `WidgetBundle` entry is the first thing to check.
+
 ---
 
-## Step 4 — Register Push‑to‑Start
+## Step 5 — Register Push‑to‑Start
 
 Call `registerPushToStart` **as early as possible** in `didFinishLaunchingWithOptions` (iOS only
 generates a PTS token on the first launch after a device restart). This is a Swift‑generic API.
@@ -202,8 +354,7 @@ func application(_ application: UIApplication,
     if #available(iOS 17.2, *) {
         CleverTap.sharedInstance()?.registerPushToStart(
             Activity<FoodOrderActivityAttributes>.self,
-            name: "FoodOrderActivityAttributes"   // SDK-internal label — stable & unique per type
-                                                  // (struct name is a convenient choice, not required)
+            name: "FoodOrderActivityAttributes"
         )
     }
     return true
@@ -240,7 +391,7 @@ import ActivityKit
 
 ---
 
-## Step 5 — Record impressions
+## Step 6 — Record impressions
 
 Impression is an **opt‑in, client‑side** event — your app decides *when* an activity counts as
 "shown". ActivityKit has no literal "on screen" callback, so use the `.active` state as the proxy.
@@ -259,13 +410,18 @@ import CleverTapSDK
 @available(iOS 17.2, *)
 final class LiveActivityImpressionObserver {
     static let shared = LiveActivityImpressionObserver()
+    private init() {}
 
     func start() {
-        for activity in Activity<FoodOrderActivityAttributes>.activities { recordIfShown(activity) }
-        Task {
+        // Activities already running at launch — this is also the path that covers a push‑to‑start
+        // arriving while the app was killed, since iOS background‑launches the app for it.
+        for activity in Activity<FoodOrderActivityAttributes>.activities {
+            recordIfShown(activity)
+        }
+        // Activities the backend starts while the app is alive (foreground or background).
+        Task { [weak self] in
             for await activity in Activity<FoodOrderActivityAttributes>.activityUpdates {
-                recordIfShown(activity)
-                Task { for await s in activity.activityStateUpdates where s == .active { self.recordIfShown(activity) } }
+                self?.recordIfShown(activity)
             }
         }
     }
@@ -283,6 +439,24 @@ final class LiveActivityImpressionObserver {
 // In didFinishLaunchingWithOptions, after registerPushToStart:
 if #available(iOS 17.2, *) { LiveActivityImpressionObserver.shared.start() }
 ```
+
+Those two loops are all you need — between them they cover every app state, because Push‑to‑Start
+makes iOS launch or wake your app when the activity starts:
+
+| App state when the activity starts | Covered by |
+|------------------------------------|------------|
+| **Foreground** | `activityUpdates` |
+| **Background** (suspended) | `activityUpdates` — iOS wakes the app |
+| **Killed** | the `activities` loop — iOS background‑launches the app, so `start()` runs again |
+
+> Because `start()` must run on a background launch for the killed case to work, call it in
+> `didFinishLaunchingWithOptions` — not from a view controller or a foreground‑only hook.
+
+> **Optional hardening.** If you also want to catch an activity that is *not* `.active` the moment
+> you first see it (e.g. it was `.stale` at launch) and becomes `.active` later, additionally
+> observe `activity.activityStateUpdates` and call `recordIfShown` on `.active`. The sample's
+> `LiveActivityImpressionObserver` does this. It is not required for the three cases above, and the
+> SDK's de‑duplication means the extra calls cannot produce duplicate impressions.
 
 ### APIs
 
@@ -317,13 +491,11 @@ func recordLiveActivityImpression<Attributes: ActivityAttributes>(_ activity: Ac
 func recordLiveActivityImpression(wzrk: [AnyHashable: Any])
 ```
 
-An impression is recorded as a **"Notification Viewed"** event (same pipeline as a push impression).
-
 ---
 
-## Step 6 — Record clicks (deep links)
+## Step 7 — Record clicks (deep links)
 
-When the user taps the activity, iOS opens the `widgetURL` you set in [Step 3](#step-3--build-the-widget-live-activity-ui).
+When the user taps the activity, iOS opens the `widgetURL` you set in [Step 4](#step-4--build-the-widget-live-activity-ui).
 Handle it in your URL open handler: record the click, then route to your destination.
 
 ### Swift
@@ -331,7 +503,9 @@ Handle it in your URL open handler: record the click, then route to your destina
 ```swift
 func application(_ app: UIApplication, open url: URL,
                  options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    guard url.host == "liveactivity",
+    // Match the scheme too — host alone would also claim a universal link or another SDK's
+    // deep link that happens to use "liveactivity". Use the scheme you set in Step 4.
+    guard url.scheme == "yourapp", url.host == "liveactivity",
           let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return false }
     let tag = comps.queryItems?.first(where: { $0.name == "tag" })?.value ?? ""
 
@@ -375,8 +549,6 @@ func recordLiveActivityClicked<Attributes: ActivityAttributes>(_ activity: Activ
 /// - Parameter wzrk: the campaign dictionary (at minimum `wzrk_activityId` from the deep link).
 func recordLiveActivityClicked(wzrk: [AnyHashable: Any])
 ```
-
-A click is recorded as a **"Notification Clicked"** event (same pipeline as a push click).
 
 ---
 
