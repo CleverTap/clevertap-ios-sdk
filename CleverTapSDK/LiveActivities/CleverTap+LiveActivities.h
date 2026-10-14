@@ -8,20 +8,25 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- CleverTap Live Activities — Objective-C API surface.
+ CleverTap Live Activities — internal bridge. Not an API you call.
 
- The primary Live Activities API (`registerPushToStart`) is implemented as a
- **Swift generic method** and is available via `CleverTap+LiveActivities.swift`.
- It cannot be expressed as an Objective-C method because it accepts
- `Activity<Attributes>` generic types from ActivityKit (a Swift-only framework).
+ There is no Objective-C Live Activities API. This category declares no methods.
+ All it does is say that `CleverTap` conforms to the internal
+ `CTLiveActivityDataQueue` protocol, so the Swift manager can queue events and
+ tokens. `CleverTap+LiveActivities.m` implements that conformance.
 
- This category conforms `CleverTap` to the internal `CTLiveActivityDataQueue`
- protocol, bridging the Swift Live Activities manager to the ObjC-only
- `pushLiveActivityData:` method.
+ Everything an app calls lives in `CleverTap+LiveActivities.swift` and is
+ Swift-only: `registerPushToStart`, and both forms of
+ `recordLiveActivityImpression` / `recordLiveActivityClicked`.
 
- The impression / click APIs (`recordLiveActivityImpression(wzrk:)` /
- `recordLiveActivityClicked(wzrk:)`) are exposed to Objective-C via `@objc` in
- `CleverTap+LiveActivities.swift` and do not need a separate declaration here.
+ Why there is no `@objc` here: `registerPushToStart` takes an
+ `Activity<Attributes>` generic, which Objective-C cannot express at all. And
+ marking the others `@objc` would make the generated `CleverTapSDK-Swift.h`
+ import the module umbrella, which breaks apps that link the SDK statically
+ (Flutter / React Native without `use_frameworks!`).
+
+ If an Objective-C app delegate needs to report a click,
+ wrap the Swift call in a small `@objc` class of your own.
 
  ## Swift integration — Push-to-Start (iOS 17.2+)
  ```swift

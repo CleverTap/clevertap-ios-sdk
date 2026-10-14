@@ -4,12 +4,12 @@
 import ActivityKit
 import Foundation
 
-// MARK: - UserDefaults key for persisting tracked activities across launches
-// Keyed by `liveActivityId` (the ActivityKit `activity.id`); stores
-// { activityName, wzrk(JSON), started } so that, on the next launch, activities that vanished
-// while the app was terminated (dismissed / ended / expired) can be reported, and so the
-// "Started" state is not re-raised for an already-reported one.
-private let kCTLAActivityStoreKey = "CLTAP_LA_ACTIVITY_STORE"
+#if canImport(CleverTapSDK.Private)
+import CleverTapSDK.Private
+#endif
+
+// MARK: - Storage key suffix for persisting tracked activities across launches
+private let kCTLAActivityStoreSuffix = "CLTAP_LA_ACTIVITY_STORE"
 
 // Keys used inside each persisted activity record.
 private let kCTLAStoreActivityName = "activityName"
@@ -45,8 +45,14 @@ final class CTLiveActivityManager: NSObject {
     private weak var cleverTap: CleverTap?
     private weak var dataQueue: (any CTLiveActivityDataQueue)?
 
+    /// Account-scoped key for the persisted activity store ("<accountId>:<suffix>"). Captured at
+    /// init so it stays available even after `cleverTap` is released.
+    private let storeKey: String
+
     /// Active observation tasks keyed by `"act_<id>"`, `"__pts__<name>"`, `"__updates__<name>"`.
     private var tasks: [String: Task<Void, Never>] = [:]
+    /// Guards this instance's in-memory maps and its read-modify-write of `storeKey`. An instance
+    /// lock is sufficient because the key is per-account — two instances no longer share a store.
     private let lock = NSLock()
 
     /// Latest push-to-start token per activity-type name (for resend on user switch).
@@ -69,6 +75,8 @@ final class CTLiveActivityManager: NSObject {
     init(cleverTap: CleverTap) {
         self.cleverTap = cleverTap
         self.dataQueue = cleverTap as? CTLiveActivityDataQueue
+        self.storeKey = CTPreferences.storageKey(withSuffix: kCTLAActivityStoreSuffix,
+                                                 config: cleverTap.config)
         super.init()
         if dataQueue == nil {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.info.rawValue, message: "CTLiveActivityManager: CleverTap instance does not conform to CTLiveActivityDataQueue; no Live Activity token or event will be sent")
@@ -295,11 +303,13 @@ final class CTLiveActivityManager: NSObject {
     // `evtData` is the `wzrk` dictionary from the activity payload.
 
     func recordLiveActivityImpression(wzrk: [AnyHashable: Any]) {
+        guard wzrkTargetsThisInstance(wzrk, "impression (Notification Viewed)") else { return }
         dataQueue?.recordLiveActivityViewedEvent(withData: wzrk)
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded Live Activity impression (Notification Viewed).")
     }
 
     func recordLiveActivityClicked(wzrk: [AnyHashable: Any]) {
+        guard wzrkTargetsThisInstance(wzrk, "click (Notification Clicked)") else { return }
         dataQueue?.recordLiveActivityClickedEvent(withData: wzrk)
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded Live Activity click (Notification Clicked).")
     }
@@ -316,7 +326,11 @@ final class CTLiveActivityManager: NSObject {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: impression already recorded for '\(activity.id)'; skipping.")
             return
         }
-        recordLiveActivityImpression(wzrk: Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state))
+        let wzrk = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
+        // Checked before the flag is written: a dropped impression must not mark itself reported,
+        // or it would permanently suppress the impression on the instance that owns the activity.
+        guard wzrkTargetsThisInstance(wzrk, "impression (Notification Viewed)") else { return }
+        recordLiveActivityImpression(wzrk: wzrk)
         setImpressionReported(activityID: activity.id)
     }
 
@@ -352,10 +366,37 @@ final class CTLiveActivityManager: NSObject {
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: device id changed; ended \(entries.count) activity(ies) for old user and re-sent \(pts.count) PTS token(s).")
     }
 
+    // MARK: - Multi-instance account guard
+
+    /// Returns `true` when `wzrk` belongs to this instance's account.
+    ///
+    /// An app may run one `CleverTap` instance per account, but `Activity.activities` is
+    /// process-global — so EVERY manager sees EVERY activity and would otherwise send tokens and
+    /// events for activities owned by another account.
+    ///
+    /// `CleverTap.m` has the same check (`ct_liveActivityWzrkTargetsThisInstance:`) but it only
+    /// covers the three event entry points, and it runs after the SDK has already done the work.
+    /// Checking here, before anything is sent, additionally covers the **token** path
+    /// (`pushLiveActivityData:` carries no `wzrk_acct_id`, so the ObjC guard can never gate it)
+    /// and stops the wrong instance writing a `started`/`impressed` flag for an event that would
+    /// then be dropped.
+    ///
+    /// Fails open, matching the ObjC guard: a payload with no `wzrk_acct_id` imposes no constraint.
+    private func wzrkTargetsThisInstance(_ wzrk: [AnyHashable: Any], _ action: String) -> Bool {
+        // Key mirrors CLTAP_WZRK_ACCT_ID in CTConstants.h.
+        guard let acctId = wzrk["wzrk_acct_id"] as? String, !acctId.isEmpty else { return true }
+        guard let myAcctId = cleverTap?.config.accountId, !myAcctId.isEmpty else { return true }
+        guard acctId != myAcctId else { return true }
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: \(action) dropped — wzrk_acct_id '\(acctId)' does not match this instance's account '\(myAcctId)'. Use the CleverTap instance that owns the activity.")
+        return false
+    }
+
     // MARK: - Private: lifecycle events (via Notification Viewed pipeline)
 
     private func reportActivityStartedIfNeeded(activityID: String, wzrk: [String: Any]) {
         guard !isStartedReported(activityID: activityID) else { return }
+        // Checked before the flag is written: a dropped event must not mark itself reported.
+        guard wzrkTargetsThisInstance(wzrk, "'Live Activity' (Started)") else { return }
         recordLifecycleEvent(state: kCTLAStateStarted, wzrk: wzrk)
         setStartedReported(activityID: activityID)
     }
@@ -363,6 +404,7 @@ final class CTLiveActivityManager: NSObject {
     /// Sends the single "Live Activity" event. `evtData` is the `wzrk` dictionary plus a `state`
     /// field ("Started" / "Updated" / "Ended" / "Dismissed").
     private func recordLifecycleEvent(state: String, wzrk: [String: Any]) {
+        guard wzrkTargetsThisInstance(wzrk, "'Live Activity' (\(state))") else { return }
         var props = wzrk
         props["state"] = state
         // Sent through the Notification Viewed pipeline, not the public recordEvent: API.
@@ -378,6 +420,10 @@ final class CTLiveActivityManager: NSObject {
     // MARK: - Private: backend communication (data channel — token BE contract)
 
     private func sendActivityToken(_ tokenData: Data, liveActivityId: String, wzrk: [String: Any]) {
+        // The token payload carries no `wzrk_acct_id`, so `pushLiveActivityData:` cannot gate it
+        // downstream — without this check the wrong account would register an update token and
+        // could then address an activity it does not own.
+        guard wzrkTargetsThisInstance(wzrk, "activity token register") else { return }
         let tokenHex = Self.hex(from: tokenData)
         updateActivityToken(activityID: liveActivityId, tokenHex: tokenHex)
         var payload: [AnyHashable: Any] = [
@@ -397,6 +443,7 @@ final class CTLiveActivityManager: NSObject {
     }
 
     private func sendActivityDeactivate(liveActivityId: String, wzrk: [String: Any]) {
+        guard wzrkTargetsThisInstance(wzrk, "activity token unregister") else { return }
         var payload: [AnyHashable: Any] = [
             "type": "la",
             "action": "unregister",
@@ -577,7 +624,7 @@ final class CTLiveActivityManager: NSObject {
         if var record = store[activityID] {
             if let json = Self.wzrkJSON(wzrk) { record[kCTLAStoreWzrk] = json }
             store[activityID] = record
-            UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+            CTPreferences.put(store, forKey: storeKey)
         }
         lock.unlock()
     }
@@ -603,7 +650,7 @@ final class CTLiveActivityManager: NSObject {
         record[kCTLAStoreActivityName] = activityName
         if let wzrkJSON = Self.wzrkJSON(wzrk) { record[kCTLAStoreWzrk] = wzrkJSON }
         store[activityID] = record
-        UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+        CTPreferences.put(store, forKey: storeKey)
         lock.unlock()
     }
 
@@ -612,7 +659,7 @@ final class CTLiveActivityManager: NSObject {
         var store = storedActivityMap()
         if store[activityID] != nil {
             store.removeValue(forKey: activityID)
-            UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+            CTPreferences.put(store, forKey: storeKey)
         }
         lock.unlock()
     }
@@ -633,7 +680,7 @@ final class CTLiveActivityManager: NSObject {
         if var record = store[activityID] {
             record[kCTLAStoreStarted] = "1"
             store[activityID] = record
-            UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+            CTPreferences.put(store, forKey: storeKey)
         }
         lock.unlock()
     }
@@ -651,13 +698,13 @@ final class CTLiveActivityManager: NSObject {
         var record = store[activityID] ?? [:]
         record[kCTLAStoreImpressed] = "1"
         store[activityID] = record
-        UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+        CTPreferences.put(store, forKey: storeKey)
         lock.unlock()
     }
 
     /// Reads the raw store. Callers must hold `lock`.
     private func storedActivityMap() -> [String: [String: String]] {
-        return UserDefaults.standard.dictionary(forKey: kCTLAActivityStoreKey) as? [String: [String: String]] ?? [:]
+        return CTPreferences.getObjectForKey(storeKey) as? [String: [String: String]] ?? [:]
     }
 }
 
