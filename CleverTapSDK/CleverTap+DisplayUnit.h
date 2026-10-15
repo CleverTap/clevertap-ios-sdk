@@ -36,6 +36,18 @@
  */
 @property (nullable, nonatomic, copy, readonly) NSArray<CleverTapDisplayUnitContent *> *contents;
 
+/*!
+ @method metaDataForContentAtIndex:
+ @abstract Returns wzrk_* metadata for a content item.
+
+ Includes the wzrk_element_id, wzrk_index, wzrk_c2a, and wzrk_action / wzrk_data when applicable.
+ Returns an empty dictionary for an invalid index or when no item attribution is available.
+ 
+ @param contentIndex Zero-based index into contents.
+ */
+- (NSDictionary<NSString *, id> *_Nonnull)metaDataForContentAtIndex:(NSInteger)contentIndex
+NS_SWIFT_NAME(metaData(forContentAt:));
+
 @end
 
 /*!
@@ -92,6 +104,11 @@
  * mediaIsGif check whether mediaUrl is a gif.
  */
 @property (nonatomic, readonly, assign) BOOL mediaIsGif;
+/*!
+ * metaData contains this item's wzrk_* attribution, including server-provided
+ * metadata and SDK-derived iOS action/data. Returns nil when no metadata is available.
+ */
+@property (nullable, nonatomic, copy, readonly) NSDictionary<NSString *, id> *metaData;
 
 - (instancetype _Nullable )initWithJSON:(NSDictionary *_Nullable)jsonObject;
 
@@ -113,7 +130,7 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  This method returns all the display units.
 
  @return all units currently held, or @c nil if no cache has been installed
- yet or the cache holds no units. Matches the Android contract.
+ yet or the cache holds no units.
  */
 - (NSArray<CleverTapDisplayUnit *>*_Nullable)getAllDisplayUnits;
 
@@ -144,7 +161,18 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  
  @abstract
  Record Notification Viewed for display unit.
- 
+
+ @discussion
+ Call this every time your app shows a display unit. The SDK does not draw display units, so this
+ call is the only way it can know that one was shown.
+
+ Frequency caps need it. A campaign capped at three views a day is only held back after the SDK has
+ been told about those three views. If the call is missing, the cap never applies and the view counts
+ sent to CleverTap stay at zero.
+
+ Call it once per view. Every call counts as another view, so do not call it from somewhere that runs
+ more than once for a single display, such as a table or collection view cell being reused.
+
  @param unitID      unique id of the display unit
  */
 - (void)recordDisplayUnitViewedEventForID:(NSString *_Nonnull)unitID;
@@ -184,6 +212,28 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
                              additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
 
 /*!
+ @method recordDisplayUnitElementViewedEventForID:additionalProperties:
+
+ @abstract Element-level view attribution for Native Display units.
+
+ Raises the Notification Viewed event for a single child element of a Native Display
+ unit (e.g. one carousel slide coming on screen) instead of the whole unit.
+
+ @c evtData is assembled in two layers (later layers win on key collision):
+ 1. Caller's @c additionalProperties, merged verbatim — should include
+    @c wzrk_element_id and other @c wzrk_* attribution fields injected by
+    the BE into the action's @c metadata object.
+ 2. Cached unit's @c wzrk_* fields layered on top — so server-controlled
+    attribution always wins over same-named caller-supplied keys.
+
+ @param unitID                  the unitID of the Display Unit.
+ @param additionalProperties    optional per-element context (slide
+                                attribution, custom KVs, …).
+ */
+- (void)recordDisplayUnitElementViewedEventForID:(NSString *_Nonnull)unitID
+                            additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
+
+/*!
  @method
 
  @abstract
@@ -204,5 +254,23 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  @since 7.x.0
  */
 - (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache;
+
+/*!
+ @method
+
+ @abstract
+ Asks CleverTap for a fresh set of Native Display frequency cap rules.
+
+ @discussion
+ The SDK is given these rules when the app launches. Call this to ask for them again in the middle
+ of a session. The rules that arrive replace the ones the SDK already holds.
+
+ The rules do not arrive straight away. They come back on a later response from CleverTap. Any
+ display unit delivered before then is checked against the rules the SDK holds at that moment.
+
+ This call does nothing on an analytics only instance. It also does nothing inside an app extension.
+ Neither one shows display units.
+ */
+- (void)fetchNativeDisplayMeta;
 
 @end

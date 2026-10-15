@@ -1,6 +1,25 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.9.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.9.0) (October 15, 2026)
+#### Added
+- **Live Activities (iOS 17.2+):** Adds support for CleverTap-driven Live Activities using Apple's Push-to-Start model, so your backend can start, update, and end an activity through push without the user opening the app.
+    * `registerPushToStart(_:name:)` registers an `ActivityAttributes` type for Push-to-Start and forwards the push-to-start token to CleverTap. Call it early in `didFinishLaunchingWithOptions`.
+    * `recordLiveActivityImpression(_:)` and `recordLiveActivityClicked(_:)` raise the `Notification Viewed` and `Notification Clicked` events for an activity. Overloads taking the `wzrk` dictionary directly are also available.
+    * Lifecycle events - Started, Updated, Ended and Dismissed and activity token register or unregister states are handled automatically.
+    * **Note:** These APIs are Swift-only, since ActivityKit is a Swift-only framework. `ActivityKit` is linked as a weak framework, so apps on older deployment targets are unaffected. Live Activities are excluded from tvOS.
+    * See [docs/LiveActivity.md](docs/LiveActivity.md) for the full integration guide and the `SwiftStarter` sample app for a working reference.
+- **Native Display Frequency Caps:** Native Display campaigns now honour the frequency caps set in the dashboard. A campaign's own limits are evaluated on the device and only the eligible campaigns are reported to CleverTap, so content is not sent for a campaign that has already hit its cap. The account-wide daily and per-session caps are applied again at delivery, and capped units are dropped before they reach your app.
+    * New `fetchNativeDisplayMeta()` asks CleverTap for a fresh set of cap rules mid-session. Rules are also delivered on app launch. The refreshed rules arrive on a later response and replace the ones the SDK holds.
+    * **Note:** Caps are counted from `recordDisplayUnitViewedEventForID:`. The SDK does not draw display units, so a campaign is only held back once your app has told the SDK about those views. Call it once per view, and not from a reused table or collection view cell.
+- **Native Display Split of Clicks:** Adds per-element click and view attribution for Native Display units, so individual carousel slides can be tracked separately from the unit as a whole.
+    * New `recordDisplayUnitElementViewedEventForID:additionalProperties:` raises `Notification Viewed` for a single element of a unit.
+    * New `metaData(forContentAt:)` on `CleverTapDisplayUnit` and a `metaData` property on `CleverTapDisplayUnitContent` expose the `wzrk_*` attribution for a content item, so you can pass it back when recording the event.
+- **Recommendations Support in In-Apps and Native Display:** Adds support for In-App campaigns personalized with recommendations, ensuring only one In-App is shown on app launch. Native Display Units from a recommendations response are merged into the ones already delivered, matched by unit ID — they no longer replace the whole set.
+
+#### Fixed
+- Fixes a bug where event name and property validation warnings were accumulated on the validator and replayed on later calls. Warnings are now collected per call and the actual validation message is logged instead of a count.
+
 ### [Version 7.8.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.2) (September 4, 2026)
 #### Fixed
 - Fixes a bug where In-App campaigns triggered by custom events could not match device and app properties.

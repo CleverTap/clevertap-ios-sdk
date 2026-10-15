@@ -195,4 +195,37 @@
     XCTAssertNotNil(result);
 }
 
+#pragma mark - Concurrency
+
+- (void)test_validateEventData_concurrentCallsOnSharedValidator_doNotCrashOrLeakWarnings {
+    const NSInteger iterations = 2000;
+    NSDictionary *clean = @{@"name": @"Alice", @"score": @100};
+    NSDictionary *dirty = @{@"bad key!": @"", @"null": [NSNull null]};
+
+    XCTestExpectation *done = [self expectationWithDescription:@"concurrent validation"];
+    done.expectedFulfillmentCount = 2;
+
+    dispatch_queue_t q1 = dispatch_queue_create("test.validator.1", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t q2 = dispatch_queue_create("test.validator.2", DISPATCH_QUEUE_SERIAL);
+
+    dispatch_async(q1, ^{
+        for (NSInteger i = 0; i < iterations; i++) {
+            CTValidationResult *result = [self.validator validateEventData:clean];
+            // Clean input must never pick up warnings produced by the other queue.
+            XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+            XCTAssertEqualObjects(((NSDictionary *)result.cleanedData)[@"name"], @"Alice");
+        }
+        [done fulfill];
+    });
+    dispatch_async(q2, ^{
+        for (NSInteger i = 0; i < iterations; i++) {
+            CTValidationResult *result = [self.validator validateEventData:dirty];
+            XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+        }
+        [done fulfill];
+    });
+
+    [self waitForExpectationsWithTimeout:30 handler:nil];
+}
+
 @end

@@ -7,7 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+// This header is copied into PrivateHeaders of the built framework.
+// CleverTapInstanceConfig.h is copied into Headers, which is a different directory.
+// A quoted import looks only next to this file, so it fails there.
+// The angled form goes through the framework module instead.
+#if __has_include(<CleverTapSDK/CleverTapInstanceConfig.h>)
+#import <CleverTapSDK/CleverTapInstanceConfig.h>
+#else
 #import "CleverTapInstanceConfig.h"
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 

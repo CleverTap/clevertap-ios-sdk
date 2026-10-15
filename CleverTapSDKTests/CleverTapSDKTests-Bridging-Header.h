@@ -9,3 +9,12 @@
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
 #import "CTValidationConfig.h"
+#import "CTLimitAdapter.h"
+
+// Native Display. CTNdFCManagerTests.swift drives the managers through NdHelper, and calls the
+// evaluation manager's batch header method. That method takes a CTQueueType. CTQueueType.h comes in
+// with CTAttachToBatchHeaderDelegate.h.
+#import "CTImpressionManager.h"
+#import "CTInAppTriggerManager.h"
+#import "CTAttachToBatchHeaderDelegate.h"
+#import "NdHelper.h"

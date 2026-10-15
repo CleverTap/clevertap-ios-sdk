@@ -15,6 +15,9 @@
 #import "CleverTapInternal.h"
 #import "CTUtils.h"
 #import "CTCustomTemplatesManager-Internal.h"
+#if !defined(CLEVERTAP_TVOS)
+#import "CTContentFetchManager.h"
+#endif
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
 #else
@@ -24,6 +27,70 @@
 @implementation CleverTap(InAppsResponseHandler)
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp {
+    [self handleInAppResponse:jsonResp source:CTResponseSourceApp];
+}
+
+/*!
+ Open an app-launch arbitration window if this response's `content_fetch` will bring back more
+ app-launch in-apps.
+
+ Two conditions must hold, and both come from fields already present in the payload:
+
+ - `responseKey` names an in-app key. A content fetch for inbox or display units must not delay
+   an in-app.
+ - `eventName` is `App Launched`. Other events are out of scope: for them the server-side path
+   uses `inapp_notifs`, which has no selection step at all, so there is no "show exactly one"
+   guarantee to protect.
+ */
+- (void)openAppLaunchedArbitrationIfNeeded:(NSDictionary *)jsonResp {
+#if !defined(CLEVERTAP_TVOS)
+    // A window must never outlive the fetch that closes it. During a user switch the content
+    // fetch is skipped entirely, so its completion would never run and the window would suppress
+    // app-launch in-apps for the rest of the session. Do not open one.
+    if (self.isUserSwitching) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Not opening App Launched arbitration, content fetch is skipped during a user switch", self);
+        return;
+    }
+
+    NSArray<CTContentFetchItem *> *items = [CTContentFetchManager contentFetchItemsFromResponse:jsonResp];
+    if (items.count == 0) {
+        return;
+    }
+
+    NSMutableArray<NSString *> *targetIds = [NSMutableArray array];
+    NSMutableArray<NSDictionary *> *syntheticCandidates = [NSMutableArray array];
+    for (CTContentFetchItem *item in items) {
+        BOOL isAppLaunched = [item.eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT];
+        BOOL isInAppKey = [item.responseKey isEqualToString:CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
+        if (isAppLaunched && isInAppKey && item.targetId) {
+            [targetIds addObject:item.targetId];
+            NSDictionary *synthetic = item.syntheticInAppPayload;
+            if (synthetic) {
+                [syntheticCandidates addObject:synthetic];
+            }
+        }
+    }
+
+    if (targetIds.count == 0) {
+        return;
+    }
+
+    // All or nothing. Predicting from a partial set could miss the campaign that would actually
+    // have won, so unless every expected in-app came with its selection rules, wait for the real
+    // response instead. Today no payload carries them, so this is always the empty case.
+    BOOL canPredict = (syntheticCandidates.count == targetIds.count);
+    if (!canPredict && syntheticCandidates.count > 0) {
+        CleverTapLogDebug(self.config.logLevel,
+                          @"%@: Only %lu of %lu content fetch items carry selection rules, cannot predict — will wait",
+                          self, (unsigned long)syntheticCandidates.count, (unsigned long)targetIds.count);
+    }
+
+    [self.inAppEvaluationManager openAppLaunchedArbitrationWithTargetIds:targetIds
+                                                    syntheticCandidates:(canPredict ? syntheticCandidates : nil)];
+#endif
+}
+
+- (void)handleInAppResponse:(NSDictionary *)jsonResp source:(CTResponseSource)source {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (self.config.analyticsOnly || [CTUIUtils runningInsideAppExtension]) {
         return;
@@ -31,14 +98,27 @@
     
     // Parse global limits
     NSNumber *perSession = jsonResp[CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY];
-    if (perSession == nil) {
-        perSession = @10;
-    }
     NSNumber *perDay = jsonResp[CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY];
-    if (perDay == nil) {
-        perDay = @10;
+
+    if (source == CTResponseSourceContentFetch) {
+        // These caps are account state and /a1 is what carries it. A content fetch response is one
+        // campaign's content, so an absent key means "no opinion" rather than "reset to the
+        // default" — defaulting it here would silently raise a cap of 1 back to 10. Each key is
+        // applied only when present, matching how the Native Display caps already behave.
+        if (perSession != nil || perDay != nil) {
+            int resolvedPerDay = perDay != nil ? perDay.intValue : [self.inAppFCManager maxPerDayCount];
+            int resolvedPerSession = perSession != nil ? perSession.intValue : [self.inAppFCManager globalSessionMax];
+            [self.inAppFCManager updateGlobalLimitsPerDay:resolvedPerDay andPerSession:resolvedPerSession];
+        }
+    } else {
+        if (perSession == nil) {
+            perSession = @10;
+        }
+        if (perDay == nil) {
+            perDay = @10;
+        }
+        [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
     }
-    [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
     
 //     Legacy SS in-apps (inapp_notifs -> NORMAL/DELAYED in-app campaigns WITHOUT advance display rules)
     ImmediateAndDelayed *partitionedLegacyInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY]];
@@ -54,6 +134,13 @@
     if ([partitionedLegacyMetaInApps hasInActionInApps]) {
         // Schedule in-action timers
         [self.inAppDisplayManager scheduleInActionInApps:partitionedLegacyMetaInApps.inActionInApps];
+    }
+
+    // Defer app-launch display if this response also asked for a content fetch that will return
+    // more app-launch in-apps. Must happen before the evaluation below so the winner is buffered
+    // rather than shown. No-op unless such a fetch is actually pending.
+    if (source == CTResponseSourceApp) {
+        [self openAppLaunchedArbitrationIfNeeded:jsonResp];
     }
 
     // App launch SS in-apps (inapp_notifs_applaunched -> NORMAL/DELAYED in-app campaigns WITH/WITHOUT advance display rules on app launched event)
@@ -93,7 +180,13 @@
     // CS in-apps (inapp_notifs_cs)
     // Only process when the key is present in the response. When present (even as an
     // empty array), always store so that stopped campaigns are cleared from preferences.
-    if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]) {
+    if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY] && source == CTResponseSourceContentFetch) {
+        // storeClientSideInApps: replaces the whole store, and the clear-on-empty behaviour above
+        // means an empty array would wipe every client-side campaign — persisted, so it would
+        // survive until the next /a1. A content fetch response is not expected to carry this key;
+        // ignore it rather than clobber the store from a partial response.
+        CleverTapLogDebug(self.config.logLevel, @"%@: Ignoring %@ in a content fetch response", self, CLTAP_INAPP_CS_JSON_RESPONSE_KEY);
+    } else if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]) {
         ImmediateAndDelayed *partitionedClientSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]];
 
         NSArray *immediateInApps = partitionedClientSideInApps.immediateInApps;
