@@ -1,0 +1,980 @@
+//
+//  CTNdGateTest.m
+//  CleverTapSDKTests
+//
+//  Copyright © 2026 CleverTap. All rights reserved.
+//
+
+#import <XCTest/XCTest.h>
+#import <CleverTapSDK/CleverTap.h>
+#import "CleverTap+DisplayUnit.h"
+#import "CleverTapInternal.h"
+#import "CTConstants.h"
+#import "CTDeviceInfo.h"
+#import "CTImpressionManager.h"
+#import "CTTriggerCondition.h"
+// CTNdStore and CTNdFCManager are written in Swift. This is the generated header that declares them
+// to Objective-C. It also carries the members CTNdFCManager+Tests.h used to expose. An internal
+// member of an @objcMembers Swift class lands in that header, so the test can reach it without a
+// category.
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#import "NdHelper.h"
+
+/**
+ The Native Display gate and the helpers it uses. None of them has a header declaration.
+ @c CleverTapInstanceTests declares the private selectors it calls the same way.
+
+ The class extension in @c CleverTap.m declares all five properties readwrite. The setters already
+ exist. This only makes them visible to the test.
+ */
+@interface CleverTap (NdGateTests)
+
+@property (nonatomic, strong) CTNdStore *ndStore;
+@property (nonatomic, strong) CTNdFCManager *ndFCManager;
+@property (nonatomic, strong) CTNdEvaluationManager *ndEvaluationManager;
+@property (atomic, assign) BOOL sentCappedNativeDisplaysToApp;
+@property (atomic, assign) BOOL appReportedANativeDisplayView;
+/// Only the tests that raise an event set these two. @c generateAppFields reads both.
+@property (nonatomic, strong, readwrite) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+
+- (void)evaluateOnEvent:(NSDictionary *)event
+               withType:(CleverTapEventType)eventType
+     flattenedEventData:(CTFlattenedEventData *)flattenedEventData;
+- (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits;
+- (BOOL)nativeDisplayExcludesGlobalCaps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
+- (BOOL)nativeDisplayNeedsTimestamps:(NSDictionary *)unitJSON forCampaignId:(NSString *)campaignId;
+- (NSArray *)appLaunchedNativeDisplaysWithinLimits:(NSArray *)entries;
+- (NSArray *)appLaunchedNativeDisplaysWithinGlobalCaps:(NSArray *)entries;
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplaysWithContent:(NSArray<NSDictionary *> *)entries;
+- (NSArray<NSDictionary *> *)appLaunchedNativeDisplayControlGroupStubs:(NSArray<NSDictionary *> *)entries;
+- (NSArray *)appLaunchedNativeDisplaysToDeliver:(NSArray<NSDictionary *> *)entriesWithContent
+                              controlGroupStubs:(NSArray<NSDictionary *> *)stubs;
+- (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit;
+- (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback;
+- (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp;
+
+@end
+
+/// The campaign id. This is @c ti. Every store uses it as its key.
+static NSString *const kCampaignId = @"70001";
+/// The same campaign's wzrk_id. It is @c ti plus a suffix that changes on every send.
+static NSString *const kWzrkId = @"70001_20260810";
+/// A second campaign, for filling up the account caps without touching the first.
+static NSString *const kOtherCampaignId = @"70002";
+
+@interface CTNdGateTest : XCTestCase
+@property (nonatomic, strong) NdHelper *helper;
+@property (nonatomic, strong) CleverTap *cleverTap;
+@end
+
+@implementation CTNdGateTest
+
+- (void)setUp {
+    [super setUp];
+    self.helper = [NdHelper new];
+
+    // A bare CleverTap object. The real initialiser reads the device, opens the event queue, starts
+    // a session and talks to the network. The gate needs none of that. It reads three things:
+    // ndFCManager, ndStore and config.logLevel. The first two are set below. config stays nil. A
+    // nil config gives a log level of 0. The log lines are then skipped. dealloc only removes
+    // notification observers. An object built this way is safe to release.
+    self.cleverTap = [[CleverTap alloc] init];
+    self.cleverTap.ndStore = self.helper.ndStore;
+    self.cleverTap.ndFCManager = self.helper.ndFCManager;
+    self.cleverTap.ndEvaluationManager = self.helper.evaluationManager;
+}
+
+- (void)tearDown {
+    self.cleverTap = nil;
+    [self.helper tearDown];
+    [super tearDown];
+}
+
+#pragma mark Helpers
+
+/// A content unit with the shape the server sends. ti is a number here. Cap fields are added
+/// through the extras argument.
+///
+/// isNdFcapEnabled is on by default. The server puts it on every campaign it sends. A test for a
+/// campaign that is outside the caps passes it as NO through the extras argument.
+- (CleverTapDisplayUnit *)unitWithTi:(NSString *)ti {
+    return [self unitWithTi:ti extras:@{}];
+}
+
+- (CleverTapDisplayUnit *)unitWithTi:(NSString *)ti extras:(NSDictionary *)extras {
+    NSMutableDictionary *json = [@{
+        CLTAP_INAPP_ID: @([ti intValue]),
+        CLTAP_NOTIFICATION_ID_TAG: [ti stringByAppendingString:@"_20260810"],
+        CLTAP_ND_IS_FCAP_ENABLED: @YES,
+        @"type": @"simple"
+    } mutableCopy];
+    [json addEntriesFromDictionary:extras];
+    return [[CleverTapDisplayUnit alloc] initWithJSON:json];
+}
+
+/// Runs the gate and returns the campaign ids that came through, in the order they came through.
+- (NSArray<NSString *> *)gate:(NSArray<CleverTapDisplayUnit *> *)units {
+    NSMutableArray<NSString *> *ids = [NSMutableArray new];
+    for (CleverTapDisplayUnit *unit in [self.cleverTap nativeDisplayUnitsStillAllowedToShow:units]) {
+        [ids addObject:[CTNdFCManager campaignIdFrom:unit.json]];
+    }
+    return ids;
+}
+
+- (void)show:(NSString *)campaignId times:(int)times {
+    for (int i = 0; i < times; i++) {
+        [self.helper.ndFCManager didShowCampaign:campaignId storeTimestamp:NO countsTowardCaps:YES];
+    }
+}
+
+/// One raw entry, in the shape the server sends inside adUnit_notifs_applaunched. The limits are
+/// added through the extras argument. The App-Launched filter reads entries, not display units.
+- (NSDictionary *)entryWithTi:(NSString *)ti extras:(NSDictionary *)extras {
+    NSMutableDictionary *entry = [@{
+        CLTAP_INAPP_ID: @([ti intValue]),
+        CLTAP_NOTIFICATION_ID_TAG: [ti stringByAppendingString:@"_20260810"],
+        CLTAP_ND_IS_FCAP_ENABLED: @YES,
+        @"type": @"simple"
+    } mutableCopy];
+    [entry addEntriesFromDictionary:extras];
+    return entry;
+}
+
+/// Runs the App-Launched filter and returns the campaign ids that came through, in the order they
+/// came through.
+- (NSArray<NSString *> *)appLaunched:(NSArray *)entries {
+    NSMutableArray<NSString *> *ids = [NSMutableArray new];
+    for (NSDictionary *entry in [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]) {
+        [ids addObject:[CTNdFCManager campaignIdFrom:entry]];
+    }
+    return ids;
+}
+
+/// Runs the App-Launched account cap trim and returns the campaign ids that came through, in the
+/// order they came through.
+- (NSArray<NSString *> *)appLaunchedWithinGlobalCaps:(NSArray *)entries {
+    NSMutableArray<NSString *> *ids = [NSMutableArray new];
+    for (NSDictionary *entry in [self.cleverTap appLaunchedNativeDisplaysWithinGlobalCaps:entries]) {
+        [ids addObject:[CTNdFCManager campaignIdFrom:entry]];
+    }
+    return ids;
+}
+
+#pragma mark Which units go through the gate
+
+- (void)testAUnitOutsideTheCapsIsNotCheckedAtTheGate {
+    // No count moves when this unit is viewed. A cap it can never fill must not hold it back. The
+    // room would otherwise be lost to a campaign that does fill one.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[[self unitWithTi:kCampaignId
+                                                           extras:@{ CLTAP_ND_IS_FCAP_ENABLED: @NO }]]]);
+}
+
+- (void)testAUnitWithoutTheFlagIsNotCheckedAtTheGate {
+    // A missing flag means the same as a flag of NO. The session cap below is full.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *noFlag = [[CleverTapDisplayUnit alloc] initWithJSON:@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        @"type": @"simple"
+    }];
+
+    XCTAssertEqual(1, [[self.cleverTap nativeDisplayUnitsStillAllowedToShow:@[noFlag]] count]);
+}
+
+- (void)testAUnitCarryingNoCapFieldsIsStillHeldBackByTheAccountCap {
+    // The bug the marker check caused. This time it is checked at the gate. Native Display content
+    // has no efc, tlc, tdc or mdc on it. A gate that only checks units with one of those four never
+    // runs at all. The account caps belong to the account. The unit says nothing about them.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    XCTAssertEqualObjects(@[], [self gate:@[[self unitWithTi:kCampaignId]]]);
+}
+
+- (void)testAnAccountWithNoLimitsLetsEveryUnitThrough {
+    // ndmc and ndmp are new keys. A response may not carry them. An account that never receives
+    // them must behave exactly as it did before this feature.
+    [self show:kCampaignId times:50];
+    [self show:kOtherCampaignId times:50];
+
+    NSArray *expected = @[kCampaignId, kOtherCampaignId];
+    XCTAssertEqualObjects(expected, ([self gate:@[[self unitWithTi:kCampaignId],
+                                                  [self unitWithTi:kOtherCampaignId]]]));
+}
+
+- (void)testAUnitWithNoTiIsLetThroughEvenWhenTheAccountCapIsFull {
+    // No ti means nothing to store a count under. There is no cap to check. Showing it is the safer
+    // mistake. Holding it back would hide a campaign for a reason nobody can see.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *noTi = [[CleverTapDisplayUnit alloc] initWithJSON:@{
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        @"type": @"simple"
+    }];
+
+    XCTAssertEqual(1, [[self.cleverTap nativeDisplayUnitsStillAllowedToShow:@[noTi]] count]);
+}
+
+- (void)testTheGateKeepsTheOrderAndDropsOnlyTheUnitThatHasNoRoom {
+    // One campaign is an exception to the account caps. The other is not. Both arrive in the same
+    // response. Only one may come through. The rest of the list must not move.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70002,
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }]];
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:@"70003" times:1];
+
+    NSArray *expected = @[kOtherCampaignId];
+    XCTAssertEqualObjects(expected, ([self gate:@[[self unitWithTi:kCampaignId],
+                                                  [self unitWithTi:kOtherCampaignId]]]));
+}
+
+- (void)testAnEmptyResponseGivesAnEmptyResult {
+    XCTAssertEqualObjects(@[], [self gate:@[]]);
+}
+
+- (void)testThereIsNoGateWithoutAnFCManager {
+    // Analytics only instances and app extensions have no Native Display managers. Nothing is
+    // capped there. The list must come back untouched.
+    self.cleverTap.ndFCManager = nil;
+
+    NSArray *units = @[[self unitWithTi:kCampaignId]];
+    XCTAssertEqualObjects(units, [self.cleverTap nativeDisplayUnitsStillAllowedToShow:units]);
+}
+
+#pragma mark Handing the App-Launched entries to the evaluator
+
+// The limits themselves are checked in CTNdEvaluationManagerTests. These two cover the route into
+// that check, which only Objective-C can reach.
+
+- (void)testAnEntryOverItsLimitIsDropped {
+    // Proves the entries really do go through the evaluator. Nothing else on this path would drop
+    // this entry. It carries no cap field the account limits read.
+    NSDictionary *overLimit = [self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }];
+    NSDictionary *noLimits = [self entryWithTi:kOtherCampaignId extras:@{}];
+
+    NSArray *expected = @[kOtherCampaignId];
+    XCTAssertEqualObjects(expected, ([self appLaunched:@[overLimit, noLimits]]));
+}
+
+- (void)testThereIsNoLimitCheckWithoutAnEvaluator {
+    // The send test path builds no Native Display evaluator. Nothing is checked there. The list must
+    // come back untouched.
+    self.cleverTap.ndEvaluationManager = nil;
+
+    NSArray *entries = @[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }]];
+
+    XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinLimits:entries]);
+}
+
+#pragma mark Splitting the App-Launched batch
+
+- (void)testTheBatchIsSplitIntoContentAndControlGroupStubs {
+    // Every entry lands on exactly one side. The content side decides whether the cache is written.
+    // The stub side decides what is acknowledged.
+    NSDictionary *content = [self entryWithTi:kCampaignId extras:@{}];
+    NSDictionary *stub = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_IS_SUPPRESSED: @YES }];
+    NSArray *batch = @[content, stub];
+
+    XCTAssertEqualObjects(@[content], [self.cleverTap appLaunchedNativeDisplaysWithContent:batch]);
+    XCTAssertEqualObjects(@[stub], [self.cleverTap appLaunchedNativeDisplayControlGroupStubs:batch]);
+}
+
+- (void)testAnEntryWithoutTheSuppressedFlagCountsAsContent {
+    // Only a control group user receives the flag. Every other entry arrives without it.
+    NSArray *batch = @[[self entryWithTi:kCampaignId extras:@{}]];
+
+    XCTAssertEqual(1, [[self.cleverTap appLaunchedNativeDisplaysWithContent:batch] count]);
+    XCTAssertEqual(0, [[self.cleverTap appLaunchedNativeDisplayControlGroupStubs:batch] count]);
+}
+
+#pragma mark Acknowledging the control group stubs
+
+- (void)testAStubInsideItsLimitsIsAcknowledged {
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(1, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testAStubOverItsLimitsIsNotAcknowledged {
+    // The campaign would not have been shown to a user outside the control group. The two halves of
+    // the test have to be counted at the same moment. Acknowledging this stub would make the half
+    // that sees nothing look larger than it is.
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }]]];
+
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testAStubBelowTheWinningPriorityIsNotAcknowledged {
+    // The comparison stopped at the content entry. The stub's campaign never had a turn. It would
+    // not have been shown to a user outside its control group either.
+    NSDictionary *content = [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *stub = [self entryWithTi:kOtherCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_INAPP_PRIORITY: @3
+    }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[content]
+                                                          controlGroupStubs:@[stub]];
+
+    XCTAssertEqualObjects(@[content], delivered);
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testTheAccountCapsDoNotStopAnAcknowledgement {
+    // A stub shows nothing. It takes no room from the campaigns that do. The session cap below is
+    // full, and the stub is still acknowledged.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(1, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+- (void)testAStubWithANullPivotIsAcknowledgedWithTheDefault {
+    // The server can send a JSON null for wzrk_pivot. That arrives as NSNull. NSNull is a value like
+    // any other, so a plain fallback does not replace it. NSUserDefaults rejects NSNull, and saving
+    // the list would then raise. Every acknowledgement waiting to be sent would be lost.
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_NOTIFICATION_PIVOT: [NSNull null]
+    }]]];
+
+    NSArray *acknowledgements = self.helper.evaluationManager.suppressedNativeDisplays;
+    XCTAssertEqual(1, [acknowledgements count]);
+    XCTAssertEqualObjects(CLTAP_NOTIFICATION_PIVOT_DEFAULT,
+                          acknowledgements.firstObject[CLTAP_NOTIFICATION_PIVOT]);
+}
+
+- (void)testThereIsNoAcknowledgementWithoutAnEvaluator {
+    // The send test path builds no Native Display evaluator. There is nothing to acknowledge there.
+    self.cleverTap.ndEvaluationManager = nil;
+
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES
+    }]]];
+
+    XCTAssertEqual(0, [self.helper.evaluationManager.suppressedNativeDisplays count]);
+}
+
+#pragma mark Comparing the App-Launched campaigns on priority
+
+- (void)testOnlyTheHighestPriorityAppLaunchedCampaignsAreDelivered {
+    // The server sends every App-Launched candidate. It cannot pick between them. It does not know
+    // when the launch will happen. The device picks here.
+    NSDictionary *top = [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *alsoTop = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @10 }];
+    NSDictionary *lower = [self entryWithTi:@"70003" extras:@{ CLTAP_INAPP_PRIORITY: @3 }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[top, lower, alsoTop]
+                                                          controlGroupStubs:@[]];
+
+    XCTAssertEqualObjects((@[top, alsoTop]), delivered);
+}
+
+- (void)testAnEntryOverItsLimitsDoesNotTakeTheHighestPriority {
+    // The limits are read before the comparison. This entry would not be shown. The entry below it
+    // is delivered in its place.
+    NSDictionary *overLimits = [self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_PRIORITY: @10,
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onExactly", @"limit": @9 }]
+    }];
+    NSDictionary *lower = [self entryWithTi:kOtherCampaignId extras:@{ CLTAP_INAPP_PRIORITY: @3 }];
+
+    NSArray *delivered = [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[overLimits, lower]
+                                                          controlGroupStubs:@[]];
+
+    XCTAssertEqualObjects(@[lower], delivered);
+}
+
+#pragma mark Cutting the App-Launched set down to the account caps
+
+// The gate below reads counts that only change when the app reports a view. No view is reported
+// while one response is handled. These entries arrive together, so the running total is kept here
+// instead.
+
+- (void)testTheAppLaunchedSetIsCutDownToTheRoomLeftToday {
+    // Room for one. Three entries arrive. Each one on its own passes the gate, because the daily
+    // count does not move while this response is handled. Only the running total stops the other
+    // two.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testTheSessionCapCanBeTheOneThatDecides {
+    // The smaller of the two caps decides. Here the day has plenty of room. The session does not.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:100 andPerSession:2];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testAnAccountWithNoLimitsTakesTheWholeAppLaunchedSet {
+    // ndmc and ndmp are new keys. A response may not carry them. Such an account has no account
+    // level cap. Nothing here may cut the set down.
+    [self show:kOtherCampaignId times:50];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}],
+        [self entryWithTi:@"70003" extras:@{}]
+    ]]));
+}
+
+- (void)testNothingComesThroughOnceTheAccountCapsAreFull {
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    XCTAssertEqualObjects(@[], ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{}]
+    ]]));
+}
+
+- (void)testAnExemptEntryComesThroughAndUsesUpNoRoom {
+    // excludeGlobalFCaps takes the entry outside the two account caps. It must not take the room
+    // the next entry needs. Room for one, so the entry after it still comes through.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testAnEntryOutsideTheCapsComesThroughAndUsesUpNoRoom {
+    // A view of this entry never reaches the counts the server reads. Spending a slot on it would
+    // take that slot from an entry that does get counted. Room for one, so the entry after it still
+    // comes through.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+    [self show:kOtherCampaignId times:4];
+
+    NSArray *expected = @[kCampaignId, @"70003"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:kCampaignId extras:@{ CLTAP_ND_IS_FCAP_ENABLED: @NO }],
+        [self entryWithTi:@"70003" extras:@{}],
+        [self entryWithTi:@"70004" extras:@{}]
+    ]]));
+}
+
+- (void)testTheRoomGoesToTheEntriesTheServerSentFirst {
+    // The server sends them in priority order. The first entry takes the last place. The order of
+    // what comes through must match the order it arrived in.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:2];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[@"70004"];
+    XCTAssertEqualObjects(expected, ([self appLaunchedWithinGlobalCaps:@[
+        [self entryWithTi:@"70004" extras:@{}],
+        [self entryWithTi:kCampaignId extras:@{}]
+    ]]));
+}
+
+- (void)testThereIsNoGlobalCapCheckWithoutAnFCManager {
+    // Analytics only instances and app extensions have no Native Display managers. Nothing is
+    // capped there. The list must come back untouched.
+    self.cleverTap.ndFCManager = nil;
+
+    NSArray *entries = @[[self entryWithTi:kCampaignId extras:@{}]];
+    XCTAssertEqualObjects(entries, [self.cleverTap appLaunchedNativeDisplaysWithinGlobalCaps:entries]);
+}
+
+#pragma mark Where the cap settings are read from
+
+- (void)testEfcOnTheContentIsIgnored {
+    // efc belongs to in-app. Native Display never sends it. A unit that somehow arrives with it set
+    // must not be treated as an exception to anything.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_EXCLUDE_FROM_CAPS: @1
+    }];
+
+    XCTAssertEqualObjects(@[], [self gate:@[unit]]);
+}
+
+- (void)testTheContentFlagLetsTheUnitThroughAFullAccountCap {
+    // App-Launched units carry excludeGlobalFCaps on the content. Their campaign is not listed in
+    // adUnit_notifs_ss, so the content is the only place the flag arrives.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[unit]]);
+}
+
+- (void)testTheThreeCountingCapFieldsOnTheContentAreIgnored {
+    // tlc, tdc and mdc belong to in-app. A Native Display campaign puts its own cap in
+    // frequencyLimits or occurrenceLimits instead. Those are checked during evaluation. All three
+    // are zero here. A gate that read them would hold the unit back.
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_TOTAL_LIFETIME_COUNT: @0,
+        CLTAP_INAPP_TOTAL_DAILY_COUNT: @0,
+        CLTAP_INAPP_MAX_PER_SESSION: @0
+    }];
+    [self show:kCampaignId times:1];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[unit]]);
+}
+
+- (void)testARuleWithTheExemptionLetsTheUnitThroughAFullAccountCap {
+    // The flag on the rule is the one that counts. This case was checked on a device. The account
+    // session cap is used up. The campaign still shows.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }]];
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[[self unitWithTi:kCampaignId]]]);
+}
+
+#pragma mark Reading the exemption flag
+
+- (void)testACampaignWithNoRuleIsNotAnException {
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
+}
+
+- (void)testTheRuleIsFoundByTiAndNotByWzrkId {
+    // A wzrk_id is the ti plus a suffix. The suffix changes on every send. A lookup by wzrk_id
+    // would find nothing. The campaign would then lose its exemption with nothing logged.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }]];
+
+    XCTAssertTrue([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kWzrkId]);
+}
+
+- (void)testAFlagOfZeroOrAMissingFlagIsNotAnException {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[
+        @{ CLTAP_INAPP_ID: @70001, CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @0 },
+        @{ CLTAP_INAPP_ID: @70002 }
+    ]];
+
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kCampaignId]);
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:@{} forCampaignId:kOtherCampaignId]);
+}
+
+- (void)testTheContentFlagWinsOverTheRule {
+    // The content is read first. A campaign that carries the flag needs no rule. A zero on the
+    // content is an answer too. The rule is not read after it.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[
+        @{ CLTAP_INAPP_ID: @70001, CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }
+    ]];
+
+    NSDictionary *contentSaysNo = @{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @0 };
+    NSDictionary *contentSaysYes = @{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 };
+    XCTAssertFalse([self.cleverTap nativeDisplayExcludesGlobalCaps:contentSaysNo forCampaignId:kCampaignId]);
+    XCTAssertTrue([self.cleverTap nativeDisplayExcludesGlobalCaps:contentSaysYes forCampaignId:kOtherCampaignId]);
+}
+
+#pragma mark Which campaigns get their impression times saved
+
+- (void)testACampaignWithFrequencyLimitsNeedsItsTimesSaved {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_FC_LIMITS: @[@{ @"type": @"hours", @"limit": @2, @"frequency": @1 }]
+    }]];
+
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
+}
+
+- (void)testACampaignWithOccurrenceLimitsNeedsItsTimesSaved {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[@{ @"type": @"onEvery", @"limit": @2 }]
+    }]];
+
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
+}
+
+- (void)testLimitsOnTheContentAlsoNeedTheTimesSaved {
+    // An App-Launched campaign has no rule. Its limits sit on the content.
+    NSDictionary *content = @{
+        CLTAP_INAPP_FC_LIMITS: @[@{ @"type": @"hours", @"limit": @2, @"frequency": @1 }]
+    };
+
+    XCTAssertTrue([self.cleverTap nativeDisplayNeedsTimestamps:content forCampaignId:kCampaignId]);
+}
+
+- (void)testACampaignWithEmptyLimitListsNeedsNoTimesSaved {
+    // Saved times have one reader. That reader matches frequencyLimits and occurrenceLimits. An
+    // empty list is never matched against. There is nothing to save for.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_FC_LIMITS: @[],
+        CLTAP_INAPP_OCCURRENCE_LIMITS: @[]
+    }]];
+
+    XCTAssertFalse([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
+}
+
+- (void)testACampaignWithNoRuleNeedsNoTimesSaved {
+    XCTAssertFalse([self.cleverTap nativeDisplayNeedsTimestamps:@{} forCampaignId:kCampaignId]);
+}
+
+#pragma mark Counting a view the app reported
+
+- (void)testAReportedViewIsCounted {
+    [self.cleverTap countNativeDisplayView:[self unitWithTi:kCampaignId]];
+
+    XCTAssertEqual(1, [self.helper.ndFCManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.helper.ndFCManager lifetimeCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.helper.ndFCManager shownTodayCount]);
+    XCTAssertTrue(self.cleverTap.appReportedANativeDisplayView);
+}
+
+- (void)testAUnitWithNoTiIsNotCounted {
+    CleverTapDisplayUnit *noTi = [[CleverTapDisplayUnit alloc] initWithJSON:@{
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId
+    }];
+
+    [self.cleverTap countNativeDisplayView:noTi];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+    XCTAssertFalse(self.cleverTap.appReportedANativeDisplayView);
+}
+
+- (void)testAViewOfACampaignOutsideTheCapsIsNotAddedToTheServerCounts {
+    // The campaign says it is outside Native Display frequency caps. The view still happened. It is
+    // not added to the two counts the server reads. The server would otherwise give a capped
+    // campaign less room than it was promised.
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId
+                                           extras:@{ CLTAP_ND_IS_FCAP_ENABLED: @NO }];
+
+    [self.cleverTap countNativeDisplayView:unit];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+    XCTAssertEqual(0, [self.helper.ndFCManager lifetimeCountForCampaign:kCampaignId]);
+    // The session still saw it. The session caps are the SDK's own work and apply to every unit.
+    XCTAssertEqual(1, [self.helper.impressionManager perSession:kCampaignId]);
+}
+
+- (void)testAViewOfAUnitWithoutTheFlagIsNotAddedToTheServerCounts {
+    // A missing flag means the same as a flag of NO. A unit that arrives without it is not part of
+    // this feature.
+    CleverTapDisplayUnit *noFlag = [[CleverTapDisplayUnit alloc] initWithJSON:@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        @"type": @"simple"
+    }];
+
+    [self.cleverTap countNativeDisplayView:noFlag];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+}
+
+- (void)testAViewOfAnExemptCampaignIsNotAddedToTheServerCounts {
+    // The flag is on, but this campaign is an exception to the account caps. It uses up none of
+    // their room, so its views must not be counted against them either.
+    CleverTapDisplayUnit *unit = [self unitWithTi:kCampaignId
+                                           extras:@{ CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1 }];
+
+    [self.cleverTap countNativeDisplayView:unit];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+    XCTAssertEqual(1, [self.helper.impressionManager perSession:kCampaignId]);
+}
+
+- (void)testTheExemptionIsAlsoReadFromTheCampaignRuleWhenAViewIsCounted {
+    // Content for an event-triggered campaign may carry no cap settings of its own. The rule is then
+    // the only place the exemption arrives.
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @1
+    }]];
+
+    [self.cleverTap countNativeDisplayView:[self unitWithTi:kCampaignId]];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+}
+
+- (void)testAViewIsCountedUnderTiAndNotUnderWzrkId {
+    // Two sends of one campaign have the same ti. Their wzrk_ids are different. A count under the
+    // wzrk_id would go back to zero every time the campaign runs again.
+    [self.cleverTap countNativeDisplayView:[self unitWithTi:kCampaignId]];
+
+    XCTAssertEqual(1, [self.helper.ndFCManager lifetimeCountForCampaign:kCampaignId]);
+    XCTAssertEqual(0, [self.helper.ndFCManager lifetimeCountForCampaign:kWzrkId]);
+}
+
+- (void)testOnlyACampaignWithLimitsGetsItsViewTimeSaved {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_INAPP_FC_LIMITS: @[@{ @"type": @"hours", @"limit": @2, @"frequency": @1 }]
+    }]];
+
+    [self.cleverTap countNativeDisplayView:[self unitWithTi:kCampaignId]];
+    [self.cleverTap countNativeDisplayView:[self unitWithTi:kOtherCampaignId]];
+
+    CTImpressionManager *impressions = self.helper.impressionManager;
+    XCTAssertEqual(1, [[impressions getImpressions:kCampaignId] count]);
+    XCTAssertEqual(0, [[impressions getImpressions:kOtherCampaignId] count]);
+
+    // The second campaign was still counted. Only its time was not saved.
+    XCTAssertEqual(1, [self.helper.ndFCManager lifetimeCountForCampaign:kOtherCampaignId]);
+}
+
+#pragma mark The change of day
+
+- (void)testTheAppLaunchedTrimChecksTheDateBeforeItAppliesTheDailyCap {
+    // A batch that arrives just after midnight. The counts on disk were made yesterday. An entry
+    // must not be measured against them. checkUpdateDailyLimits runs before the loop for this
+    // reason.
+    [self.helper.ndFCManager resetDailyCounters:@"20250101"];
+    [self show:kCampaignId times:2];
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:1 andPerSession:-1];
+
+    // The state the trim starts from. Two units were counted under yesterday's date. The cap is
+    // one. Without the date check the entry below has no room left.
+    XCTAssertEqual(2, [self.helper.ndFCManager shownTodayCount]);
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self appLaunchedWithinGlobalCaps:@[[self entryWithTi:kCampaignId extras:@{}]]]);
+    XCTAssertEqual(0, [self.helper.ndFCManager shownTodayCount]);
+}
+
+- (void)testTheDailyCapDoesNotHoldBackAUnitAtTheGate {
+    // The daily cap ndmp is full. The gate still lets the unit through. For a regular event the
+    // server applied that cap before it sent the content. For the App-Launched batch the trim above
+    // applied it. A third check here would hold back a unit that one of those two already allowed.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:1 andPerSession:-1];
+    [self show:kOtherCampaignId times:1];
+
+    NSArray *expected = @[kCampaignId];
+    XCTAssertEqualObjects(expected, [self gate:@[[self unitWithTi:kCampaignId]]]);
+}
+
+#pragma mark The warning about missing view reports
+
+- (void)testAHeldBackUnitDoesNotArmTheWarning {
+    // The warning is about units the app was really given. The app cannot report a view of a unit
+    // it never received. A held back unit must not be counted here.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:-1 andPerSession:1];
+    [self show:kOtherCampaignId times:1];
+
+    [self gate:@[[self unitWithTi:kCampaignId]]];
+
+    XCTAssertFalse(self.cleverTap.sentCappedNativeDisplaysToApp);
+}
+
+- (void)testADeliveredUnitArmsTheWarningWhenTheAccountHasCaps {
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:5 andPerSession:-1];
+
+    [self gate:@[[self unitWithTi:kCampaignId]]];
+
+    XCTAssertTrue(self.cleverTap.sentCappedNativeDisplaysToApp);
+}
+
+- (void)testAnAccountWithNoCapsNeverArmsTheWarning {
+    // Nothing is capped here. A missing view report changes nothing. There is nothing to warn about.
+    [self gate:@[[self unitWithTi:kCampaignId]]];
+
+    XCTAssertFalse(self.cleverTap.sentCappedNativeDisplaysToApp);
+}
+
+#pragma mark Reading the two account caps off a response
+
+- (void)testTheCapsAreReadFromNumbersAndFromStrings {
+    XCTAssertEqual(5, [self.cleverTap nativeDisplayIntFrom:@5 fallback:-1]);
+    XCTAssertEqual(5, [self.cleverTap nativeDisplayIntFrom:@"5" fallback:-1]);
+}
+
+- (void)testAValueThatIsNotANumberUsesTheFallback {
+    // Without the fallback these would all be read as zero. Zero is a real cap. It would stop
+    // every Native Display unit on the account.
+    XCTAssertEqual(-1, [self.cleverTap nativeDisplayIntFrom:@"not a number" fallback:-1]);
+    XCTAssertEqual(-1, [self.cleverTap nativeDisplayIntFrom:nil fallback:-1]);
+    XCTAssertEqual(-1, [self.cleverTap nativeDisplayIntFrom:@{} fallback:-1]);
+    XCTAssertEqual(-1, [self.cleverTap nativeDisplayIntFrom:@[] fallback:-1]);
+}
+
+- (void)testAResponseWithoutNdmcLeavesTheAccountCapsAlone {
+    // ndmc is on every response that knows about caps. Seeing it is how we know the response has
+    // caps at all. A response without it says nothing about them.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:6 andPerSession:5];
+
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{}];
+
+    XCTAssertEqual(5, [self.helper.ndFCManager globalSessionMax]);
+    XCTAssertEqual(6, [self.helper.ndFCManager maxPerDayCount]);
+}
+
+- (void)testAResponseWithNdmcAndNoNdmpClearsTheDailyCap {
+    // The response does know about caps. A missing ndmp then means there is no daily limit, not
+    // that the old one still stands.
+    [self.helper.ndFCManager updateGlobalLimitsPerDay:6 andPerSession:5];
+
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{ CLTAP_ND_SESSION_MAX_META_KEY: @2 }];
+
+    XCTAssertEqual(2, [self.helper.ndFCManager globalSessionMax]);
+    XCTAssertEqual(-1, [self.helper.ndFCManager maxPerDayCount]);
+}
+
+- (void)testTheCapsAreSavedWhenTheServerSendsThemAsStrings {
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{
+        CLTAP_ND_SESSION_MAX_META_KEY: @"3",
+        CLTAP_ND_DAILY_MAX_META_KEY: @"7"
+    }];
+
+    XCTAssertEqual(3, [self.helper.ndFCManager globalSessionMax]);
+    XCTAssertEqual(7, [self.helper.ndFCManager maxPerDayCount]);
+}
+
+- (void)testTheRulesAreStoredAndAnEmptyListClearsThem {
+    NSArray *rules = @[@{ CLTAP_INAPP_ID: @70001 }];
+
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{ CLTAP_ND_SS_JSON_RESPONSE_KEY: rules }];
+    XCTAssertEqual(1, [[self.helper.ndStore serverSideNativeDisplays] count]);
+
+    // The server sends this list only when it is sending the full current set. An empty array
+    // really does mean there are no rules left.
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{ CLTAP_ND_SS_JSON_RESPONSE_KEY: @[] }];
+    XCTAssertEqual(0, [[self.helper.ndStore serverSideNativeDisplays] count]);
+}
+
+- (void)testStaleCampaignsHaveTheirCountsRemoved {
+    [self show:kCampaignId times:2];
+    [self show:kOtherCampaignId times:1];
+
+    // The server sends these ids as numbers.
+    [self.cleverTap saveNativeDisplayRulesAndCaps:@{ CLTAP_ND_STALE_JSON_RESPONSE_KEY: @[@70001] }];
+
+    XCTAssertEqual(0, [self.helper.ndFCManager lifetimeCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.helper.ndFCManager lifetimeCountForCampaign:kOtherCampaignId]);
+}
+
+#pragma mark Matching a custom event against the device and app properties
+
+/// Gives the instance a config and a device. @c generateAppFields reads the device for the app
+/// version, the OS version, the make and the model. A bare instance has no device. Every one of
+/// those values would be missing.
+- (void)useARealDevice {
+    self.cleverTap.config = self.helper.config;
+    self.cleverTap.deviceInfo = [[CTDeviceInfo alloc] initWithConfig:self.helper.config
+                                                      andCleverTapID:self.helper.deviceId];
+}
+
+/// Stores one rule. It fires on the named event, when the named property has the given value.
+- (void)storeRuleFiringOn:(NSString *)eventName
+                 property:(NSString *)propertyName
+                   equals:(id)propertyValue {
+    [self.helper.ndStore storeServerSideNativeDisplays:@[@{
+        CLTAP_INAPP_ID: @70001,
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        CLTAP_INAPP_TRIGGERS: @[@{
+            @"eventName": eventName,
+            @"eventProperties": @[@{
+                @"propertyName": propertyName,
+                @"operator": @(CTTriggerOperatorEquals),
+                @"propertyValue": propertyValue
+            }]
+        }]
+    }]];
+}
+
+/// Raises a custom event the same way @c queueEvent does.
+- (void)raiseEvent:(NSString *)eventName withProperties:(NSDictionary *)properties {
+    [self.cleverTap evaluateOnEvent:@{ CLTAP_EVENT_NAME: eventName, CLTAP_EVENT_DATA: properties }
+                           withType:CleverTapEventTypeRaised
+                 flattenedEventData:[CTFlattenedEventData eventProperties:properties]];
+}
+
+/// The campaigns found eligible so far. The SDK sends these ids to the server.
+- (NSArray *)eligibleCampaigns {
+    return self.helper.evaluationManager.evaluatedServerSideNativeDisplayIds;
+}
+
+- (void)testACustomEventIsMatchedAgainstTheAppFields {
+    // A trigger can name a device or app property, such as the OS version. That value is not part
+    // of the event. It is added to the event properties before the rules are read. Without it a
+    // rule like the one below never matches. The campaign is then never reported as eligible.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed"
+                   property:CLTAP_OS_VERSION
+                     equals:self.cleverTap.deviceInfo.osVersion];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testACustomEventIsStillMatchedAgainstItsOwnProperties {
+    // The app fields are added to the event properties. They must not push the event's own
+    // properties out.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:@"Category" equals:@"shoes"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testAnEventPropertyWinsOverAnAppFieldOfTheSameName {
+    // The app fields go in first. The event properties go in last. The value below is not the real
+    // OS version, so the rule matches only if the event's own value is the one that was read.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:CLTAP_OS_VERSION equals:@"99.9"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ CLTAP_OS_VERSION: @"99.9" }];
+
+    XCTAssertEqualObjects(@[@70001], [self eligibleCampaigns]);
+}
+
+- (void)testACampaignIsNotEligibleWhenTheAppFieldHasAnotherValue {
+    // The opposite of the first test. It shows that the first test passes because the value
+    // matched, and not because every rule matches.
+    [self useARealDevice];
+    [self storeRuleFiringOn:@"Product Viewed" property:CLTAP_OS_VERSION equals:@"99.9"];
+
+    [self raiseEvent:@"Product Viewed" withProperties:@{ @"Category": @"shoes" }];
+
+    XCTAssertEqual(0, [[self eligibleCampaigns] count]);
+}
+
+@end

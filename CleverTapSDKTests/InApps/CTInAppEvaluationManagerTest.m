@@ -1111,4 +1111,550 @@
     XCTAssertEqualObjects(@{ @"ti": @"1" }, inAppNoOffset);
 }
 
+#pragma mark App Launched Arbitration Helpers
+
+/// An app-launch in-app that always matches the App Launched event and has no limits.
+- (NSDictionary *)appLaunchedInAppWithId:(NSInteger)ti priority:(NSInteger)priority {
+    return @{
+        @"ti": @(ti),
+        @"priority": @(priority),
+        @"whenTriggers": @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }]
+    };
+}
+
+/// The same shape, tagged as built from content_fetch selection rules.
+- (NSDictionary *)syntheticInAppWithId:(NSInteger)ti priority:(NSInteger)priority {
+    NSMutableDictionary *inApp = [[self appLaunchedInAppWithId:ti priority:priority] mutableCopy];
+    inApp[CLTAP_INAPP_SYNTHETIC_CANDIDATE] = @YES;
+    return inApp;
+}
+
+- (NSArray<NSNumber *> *)queuedInAppIds {
+    NSMutableArray *ids = [NSMutableArray array];
+    for (NSDictionary *inApp in self.mockDisplayManager.inappNotifs) {
+        [ids addObject:@([[CTInAppNotification inAppId:inApp] integerValue])];
+    }
+    return ids;
+}
+
+#pragma mark App Launched Arbitration Tests
+
+- (void)testArbitrationNotOpenShowsImmediately {
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1],
+        [self appLaunchedInAppWithId:200 priority:1]
+    ]];
+
+    // No window, so today's behaviour: the winner displays right away.
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationBuffersUntilContentFetchCompletes {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0,
+                   @"the in-app must be held while the content fetch is pending");
+
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+/// The bug this whole feature exists for: two responses, each with its own winner, must still
+/// produce exactly one in-app.
+- (void)testArbitrationMergesBothResponsesAndShowsExactlyOne {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300", @"400"] syntheticCandidates:nil];
+
+    // /a1 response — its winner is 100 (equal priority, lower ti).
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1],
+        [self appLaunchedInAppWithId:200 priority:1]
+    ]];
+    // /content response — 300 has a higher priority than anything in /a1.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50],
+        [self appLaunchedInAppWithId:400 priority:1]
+    ]];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    // One in-app, and the highest priority across both responses — not one per response.
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationAppLaunchedWinsMergeOnPriority {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:80]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:10]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationTimeoutShowsBestCandidateSoFar {
+    self.evaluationManager.appLaunchedArbitrationTimeout = 0.2;
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    XCTestExpectation *shown = [self expectationWithDescription:@"timeout shows buffered candidate"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        [shown fulfill];
+    });
+    [self waitForExpectations:@[shown] timeout:3.0];
+
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+/// A slow fetch must not produce a second in-app after the timeout has already shown one.
+- (void)testArbitrationDropsCandidateArrivingAfterTimeout {
+    self.evaluationManager.appLaunchedArbitrationTimeout = 0.2;
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+
+    XCTestExpectation *timedOut = [self expectationWithDescription:@"window times out"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        [timedOut fulfill];
+    });
+    [self waitForExpectations:@[timedOut] timeout:3.0];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+
+    // The content response finally lands, with a candidate that would have won.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:100]
+    ]];
+
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds],
+                          @"a late candidate must be dropped, not shown as a second in-app");
+
+    // Completion tears the window down; still no second in-app.
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationAfterCompletionBehavesNormallyAgain {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+
+    // Window is gone, so a later response displays immediately as it would without the feature.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:500 priority:1]
+    ]];
+    XCTAssertEqualObjects((@[@100, @500]), [self queuedInAppIds]);
+}
+
+/*!
+ A window that is never closed suppresses app-launch in-apps for the rest of the session, which
+ is far worse than the duplicate it exists to prevent. This asserts the recovery path: once the
+ completion runs, in-apps work again.
+
+ The matching prevention — never opening a window when the content fetch will be skipped, as
+ during a user switch — lives in openAppLaunchedArbitrationIfNeeded:.
+ */
+- (void)testArbitrationWindowDoesNotSuppressInAppsForeverAfterCompletion {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+
+    // Several later launches must all display, i.e. nothing is still suppressing.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:600 priority:1]]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:700 priority:1]]];
+    XCTAssertEqualObjects((@[@100, @600, @700]), [self queuedInAppIds]);
+}
+
+/*!
+ A buffered winner belongs to the user who was active when it was evaluated.
+
+ On a user switch the content fetch manager drains its pending completions, and each of those
+ would close a window and display what it held. The in-app display path has no identity check,
+ so that in-app would render for the newly logged-in user. The window is discarded instead.
+ */
+- (void)testArbitrationDiscardOnUserSwitchDropsBufferedWinner {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager discardAppLaunchedArbitration];
+
+    // The completion still arrives — the fetch was in flight when the switch began — but there is
+    // no longer a window for it to close.
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0,
+                   @"the previous user's in-app must not be displayed after a switch");
+}
+
+- (void)testArbitrationDiscardLeavesLaterLaunchesWorking {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:100 priority:1]]];
+    [self.evaluationManager discardAppLaunchedArbitration];
+
+    // Discarding must not leave anything suppressing — the new user's in-apps display normally.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:800 priority:1]]];
+    XCTAssertEqualObjects(@[@800], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationDiscardIsSafeWithNoWindowAndIdempotent {
+    XCTAssertNoThrow([self.evaluationManager discardAppLaunchedArbitration]);
+
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager discardAppLaunchedArbitration];
+    XCTAssertNoThrow([self.evaluationManager discardAppLaunchedArbitration]);
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[[self appLaunchedInAppWithId:900 priority:1]]];
+    XCTAssertEqualObjects(@[@900], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationCompletionWithNoCandidatesShowsNothing {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+}
+
+- (void)testArbitrationSecondOpenDoesNotDisplaceTheFirst {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+
+    // Opening again must not close the first window, which would show its winner and then start
+    // arbitrating a second time — the multi-in-app behaviour being removed.
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"400"] syntheticCandidates:nil];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+/*!
+ Synthetic payloads carry selection rules but no content, so displaying one would render an
+ empty in-app.
+
+ In production they only ever reach the dry-run path, never a response array — this covers the
+ display-boundary guard in case one ever leaks. Losing the slot is the accepted outcome; the
+ point is that nothing contentless is shown.
+ */
+- (void)testArbitrationNeverDisplaysSyntheticCandidate {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self syntheticInAppWithId:300 priority:100]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0,
+                   @"a synthetic candidate must never reach the display queue");
+}
+
+#pragma mark JSON null Tolerance Tests
+
+/*!
+ A JSON null in a campaign must not terminate the app.
+
+ It arrives as NSNull, which is not nil, so presence checks let it through. On the /a1 path an
+ exception costs the launch its in-app and is caught in CleverTap+InAppsResponseHandler, but
+ `closeAppLaunchedArbitration` runs from the backstop timer and from the content fetch completion
+ — both GCD blocks with nothing above them to catch.
+
+ Each case below uses two single-candidate responses on purpose. A one-element sort never invokes
+ the comparator, so a null priority survives selection in its own response and only raises when
+ the two are merged at close — inside the timer block.
+ */
+- (NSDictionary *)appLaunchedInAppWithId:(NSInteger)ti nullValueForKey:(NSString *)key {
+    NSMutableDictionary *inApp = [[self appLaunchedInAppWithId:ti priority:1] mutableCopy];
+    inApp[key] = [NSNull null];
+    return inApp;
+}
+
+- (void)testArbitrationCloseToleratesNullPriority {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    // The null defaults to priority 1, so the real priority 50 wins.
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationCloseToleratesNullDelay {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_DELAY_AFTER_TRIGGER]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+/// The backstop timer is the path with no exception handling above it at all.
+- (void)testArbitrationTimeoutToleratesNullPriority {
+    self.evaluationManager.appLaunchedArbitrationTimeout = 0.2;
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+
+    XCTestExpectation *timedOut = [self expectationWithDescription:@"window times out"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        [timedOut fulfill];
+    });
+    [self waitForExpectations:@[timedOut] timeout:3.0];
+
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testSortByPriorityToleratesNullPriorityAndDelay {
+    NSMutableArray *inApps = [@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY],
+        [self appLaunchedInAppWithId:200 nullValueForKey:CLTAP_DELAY_AFTER_TRIGGER],
+        [self appLaunchedInAppWithId:300 priority:50]
+    ] mutableCopy];
+
+    XCTAssertNoThrow([self.evaluationManager sortByPriority:inApps]);
+    XCTAssertEqualObjects(inApps.firstObject[@"ti"], @300,
+                          @"a null priority defaults to 1 and must not outrank a real priority");
+}
+
+/// A numeric field sent as a string still carries its value — treating it as missing would
+/// silently reorder selection.
+- (void)testSortByPriorityAcceptsNumericStrings {
+    NSMutableDictionary *stringPriority = [[self appLaunchedInAppWithId:100 priority:1] mutableCopy];
+    stringPriority[CLTAP_INAPP_PRIORITY] = @"50";
+    NSMutableArray *inApps = [@[
+        [self appLaunchedInAppWithId:300 priority:10],
+        stringPriority
+    ] mutableCopy];
+
+    [self.evaluationManager sortByPriority:inApps];
+    XCTAssertEqualObjects(inApps.firstObject[@"ti"], @100);
+}
+
+- (void)testShouldSuppressToleratesNullValue {
+    NSDictionary *inApp = @{ @"ti": @"1", @"suppressed": [NSNull null] };
+
+    XCTAssertNoThrow([self.evaluationManager shouldSuppress:inApp]);
+    XCTAssertFalse([self.evaluationManager shouldSuppress:inApp],
+                   @"an unreadable suppressed flag must not be treated as suppressed");
+}
+
+/// NSNull is truthy and is not a property list type, so an unchecked pivot raises when the
+/// suppressed record is written to NSUserDefaults.
+- (void)testSuppressToleratesNullPivotAndControlGroup {
+    NSUInteger before = [self.evaluationManager.suppressedClientSideInApps count];
+    NSDictionary *inApp = @{
+        @"ti": @"1",
+        @"wzrk_pivot": [NSNull null],
+        @"wzrk_cgId": [NSNull null]
+    };
+
+    XCTAssertNoThrow([self.evaluationManager suppress:inApp]);
+    XCTAssertEqual([self.evaluationManager.suppressedClientSideInApps count], before + 1);
+
+    NSDictionary *saved = self.evaluationManager.suppressedClientSideInApps[before];
+    XCTAssertEqualObjects(saved[@"wzrk_pivot"], @"wzrk_default");
+    XCTAssertNil(saved[@"wzrk_cgId"]);
+    // The actual constraint: NSUserDefaults rejects anything that is not a property list type,
+    // and NSNull is not one. NSKeyedArchiver would encode NSNull happily, so it cannot stand in
+    // for this check.
+    XCTAssertTrue([NSPropertyListSerialization propertyList:saved
+                                          isValidForFormat:NSPropertyListBinaryFormat_v1_0],
+                  @"the saved record must stay property list safe for NSUserDefaults");
+}
+
+#pragma mark Dry Run Evaluation Tests
+
+- (void)testDryRunDoesNotRecordTriggers {
+    NSString *campaignId = @"1";
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT
+                                                     eventProperties:@{}
+                                                         andLocation:kCLLocationCoordinate2DInvalid];
+    NSArray *inApps = @[[self appLaunchedInAppWithId:1 priority:1]];
+
+    NSUInteger before = [self.evaluationManager.triggerManager getTriggers:campaignId];
+    [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:NO];
+    XCTAssertEqual([self.evaluationManager.triggerManager getTriggers:campaignId], before);
+
+    [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:YES];
+    XCTAssertEqual([self.evaluationManager.triggerManager getTriggers:campaignId], before + 1);
+}
+
+/*!
+ The off-by-one guard.
+
+ The real path increments a campaign's trigger count *before* checking limits, so onExactly
+ compares against N+1. A dry run that read the raw N would disagree at every N — this asserts
+ the two stay in lockstep.
+ */
+- (void)testDryRunMatchesRealPathForOnExactlyLimit {
+    NSString *campaignId = @"1";
+    NSArray *inApps = @[@{
+        @"ti": @1,
+        @"priority": @1,
+        @"whenTriggers": @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }],
+        @"occurrenceLimits": @[@{ @"type": @"onExactly", @"limit": @3 }]
+    }];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT
+                                                     eventProperties:@{}
+                                                         andLocation:kCLLocationCoordinate2DInvalid];
+
+    for (NSUInteger initial = 0; initial <= 4; initial++) {
+        [self.evaluationManager.triggerManager removeTriggers:campaignId];
+        for (NSUInteger i = 0; i < initial; i++) {
+            [self.evaluationManager.triggerManager incrementTrigger:campaignId];
+        }
+
+        NSArray *dryRun = [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:NO];
+        NSArray *real = [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:YES];
+
+        XCTAssertEqual(dryRun.count, real.count,
+                       @"dry run disagreed with the real path at trigger count %lu",
+                       (unsigned long)initial);
+    }
+}
+
+- (void)testDryRunMatchesRealPathForOnEveryLimit {
+    NSString *campaignId = @"1";
+    NSArray *inApps = @[@{
+        @"ti": @1,
+        @"priority": @1,
+        @"whenTriggers": @[@{ @"eventName": CLTAP_APP_LAUNCHED_EVENT }],
+        @"occurrenceLimits": @[@{ @"type": @"onEvery", @"limit": @2 }]
+    }];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT
+                                                     eventProperties:@{}
+                                                         andLocation:kCLLocationCoordinate2DInvalid];
+
+    for (NSUInteger initial = 0; initial <= 5; initial++) {
+        [self.evaluationManager.triggerManager removeTriggers:campaignId];
+        for (NSUInteger i = 0; i < initial; i++) {
+            [self.evaluationManager.triggerManager incrementTrigger:campaignId];
+        }
+
+        NSArray *dryRun = [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:NO];
+        NSArray *real = [self.evaluationManager evaluate:event withInApps:inApps recordTriggers:YES];
+
+        XCTAssertEqual(dryRun.count, real.count,
+                       @"dry run disagreed with the real path at trigger count %lu",
+                       (unsigned long)initial);
+    }
+}
+
+#pragma mark Fast Path Tests
+
+- (void)testFastPathShowsImmediatelyWhenAppLaunchedOutranksContent {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"]
+                                               syntheticCandidates:@[[self syntheticInAppWithId:300 priority:10]]];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:80]
+    ]];
+
+    // No wait needed — nothing the fetch returns can outrank priority 80.
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+
+    // And the real content response is then dropped rather than shown as a second in-app.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:10]
+    ]];
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds]);
+}
+
+- (void)testFastPathWaitsWhenContentOutranksAppLaunched {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"]
+                                               syntheticCandidates:@[[self syntheticInAppWithId:300 priority:90]]];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:10]
+    ]];
+
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0,
+                   @"a higher-priority content candidate is predicted, so the window must wait");
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:90]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testFastPathShowsImmediatelyWhenNoContentCandidateQualifies {
+    // The synthetic candidate cannot qualify — its trigger does not match App Launched.
+    NSDictionary *ineligible = @{
+        @"ti": @300,
+        @"priority": @100,
+        @"whenTriggers": @[@{ @"eventName": @"Some Other Event" }],
+        CLTAP_INAPP_SYNTHETIC_CANDIDATE: @YES
+    };
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"]
+                                               syntheticCandidates:@[ineligible]];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 priority:1]
+    ]];
+
+    XCTAssertEqualObjects(@[@100], [self queuedInAppIds],
+                          @"waiting cannot change the outcome, so show without waiting");
+}
+
+- (void)testFastPathWaitsWhenNoAppLaunchedCandidateIsEligible {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"]
+                                               syntheticCandidates:@[[self syntheticInAppWithId:300 priority:1]]];
+
+    // Nothing to show now, so the content result is the only possibility.
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[]];
+    XCTAssertEqual(self.mockDisplayManager.inappNotifs.count, 0);
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:1]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
 @end

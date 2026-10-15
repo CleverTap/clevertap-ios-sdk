@@ -1,6 +1,7 @@
 #if CLEVERTAP_SSL_PINNING
 
 #import "CTCertificatePinning.h"
+#import "CTConstants.h"
 
 @implementation CTCertificatePinning
 
@@ -30,7 +31,7 @@
                                                                   options:0
                                                                     error:&error];
     if (plistData == nil) {
-        NSLog(@"Error serializing plist: %@", error);
+        CleverTapLogStaticInfo(@"SSL pinning: the pinned certificates could not be converted into a file. Pinning is not set up. Reason: %@", error);
         return NO;
     }
     
@@ -39,7 +40,7 @@
     if ([plistData writeToFile:[[self plistFilePathForAccountId:accountId] stringByExpandingTildeInPath]
                        options:NSDataWritingAtomic
                          error:&writeError] == NO) {
-        NSLog(@"Error saving plist to the filesystem: %@", writeError);
+        CleverTapLogStaticInfo(@"SSL pinning: the pinned certificate file could not be saved to the device. Pinning is not set up. Reason: %@", writeError);
         return NO;
     }
     
@@ -56,13 +57,14 @@
     NSString *path = [self plistFilePathForAccountId:accountId];
     NSDictionary *SSLPinsDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByExpandingTildeInPath]];
     if (SSLPinsDict == nil) {
-        NSLog(@"Error accessing the SSL Pins plist at %@", path);
+        CleverTapLogStaticInfo(@"SSL pinning: the pinned certificate file could not be read at %@. The connection is refused.", path);
         return NO;
     }
-    
+
     // Do we have certificates pinned for this domain ?
     NSArray *trustedCertificates = [SSLPinsDict objectForKey:domain];
     if ((trustedCertificates == nil) || ([trustedCertificates count] < 1)) {
+        CleverTapLogStaticInfo(@"SSL pinning: no certificate is pinned for the domain %@. The connection is refused.", domain);
         return NO;
     }
     
@@ -109,6 +111,7 @@
         CFRelease(anchorCertificate);
     }
     // If we get here, we didn't find any matching certificate in the chain
+    CleverTapLogStaticInfo(@"SSL pinning: the server certificate for the domain %@ does not match any of the %lu pinned certificates. The connection is refused. The pinned certificate may have expired, or the server may have been issued a new one.", domain, (unsigned long)[trustedCertificates count]);
     return NO;
 }
 
