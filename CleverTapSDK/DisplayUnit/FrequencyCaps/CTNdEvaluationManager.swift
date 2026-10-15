@@ -457,7 +457,8 @@ public final class CTNdEvaluationManager: NSObject {
 
         var acknowledgement: [String: Any] = [:]
         acknowledgement[CLTAP_NOTIFICATION_ID_TAG] = wzrkId
-        acknowledgement[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?? CLTAP_NOTIFICATION_PIVOT_DEFAULT
+        acknowledgement[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] as? String
+            ?? CLTAP_NOTIFICATION_PIVOT_DEFAULT
         // wzrk_cgId is always part of the acknowledgement. The stub may not have one. 0 is sent in
         // that case. The acknowledgement keeps the same shape every time. The value is always a
         // number. A string value is converted to one.

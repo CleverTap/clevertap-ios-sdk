@@ -352,6 +352,21 @@ static NSString *const kOtherCampaignId = @"70002";
     XCTAssertEqual(1, [self.helper.evaluationManager.suppressedNativeDisplays count]);
 }
 
+- (void)testAStubWithANullPivotIsAcknowledgedWithTheDefault {
+    // The server can send a JSON null for wzrk_pivot. That arrives as NSNull. NSNull is a value like
+    // any other, so a plain fallback does not replace it. NSUserDefaults rejects NSNull, and saving
+    // the list would then raise. Every acknowledgement waiting to be sent would be lost.
+    [self.cleverTap appLaunchedNativeDisplaysToDeliver:@[] controlGroupStubs:@[[self entryWithTi:kCampaignId extras:@{
+        CLTAP_INAPP_IS_SUPPRESSED: @YES,
+        CLTAP_NOTIFICATION_PIVOT: [NSNull null]
+    }]]];
+
+    NSArray *acknowledgements = self.helper.evaluationManager.suppressedNativeDisplays;
+    XCTAssertEqual(1, [acknowledgements count]);
+    XCTAssertEqualObjects(CLTAP_NOTIFICATION_PIVOT_DEFAULT,
+                          acknowledgements.firstObject[CLTAP_NOTIFICATION_PIVOT]);
+}
+
 - (void)testThereIsNoAcknowledgementWithoutAnEvaluator {
     // The send test path builds no Native Display evaluator. There is nothing to acknowledge there.
     self.cleverTap.ndEvaluationManager = nil;

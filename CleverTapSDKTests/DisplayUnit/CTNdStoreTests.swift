@@ -64,6 +64,36 @@ struct CTNdStoreTests {
         #expect(store.serverSideNativeDisplays().isEmpty)
     }
 
+    // A trigger that tests whether an event property is set carries no value for it. The server
+    // sends a JSON null there, which is read into memory as NSNull. NSUserDefaults rejects NSNull
+    // and raises. The whole list was then lost, not just the one rule.
+    @Test("A rule holding a null is stored and read back")
+    func ruleHoldingNullIsStoredAndReadBack() {
+        let ruleWithNull: [AnyHashable: Any] = [
+            "ti": "1",
+            "whenTriggers": [[
+                "eventName": "App Launched",
+                "eventProperties": [[
+                    "operator": 26,
+                    "propertyName": "CT SDK Version",
+                    "propertyValue": NSNull()
+                ]]
+            ]]
+        ]
+        store.storeServerSideNativeDisplays([ruleWithNull])
+
+        // Two switches, so the next read comes from storage and not from the in-memory copy.
+        delegateManager.notifyDelegatesDeviceIdDidChange("\(firstDeviceId)_2")
+        delegateManager.notifyDelegatesDeviceIdDidChange(firstDeviceId)
+
+        let loaded = store.serverSideNativeDisplays()
+        #expect(loaded.count == 1)
+
+        let trigger = (loaded.first as? [AnyHashable: Any])?["whenTriggers"] as? [[AnyHashable: Any]]
+        let properties = trigger?.first?["eventProperties"] as? [[AnyHashable: Any]]
+        #expect(properties?.first?["propertyValue"] is NSNull)
+    }
+
     @Test("A user switch hides the previous user's rules")
     func userSwitchHidesPreviousRules() {
         store.storeServerSideNativeDisplays([["ti": "1"]])

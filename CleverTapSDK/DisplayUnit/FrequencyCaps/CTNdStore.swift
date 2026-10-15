@@ -85,7 +85,11 @@ public final class CTNdStore: NSObject {
         }
 
         let saved = CTPreferences.getObjectForKey(storageKey(withSuffix: Self.serverSideKeySuffix))
-        let loaded = saved as? [Any] ?? []
+        var loaded: [Any] = []
+        if let data = saved as? Data,
+           let parsed = try? JSONSerialization.jsonObject(with: data) as? [Any] {
+            loaded = parsed
+        }
         cachedServerSideNativeDisplays = loaded
         return loaded
     }
@@ -97,9 +101,15 @@ public final class CTNdStore: NSObject {
         lock.lock()
         defer { lock.unlock() }
 
+        // The list is held in memory even when it cannot be written. The rules are still applied for
+        // the rest of this run. The next response writes the list again.
         cachedServerSideNativeDisplays = serverSideNativeDisplays
-        CTPreferences.put(serverSideNativeDisplays,
-                          forKey: storageKey(withSuffix: Self.serverSideKeySuffix))
+
+        guard let data = try? JSONSerialization.data(withJSONObject: serverSideNativeDisplays) else {
+            log("The Native Display rules could not be turned into JSON, so they were not saved. They still apply for the rest of this run.")
+            return
+        }
+        CTPreferences.put(data, forKey: storageKey(withSuffix: Self.serverSideKeySuffix))
     }
 
     func removeServerSideNativeDisplays() {
@@ -108,6 +118,15 @@ public final class CTNdStore: NSObject {
 
         cachedServerSideNativeDisplays = []
         CTPreferences.removeObject(forKey: storageKey(withSuffix: Self.serverSideKeySuffix))
+    }
+
+    // MARK: - Logging
+
+    /// The prefix is added here. Every line this class writes then carries it.
+    private func log(_ message: String) {
+        CTLogger.logWithLevel(Int32(config.logLevel.rawValue),
+                              type: CTLogType.debug.rawValue,
+                              message: "\(CLTAP_ND_LOG_PREFIX) \(message)")
     }
 
     // MARK: - Storage Key
