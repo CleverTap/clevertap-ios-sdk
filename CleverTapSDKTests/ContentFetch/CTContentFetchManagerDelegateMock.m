@@ -34,34 +34,12 @@
     return self.batchHeader;
 }
 
-- (void)contentFetchManager:(CTContentFetchManager *)manager
-         didReceiveResponse:(NSData *)data
-                 completion:(dispatch_block_t)completion {
+- (void)contentFetchManager:(CTContentFetchManager *)manager didReceiveResponse:(NSData *)data {
     [self.receivedResponses addObject:data ?: [NSData data]];
-
+    
     if (self.onResponseReceived) {
         self.onResponseReceived(data);
     }
-
-    // The real delegate parses before completing. Mirror that by default, so a batch is only
-    // marked complete once this mock has finished with the response.
-    if (self.holdsCompletion) {
-        self.heldCompletion = completion;
-        return;
-    }
-    if (completion) {
-        completion();
-    }
-}
-
-- (BOOL)runHeldCompletion {
-    dispatch_block_t held = self.heldCompletion;
-    if (!held) {
-        return NO;
-    }
-    self.heldCompletion = nil;
-    held();
-    return YES;
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager

@@ -20,7 +20,6 @@
 #import "CTInAppFCManager.h"
 #import "CTInAppFCManager+Tests.h"
 #import "CleverTap+InAppsResponseHandler.h"
-#import "CTContentFetchManagerDelegate.h"
 #import "CleverTapInternal.h"
 #import "CTMultiDelegateManager.h"
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
@@ -2908,65 +2907,6 @@
 
     XCTAssertEqual([self.cleverTapInstance.inAppFCManager globalSessionMax], 10);
     XCTAssertEqual([self.cleverTapInstance.inAppFCManager maxPerDayCount], 10);
-}
-
-#pragma mark Content Fetch Response Threading
-
-/*!
- A content fetch response must be parsed on the serial queue, and its batch must not be reported
- complete until that parse has finished.
-
- Both halves matter. Parsing arrives on the URL session's completion queue, where it would race an
- /a1 response being parsed on the serial queue over the unguarded impressions dictionary and
- suppression array. Hopping to the serial queue fixes that — but only if the completion travels
- with it. The completion closes the app-launch arbitration window, so running it before this
- response's in-apps are buffered would show the /a1 winner and then this one.
- */
-- (id<CTContentFetchManagerDelegate>)contentFetchDelegate {
-    return (id<CTContentFetchManagerDelegate>)self.cleverTapInstance;
-}
-
-- (NSData *)contentFetchResponseWithSessionCap:(NSInteger)cap {
-    return [NSJSONSerialization dataWithJSONObject:@{
-        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @(cap)
-    } options:0 error:nil];
-}
-
-- (void)test_contentFetchResponse_completionRunsAfterParse {
-    // Baseline from /a1 so a stale read is distinguishable from the parsed value.
-    [self.cleverTapInstance handleInAppResponse:@{
-        CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY: @1
-    } source:CTResponseSourceApp];
-
-    __block int capWhenCompletionRan = -1;
-    XCTestExpectation *completed = [self expectationWithDescription:@"parse completion"];
-    [[self contentFetchDelegate] contentFetchManager:nil
-                                  didReceiveResponse:[self contentFetchResponseWithSessionCap:7]
-                                          completion:^{
-        capWhenCompletionRan = [self.cleverTapInstance.inAppFCManager globalSessionMax];
-        [completed fulfill];
-    }];
-    [self waitForExpectations:@[completed] timeout:5.0];
-
-    XCTAssertEqual(capWhenCompletionRan, 7,
-                   @"the completion ran before the response was parsed — anything waiting on this "
-                   @"batch, including the arbitration window, would act on stale state");
-}
-
-- (void)test_contentFetchResponse_parsesOnSerialQueue {
-    __block NSString *queueLabel = nil;
-    XCTestExpectation *completed = [self expectationWithDescription:@"parse completion"];
-    [[self contentFetchDelegate] contentFetchManager:nil
-                                  didReceiveResponse:[self contentFetchResponseWithSessionCap:7]
-                                          completion:^{
-        queueLabel = @(dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));
-        [completed fulfill];
-    }];
-    [self waitForExpectations:@[completed] timeout:5.0];
-
-    XCTAssertTrue([queueLabel hasPrefix:@"com.clevertap.serialQueue"],
-                  @"parsing must run on the serial queue, not the URL session queue — it was on %@",
-                  queueLabel);
 }
 
 @end

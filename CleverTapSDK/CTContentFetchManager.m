@@ -415,10 +415,7 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
                 NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                 if (httpResponse.statusCode == 200) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received successfully", self);
-                    if (self.delegate) {
-                        [self.delegate contentFetchManager:self didReceiveResponse:data completion:completedBlock];
-                        return;
-                    }
+                    [self.delegate contentFetchManager:self didReceiveResponse:data];
                 } else {
                     // Error cases - create appropriate NSError and call didFailWithError
                     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
