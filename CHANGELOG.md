@@ -14,8 +14,9 @@ All notable changes to this project will be documented in this file.
 - **Native Display Split of Clicks:** Adds per-element click and view attribution for Native Display units, so individual carousel slides can be tracked separately from the unit as a whole.
     * New `recordDisplayUnitElementViewedEventForID:additionalProperties:` raises `Notification Viewed` for a single element of a unit.
     * New `metaData(forContentAt:)` on `CleverTapDisplayUnit` and a `metaData` property on `CleverTapDisplayUnitContent` expose the `wzrk_*` attribution for a content item, so you can pass it back when recording the event.
+- **Recommendations Support in In-Apps and Native Display:** Adds support for In-App campaigns personalized with recommendations, ensuring only one In-App is shown on app launch. Native Display Units from a recommendations response are merged into the ones already delivered, matched by unit ID — they no longer replace the whole set.
+
 #### Fixed
-- Fixes a bug where two In-Apps could be shown on app launch when one of them needed its content fetched separately. App launch In-App arbitration now waits for the content fetch to settle and picks a single winner.
 - Fixes a bug where event name and property validation warnings were accumulated on the validator and replayed on later calls. Warnings are now collected per call and the actual validation message is logged instead of a count.
 
 ### [Version 7.8.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.2) (September 4, 2026)
