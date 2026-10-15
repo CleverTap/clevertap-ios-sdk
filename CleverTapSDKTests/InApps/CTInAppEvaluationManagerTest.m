@@ -1377,6 +1377,135 @@
                    @"a synthetic candidate must never reach the display queue");
 }
 
+#pragma mark JSON null Tolerance Tests
+
+/*!
+ A JSON null in a campaign must not terminate the app.
+
+ It arrives as NSNull, which is not nil, so presence checks let it through. On the /a1 path an
+ exception costs the launch its in-app and is caught in CleverTap+InAppsResponseHandler, but
+ `closeAppLaunchedArbitration` runs from the backstop timer and from the content fetch completion
+ — both GCD blocks with nothing above them to catch.
+
+ Each case below uses two single-candidate responses on purpose. A one-element sort never invokes
+ the comparator, so a null priority survives selection in its own response and only raises when
+ the two are merged at close — inside the timer block.
+ */
+- (NSDictionary *)appLaunchedInAppWithId:(NSInteger)ti nullValueForKey:(NSString *)key {
+    NSMutableDictionary *inApp = [[self appLaunchedInAppWithId:ti priority:1] mutableCopy];
+    inApp[key] = [NSNull null];
+    return inApp;
+}
+
+- (void)testArbitrationCloseToleratesNullPriority {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    // The null defaults to priority 1, so the real priority 50 wins.
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testArbitrationCloseToleratesNullDelay {
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_DELAY_AFTER_TRIGGER]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+    [self.evaluationManager appLaunchedArbitrationContentFetchDidComplete];
+
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+/// The backstop timer is the path with no exception handling above it at all.
+- (void)testArbitrationTimeoutToleratesNullPriority {
+    self.evaluationManager.appLaunchedArbitrationTimeout = 0.2;
+    [self.evaluationManager openAppLaunchedArbitrationWithTargetIds:@[@"300"] syntheticCandidates:nil];
+
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY]
+    ]];
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:@[
+        [self appLaunchedInAppWithId:300 priority:50]
+    ]];
+
+    XCTestExpectation *timedOut = [self expectationWithDescription:@"window times out"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        [timedOut fulfill];
+    });
+    [self waitForExpectations:@[timedOut] timeout:3.0];
+
+    XCTAssertEqualObjects(@[@300], [self queuedInAppIds]);
+}
+
+- (void)testSortByPriorityToleratesNullPriorityAndDelay {
+    NSMutableArray *inApps = [@[
+        [self appLaunchedInAppWithId:100 nullValueForKey:CLTAP_INAPP_PRIORITY],
+        [self appLaunchedInAppWithId:200 nullValueForKey:CLTAP_DELAY_AFTER_TRIGGER],
+        [self appLaunchedInAppWithId:300 priority:50]
+    ] mutableCopy];
+
+    XCTAssertNoThrow([self.evaluationManager sortByPriority:inApps]);
+    XCTAssertEqualObjects(inApps.firstObject[@"ti"], @300,
+                          @"a null priority defaults to 1 and must not outrank a real priority");
+}
+
+/// A numeric field sent as a string still carries its value — treating it as missing would
+/// silently reorder selection.
+- (void)testSortByPriorityAcceptsNumericStrings {
+    NSMutableDictionary *stringPriority = [[self appLaunchedInAppWithId:100 priority:1] mutableCopy];
+    stringPriority[CLTAP_INAPP_PRIORITY] = @"50";
+    NSMutableArray *inApps = [@[
+        [self appLaunchedInAppWithId:300 priority:10],
+        stringPriority
+    ] mutableCopy];
+
+    [self.evaluationManager sortByPriority:inApps];
+    XCTAssertEqualObjects(inApps.firstObject[@"ti"], @100);
+}
+
+- (void)testShouldSuppressToleratesNullValue {
+    NSDictionary *inApp = @{ @"ti": @"1", @"suppressed": [NSNull null] };
+
+    XCTAssertNoThrow([self.evaluationManager shouldSuppress:inApp]);
+    XCTAssertFalse([self.evaluationManager shouldSuppress:inApp],
+                   @"an unreadable suppressed flag must not be treated as suppressed");
+}
+
+/// NSNull is truthy and is not a property list type, so an unchecked pivot raises when the
+/// suppressed record is written to NSUserDefaults.
+- (void)testSuppressToleratesNullPivotAndControlGroup {
+    NSUInteger before = [self.evaluationManager.suppressedClientSideInApps count];
+    NSDictionary *inApp = @{
+        @"ti": @"1",
+        @"wzrk_pivot": [NSNull null],
+        @"wzrk_cgId": [NSNull null]
+    };
+
+    XCTAssertNoThrow([self.evaluationManager suppress:inApp]);
+    XCTAssertEqual([self.evaluationManager.suppressedClientSideInApps count], before + 1);
+
+    NSDictionary *saved = self.evaluationManager.suppressedClientSideInApps[before];
+    XCTAssertEqualObjects(saved[@"wzrk_pivot"], @"wzrk_default");
+    XCTAssertNil(saved[@"wzrk_cgId"]);
+    // The actual constraint: NSUserDefaults rejects anything that is not a property list type,
+    // and NSNull is not one. NSKeyedArchiver would encode NSNull happily, so it cannot stand in
+    // for this check.
+    XCTAssertTrue([NSPropertyListSerialization propertyList:saved
+                                          isValidForFormat:NSPropertyListBinaryFormat_v1_0],
+                  @"the saved record must stay property list safe for NSUserDefaults");
+}
+
 #pragma mark Dry Run Evaluation Tests
 
 - (void)testDryRunDoesNotRecordTriggers {

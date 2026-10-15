@@ -23,6 +23,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void (^onErrorReceived)(NSError *error);
 @property (nonatomic, copy, nullable) void (^onMetadataAdded)(NSDictionary *event);
 
+/// Hold the parse completion instead of running it, standing in for a delegate that parses on
+/// another queue. Release it with `runHeldCompletion`.
+@property (nonatomic, assign) BOOL holdsCompletion;
+
+/// The completion captured while `holdsCompletion` was set, if any.
+@property (nonatomic, copy, nullable) dispatch_block_t heldCompletion;
+
+/// Run and clear `heldCompletion`. Returns NO when nothing was held.
+- (BOOL)runHeldCompletion;
+
 @end
 
 NS_ASSUME_NONNULL_END

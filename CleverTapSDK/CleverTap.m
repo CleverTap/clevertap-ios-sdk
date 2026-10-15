@@ -6721,8 +6721,19 @@ static BOOL sharedInstanceErrorLogged;
     return [self batchHeaderForQueue:CTQueueTypeUndefined];
 }
 
-- (void)contentFetchManager:(CTContentFetchManager *)manager didReceiveResponse:(NSData *)data {
-    [self parseResponse:data responseEncrypted:NO source:CTResponseSourceContentFetch];
+- (void)contentFetchManager:(CTContentFetchManager *)manager
+         didReceiveResponse:(NSData *)data
+                 completion:(dispatch_block_t)completion {
+    // This arrives on the URL session's queue. Parsing mutates collections that have no lock, such
+    // as the impressions dictionary and suppressedClientSideInApps, which an /a1 response could be
+    // writing to at the same time. The serial queue is where every other response is parsed.
+    [self.dispatchQueueManager runSerialAsync:^{
+        [self parseResponse:data responseEncrypted:NO source:CTResponseSourceContentFetch];
+        // Inside the block: the batch is not done until the response has been parsed.
+        if (completion) {
+            completion();
+        }
+    }];
 }
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager addMetadataToEvent:(NSMutableDictionary *)event ofType:(CleverTapEventType)eventType {

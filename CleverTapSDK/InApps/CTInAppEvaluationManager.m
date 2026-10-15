@@ -451,9 +451,19 @@
     // One merged selection across every buffered winner, so exactly one in-app is shown for the
     // launch. Reuses the normal path so the sort, suppression and reporting stay identical.
     NSMutableArray *merged = [[self class] withoutSyntheticCandidates:candidates];
-    NSArray<NSDictionary *> *winner = [self selectAndProcessEligibleInApps:merged
-                                                              withStrategy:[ImmediateInAppSelectionStrategy shared]
-                                                                   withTTL:false];
+    NSArray<NSDictionary *> *winner = nil;
+    // Both callers of this method run on a GCD queue — the backstop timer and the content fetch
+    // completion — with no frame above them to catch. The equivalent work on the /a1 path is
+    // wrapped in CleverTap+InAppsResponseHandler, where a malformed campaign costs the launch its
+    // in-app rather than terminating the app. Match that here instead of crashing.
+    @try {
+        winner = [self selectAndProcessEligibleInApps:merged
+                                         withStrategy:[ImmediateInAppSelectionStrategy shared]
+                                              withTTL:false];
+    } @catch (NSException *e) {
+        CleverTapLogStaticDebug(@"Error selecting the App Launched arbitration winner: %@", e.debugDescription);
+        return;
+    }
     CleverTapLogStaticDebug(@"Closed App Launched arbitration, %lu candidate(s) merged, showing %@",
                             (unsigned long)candidates.count,
                             winner.firstObject ? [CTInAppNotification inAppId:winner.firstObject] : @"none");
@@ -819,15 +829,27 @@
 }
 
 - (BOOL)shouldSuppress:(NSDictionary *)inApp {
-    return [inApp[CLTAP_INAPP_IS_SUPPRESSED] boolValue];
+    // A JSON null arrives as NSNull, which is not nil and does not respond to boolValue. Reading
+    // it unchecked raises, and on the arbitration paths that happens inside a GCD block with no
+    // frame above it to catch.
+    id suppressed = inApp[CLTAP_INAPP_IS_SUPPRESSED];
+    if ([suppressed isKindOfClass:[NSNumber class]] || [suppressed isKindOfClass:[NSString class]]) {
+        return [suppressed boolValue];
+    }
+    return NO;
 }
 
 - (void)suppress:(NSDictionary *)inApp {
     NSString *ti = [CTInAppNotification inAppId:inApp];
     if (!ti) return;
     NSString *wzrk_id = [self generateWzrkId:ti];
-    NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
-    NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
+    // NSNull is truthy, so a JSON null would pass the old presence check and land in the meta
+    // dictionary. NSNull is not a property list type, so saveSuppressedClientSideInApps would then
+    // raise when NSUserDefaults tried to write it.
+    id rawPivot = inApp[CLTAP_NOTIFICATION_PIVOT];
+    NSString *pivot = [rawPivot isKindOfClass:[NSString class]] ? rawPivot : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
+    id rawCgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
+    NSNumber *cgId = [rawCgId isKindOfClass:[NSNumber class]] ? rawCgId : nil;
     
     NSMutableDictionary *suppressedInAppMeta = [NSMutableDictionary new];
     suppressedInAppMeta[CLTAP_NOTIFICATION_ID_TAG] = wzrk_id;
@@ -839,19 +861,32 @@
     [self saveSuppressedClientSideInApps];
 }
 
+/*!
+ A numeric field from an in-app payload, or `fallback` when it is missing or not numeric.
+
+ Server values arrive untyped. A JSON null becomes NSNull — not nil, and with no `compare:` — so
+ an unchecked read raises inside the sort comparators below. Strings are converted rather than
+ rejected, matching how `ti` is read: a numeric field sent as a string still carries its intended
+ value, and treating it as missing would silently reorder selection.
+ */
+static NSNumber *CTNumberFromInAppField(id value, NSNumber *fallback) {
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return value;
+    }
+    if ([value isKindOfClass:[NSString class]]) {
+        NSNumber *converted = [CTUtils numberFromString:value];
+        if (converted) return converted;
+    }
+    return fallback;
+}
+
 - (void)sortByPriority:(NSMutableArray *)inApps {
     NSNumber *(^delay)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *d = inApp[CLTAP_DELAY_AFTER_TRIGGER];
-        if (d != nil) return d;
-        return @(0); // default to 0 if missing
+        return CTNumberFromInAppField(inApp[CLTAP_DELAY_AFTER_TRIGGER], @(0));
     };
-    
+
     NSNumber *(^priority)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *priority = inApp[CLTAP_INAPP_PRIORITY];
-        if (priority != nil) {
-            return priority;
-        }
-        return @(1);
+        return CTNumberFromInAppField(inApp[CLTAP_INAPP_PRIORITY], @(1));
     };
     
     NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
