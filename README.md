@@ -32,8 +32,18 @@ Following are required for using CleverTap iOS SDK -
 
 Details about the different installation methods
 
-1. [CocoaPods](/docs/CocoaPods.md)
-2. [Swift Package Manager](/docs/SwiftPackageManager.md)
+> **CocoaPods users:** CocoaPods trunk becomes read-only on December 2, 2026. Add these two
+> lines to the top of your Podfile to keep receiving CleverTap updates:
+>
+> ```ruby
+> source 'https://github.com/CleverTap/podspecs.git'
+> source 'https://cdn.cocoapods.org/'
+> ```
+>
+> Existing installs keep working with no change. See [CocoaPods](/docs/CocoaPods.md) for details.
+
+1. [Swift Package Manager](/docs/SwiftPackageManager.md) (recommended)
+2. [CocoaPods](/docs/CocoaPods.md)
 3. [Carthage](/docs/Carthage.md)
 4. [Manual Installation](/docs/Manual.md)
 
