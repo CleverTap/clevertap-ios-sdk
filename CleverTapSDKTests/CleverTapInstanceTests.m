@@ -2553,19 +2553,12 @@
 #pragma mark - Switch User App Launched State
 
 - (void)test_asyncSwitchUser_keepsAppLaunchProcessedSet {
-    // Regression guard for the onUserLogin event clobber (SUC-137662).
-    // _asyncSwitchUser resets the session near the start of its block.
-    // A reset sets appLaunchProcessed to NO.
-    // recordAppLaunched then sets appLaunchProcessed back to YES.
-    // recordAppLaunched queues the App Launched event through queueEvent.
-    // queueEvent calls createSessionIfNeeded.
-    // The fix opens the session before recordAppLaunched.
-    // So createSessionIfNeeded finds an open session and does not reset again.
-    // appLaunchProcessed stays YES.
-    // Without the fix the flag ends at NO and custom events after login are deferred forever.
-
-    // Use a dedicated instance. _asyncSwitchUser changes the device id.
-    // A dedicated instance keeps that change away from the shared singleton.
+    // Regression guard for the onUserLogin event clobber
+    // _asyncSwitchUser resets appLaunchProcessed to NO.
+    // recordAppLaunched sets it to YES, then queueEvent may create a new session
+    // and reset it to NO, leaving subsequent custom events deferred forever.
+    // Opening the session first prevents this reset.
+    // Use a dedicated instance because _asyncSwitchUser changes the device ID.
     CleverTapInstanceConfig *cfg = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testSwitchUser"
                                                                          accountToken:@"testSwitchUser"
                                                                         accountRegion:@"eu1"];
