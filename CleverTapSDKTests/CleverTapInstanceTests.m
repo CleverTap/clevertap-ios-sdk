@@ -82,6 +82,8 @@
 // Discarded-events ARP processing — private methods in CleverTap.m, no header declaration
 - (void)processDiscardedEventsRequest:(NSDictionary *)arp;
 - (void)updateARP:(NSDictionary *)arp;
+// User switch - private method in CleverTap.m, no header declaration
+- (void)_asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString *)action;
 @property (nonatomic, strong) CTValidationConfig *validationConfig;
 @end
 
@@ -2546,6 +2548,43 @@
     OCMVerifyAll(mockInAction);
     [mockDelay stopMocking];
     [mockInAction stopMocking];
+}
+
+#pragma mark - Switch User App Launched State
+
+- (void)test_asyncSwitchUser_keepsAppLaunchProcessedSet {
+    // Regression guard for the onUserLogin event clobber (SUC-137662).
+    // _asyncSwitchUser resets the session near the start of its block.
+    // A reset sets appLaunchProcessed to NO.
+    // recordAppLaunched then sets appLaunchProcessed back to YES.
+    // recordAppLaunched queues the App Launched event through queueEvent.
+    // queueEvent calls createSessionIfNeeded.
+    // The fix opens the session before recordAppLaunched.
+    // So createSessionIfNeeded finds an open session and does not reset again.
+    // appLaunchProcessed stays YES.
+    // Without the fix the flag ends at NO and custom events after login are deferred forever.
+
+    // Use a dedicated instance. _asyncSwitchUser changes the device id.
+    // A dedicated instance keeps that change away from the shared singleton.
+    CleverTapInstanceConfig *cfg = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testSwitchUser"
+                                                                         accountToken:@"testSwitchUser"
+                                                                        accountRegion:@"eu1"];
+    CleverTap *instance = [CleverTap instanceWithConfig:cfg];
+
+    [instance _asyncSwitchUser:@{@"Identity": @"userB"}
+                withCachedGuid:nil
+                andCleverTapID:nil
+                     forAction:@"OnUserLogin"];
+
+    // The switch runs on the serial queue. This trailing block runs after it.
+    XCTestExpectation *drained = [self expectationWithDescription:@"switch user serial block drained"];
+    [instance.dispatchQueueManager runSerialAsync:^{
+        [drained fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+
+    XCTAssertTrue(instance.sessionManager.appLaunchProcessed,
+                  @"appLaunchProcessed must stay YES after _asyncSwitchUser so events after onUserLogin are not deferred");
 }
 
 #pragma mark - Profile Evaluation Input Shape

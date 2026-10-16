@@ -3737,6 +3737,11 @@ static BOOL sharedInstanceErrorLogged;
         [self _resetProductConfig];
         
         [self _resetVars];
+        // resetSession above closed the session. Open the new user's session before App Launched,
+        // otherwise queueEvent: opens it and clears appLaunchProcessed again, so every later
+        // recordEvent call keeps re-queueing forever.
+        [self.sessionManager createSessionIfNeeded];
+        
         // push data on reset profile
         [self recordAppLaunched:action];
         if (properties) {
