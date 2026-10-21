@@ -7,7 +7,11 @@
 
 #import <XCTest/XCTest.h>
 #import "CTTriggerEvaluator.h"
-#import "CTTriggerValue.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTTriggerCondition.h"
 
 /// Helper to build CTTriggerValue concisely

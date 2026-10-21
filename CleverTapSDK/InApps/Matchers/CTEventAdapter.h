@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
-#import "CTTriggerValue.h"
+@class CTTriggerValue;
 
 NS_ASSUME_NONNULL_BEGIN
 

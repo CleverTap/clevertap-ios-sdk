@@ -43,7 +43,6 @@ s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTa
     'CleverTapSDK/CTDeviceInfo.h',
     'CleverTapSDK/CTDispatchQueueManager.h',
     'CleverTapSDK/Profile/CTProfileOperationType.h',
-    'CleverTapSDK/InApps/Matchers/CTTriggerValue.h',
     'CleverTapSDK/LiveActivities/CleverTap+LiveActivities.h',
     'CleverTapSDK/LiveActivities/CTLiveActivityDataQueue.h'
 s.tvos.deployment_target    = '9.0'
