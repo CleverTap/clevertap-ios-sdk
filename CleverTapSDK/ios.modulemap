@@ -69,7 +69,6 @@ framework module CleverTapSDK {
         header "CTDeviceInfo.h"
         header "CTDispatchQueueManager.h"
         header "CTProfileOperationType.h"
-        header "CTLimitAdapter.h"
         header "CTTriggerValue.h"
         export *
     }

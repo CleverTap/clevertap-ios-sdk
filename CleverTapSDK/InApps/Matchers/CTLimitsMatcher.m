@@ -7,6 +7,11 @@
 //
 
 #import "CTLimitsMatcher.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTLimitsMatcher
 
@@ -32,7 +37,7 @@
 - (BOOL)matchLimit:(CTLimitAdapter *)limit
      forCampaignId:(NSString *)campaignId
 withImpressionManager:(CTImpressionManager *)impressionManager
- andTriggerManager:(CTInAppTriggerManager *)triggerManager {
+ andTriggerManager:(id<CTTriggerCounting>)triggerManager {
     
     switch ([limit limitType]) {
         case CTLimitTypeSession:

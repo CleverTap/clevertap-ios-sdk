@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "CTImpressionManager.h"
-#import "CTLimitAdapter.h"
 #import "CTInAppTriggerManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
