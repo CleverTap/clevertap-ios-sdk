@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <UserNotifications/UserNotifications.h>
 #import <sys/utsname.h>
 
 #import "CleverTap.h"
@@ -11,6 +12,7 @@
 #import "CleverTapBuildInfo.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
+#import "CTUIUtils.h"
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -21,9 +23,6 @@
 NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
-
-static BOOL _wifi;
-static BOOL _isOnline;
 
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
@@ -36,17 +35,32 @@ static NSString *_model;
 static NSString *_carrier;
 static NSString *_countryCode;
 static NSString *_timeZone;
-static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
 static NSLocale *_systemLocale;
+static NSNumber *_deviceType;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-SCNetworkReachabilityRef _reachability;
+// Weak box handed to the reachability callback, so a callback already queued when the
+// device info is deallocated finds nil instead of a dangling pointer.
+@interface CTReachabilityTarget : NSObject
+@property (nonatomic, weak) CTDeviceInfo *deviceInfo;
+@end
+
+@implementation CTReachabilityTarget
+@end
+
+// Shared by all instances, it only reads device-wide radio and carrier info. Each CTTelephonyNetworkInfo
+// posts its own radio change notification, so one per instance made every observer hear each change twice.
 static CTTelephonyNetworkInfo *_networkInfo;
 #endif
 
-@interface CTDeviceInfo () {}
+@interface CTDeviceInfo () {
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+    SCNetworkReachabilityRef _reachability;
+    dispatch_queue_t _reachabilityQueue;
+#endif
+}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 
@@ -54,16 +68,23 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @property (strong, readwrite) NSString *fallbackDeviceId;
 @property (strong, readwrite) NSString *vendorIdentifier;
 @property (strong, readwrite) NSMutableArray *validationErrors;
+@property (atomic, strong, readwrite) NSNumber *darkMode;
+@property (atomic, strong, readwrite) NSString *textSize;
+@property (atomic, strong, readwrite) NSNumber *reduceMotion;
+@property (atomic, strong, readwrite) NSNumber *pushStatus;
+// Written on the reachability queue and read from the SDK queues, so both are atomic.
+@property (atomic, assign, readwrite) BOOL wifi;
+@property (atomic, assign, readwrite) BOOL isOnline;
+// Cached cellular radio technology, updated from the CoreTelephony change notification.
+@property (atomic, copy) NSString *currentRadio;
 
 @end
 
 @implementation CTDeviceInfo
-const char *domainURL;
 
 @synthesize deviceId =_deviceId;
 @synthesize validationErrors =_validationErrors;
 
-static dispatch_queue_t backgroundQueue;
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
 #endif
@@ -78,13 +99,16 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info) {
-    [[CTDeviceInfo class] handleReachabilityUpdate:flags];
+    CTReachabilityTarget *reachabilityTarget = (__bridge CTReachabilityTarget *)info;
+    [reachabilityTarget.deviceInfo handleReachabilityUpdate:flags];
 }
 
-+ (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags {
-    _wifi = (flags & kSCNetworkReachabilityFlagsReachable) && !(flags & kSCNetworkReachabilityFlagsIsWWAN);
-    _isOnline = [self isOnlineForFlags:flags];
-    CleverTapLogStaticInternal(@"Updating wifi to: %@ and isOnline to %@", @(_wifi), @(_isOnline));
+- (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags {
+    BOOL wifi = (flags & kSCNetworkReachabilityFlagsReachable) && !(flags & kSCNetworkReachabilityFlagsIsWWAN);
+    BOOL isOnline = [[self class] isOnlineForFlags:flags];
+    self.wifi = wifi;
+    self.isOnline = isOnline;
+    CleverTapLogStaticInternal(@"Updating wifi to: %@ and isOnline to %@", @(wifi), @(isOnline));
 }
 
 + (BOOL)isOnlineForFlags:(SCNetworkReachabilityFlags)flags {
@@ -110,22 +134,35 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
-        NSString *_domainURL = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
-        domainURL = [_domainURL cStringUsingEncoding:NSASCIIStringEncoding];
         _validationErrors = [NSMutableArray new];
-        
+
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-        backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
+        NSString *domain = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
+        const char *domainURL = [domain cStringUsingEncoding:NSASCIIStringEncoding];
+        _reachabilityQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
         // reachability callback
-        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, domainURL)) != NULL) {
-            SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
+        if (domainURL && (_reachability = SCNetworkReachabilityCreateWithName(NULL, domainURL)) != NULL) {
+            CTReachabilityTarget *reachabilityTarget = [CTReachabilityTarget new];
+            reachabilityTarget.deviceInfo = self;
+            // The reachability object retains the target through CFRetain and releases it when it is freed.
+            SCNetworkReachabilityContext context = {0, (__bridge void*)reachabilityTarget, CFRetain, CFRelease, NULL};
             if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
-                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
+                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, _reachabilityQueue)) {
                     SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
                 }
             }
         }
-        _networkInfo = [CTTelephonyNetworkInfo new];
+        static dispatch_once_t networkInfoOnceToken;
+        dispatch_once(&networkInfoOnceToken, ^{
+            _networkInfo = [CTTelephonyNetworkInfo new];
+        });
+        if (@available(iOS 12.0, *)) {
+            // Keep radio current when the cellular technology changes, e.g. LTE to 5G. Removed in dealloc.
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(radioAccessTechnologyDidChange:)
+                                                         name:CTServiceRadioAccessTechnologyDidChangeNotification
+                                                       object:nil];
+        }
 #endif
         [self initDeviceID:cleverTapID];
     }
@@ -134,6 +171,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+    if (_reachability) {
+        SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+        SCNetworkReachabilitySetDispatchQueue(_reachability, NULL);
+        CFRelease(_reachability);
+        _reachability = NULL;
+    }
+#endif
 }
 
 - (NSString *)description {
@@ -436,12 +481,94 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return _timeZone;
 }
 
-- (BOOL)wifi {
-    return _wifi;
+- (NSNumber *)deviceType {
+    if (_deviceType == nil) {
+        switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
+            case UIUserInterfaceIdiomPhone:
+                _deviceType = @1;
+                break;
+            case UIUserInterfaceIdiomPad:
+                _deviceType = @2;
+                break;
+            case UIUserInterfaceIdiomTV:
+                _deviceType = @3;
+                break;
+            default:
+                _deviceType = @0;
+                break;
+        }
+    }
+    return _deviceType;
 }
 
-- (BOOL)isOnline {
-    return _isOnline;
+- (BOOL)lowPowerModeEnabled {
+    return [[NSProcessInfo processInfo] isLowPowerModeEnabled];
+}
+
+- (NSNumber *)thermalState {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
+        return @([[NSProcessInfo processInfo] thermalState]);
+    }
+    return nil;
+}
+
+- (void)refreshDisplaySettings {
+    // Trait collections and accessibility state are UIKit reads, so they must happen on the main thread.
+    if (![NSThread isMainThread]) {
+        [CTUtils runAsyncMainQueue:^{
+            [self refreshDisplaySettings];
+        }];
+        return;
+    }
+
+    UIWindow *keyWindow = [CTUIUtils getKeyWindow];
+    if (!keyWindow) return;
+
+    UITraitCollection *traits = keyWindow.traitCollection;
+    if (@available(iOS 12.0, tvOS 10.0, *)) {
+        self.darkMode = [[self class] darkModeForInterfaceStyle:traits.userInterfaceStyle];
+    }
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
+        self.textSize = [[self class] textSizeForContentSizeCategory:traits.preferredContentSizeCategory];
+    }
+    self.reduceMotion = @(UIAccessibilityIsReduceMotionEnabled());
+}
+
++ (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style API_AVAILABLE(ios(12.0), tvos(10.0)) {
+    if (style == UIUserInterfaceStyleUnspecified) return nil;
+    // A C comparison is an int, so box it as a BOOL to serialize as true/false like the other flags.
+    return @((BOOL)(style == UIUserInterfaceStyleDark));
+}
+
+- (void)refreshPushStatus {
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
+        // The completion runs on a background queue chosen by the system, so pushStatus is atomic.
+        [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
+            self.pushStatus = @(settings.authorizationStatus);
+        }];
+    }
+}
+
++ (NSString *)textSizeForContentSizeCategory:(UIContentSizeCategory)category {
+    static NSDictionary<UIContentSizeCategory, NSString *> *textSizes;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        textSizes = @{
+            UIContentSizeCategoryExtraSmall: @"xs",
+            UIContentSizeCategorySmall: @"s",
+            UIContentSizeCategoryMedium: @"m",
+            UIContentSizeCategoryLarge: @"l",
+            UIContentSizeCategoryExtraLarge: @"xl",
+            UIContentSizeCategoryExtraExtraLarge: @"xxl",
+            UIContentSizeCategoryExtraExtraExtraLarge: @"xxxl",
+            UIContentSizeCategoryAccessibilityMedium: @"ax1",
+            UIContentSizeCategoryAccessibilityLarge: @"ax2",
+            UIContentSizeCategoryAccessibilityExtraLarge: @"ax3",
+            UIContentSizeCategoryAccessibilityExtraExtraLarge: @"ax4",
+            UIContentSizeCategoryAccessibilityExtraExtraExtraLarge: @"ax5"
+        };
+    });
+    return category ? textSizes[category] : nil;
 }
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
@@ -478,11 +605,22 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (NSString *)radio {
-    if (!_radio) {
-        _radio =  [self getCurrentRadioAccessTechnology] ?: @"";
-        CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
+    NSString *radio = self.currentRadio;
+    if (!radio) {
+        radio = [self updateRadio];
     }
-    return _radio;
+    return radio;
+}
+
+- (void)radioAccessTechnologyDidChange:(NSNotification *)notification {
+    [self updateRadio];
+}
+
+- (NSString *)updateRadio {
+    NSString *radio = [self getCurrentRadioAccessTechnology] ?: @"";
+    self.currentRadio = radio;
+    CleverTapLogStaticInternal(@"Updated radio to %@", radio);
+    return radio;
 }
 
 #pragma clang diagnostic push

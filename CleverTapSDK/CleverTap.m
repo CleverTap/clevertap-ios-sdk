@@ -1043,6 +1043,34 @@ static BOOL sharedInstanceErrorLogged;
         evtData[@"wv_init"] = @(YES);
     }
     
+    evtData[@"dt"] = self.deviceInfo.deviceType;
+    evtData[@"lowPower"] = @(self.deviceInfo.lowPowerModeEnabled);
+    
+    NSNumber *thermalState = self.deviceInfo.thermalState;
+    if (thermalState != nil) {
+        evtData[@"thermal"] = thermalState;
+    }
+    
+    // Display settings are cached on the main thread when the app comes to foreground, nil until then.
+    NSNumber *darkMode = self.deviceInfo.darkMode;
+    if (darkMode != nil) {
+        evtData[@"darkMode"] = darkMode;
+    }
+    NSString *textSize = self.deviceInfo.textSize;
+    if (textSize != nil) {
+        evtData[@"textSize"] = textSize;
+    }
+    NSNumber *reduceMotion = self.deviceInfo.reduceMotion;
+    if (reduceMotion != nil) {
+        evtData[@"reduceMotion"] = reduceMotion;
+    }
+    
+    // Cached when the app comes to foreground, nil until the first read completes.
+    NSNumber *pushStatus = self.deviceInfo.pushStatus;
+    if (pushStatus != nil) {
+        evtData[@"pushStatus"] = pushStatus;
+    }
+    
     return evtData;
 }
 
@@ -1230,6 +1258,9 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_appEnteredForeground {
     if ([CTUIUtils runningInsideAppExtension]) return;
+    
+    [self.deviceInfo refreshDisplaySettings];
+    [self.deviceInfo refreshPushStatus];
     
     // Check application state
     UIApplication *application = [CTUIUtils getSharedApplication];

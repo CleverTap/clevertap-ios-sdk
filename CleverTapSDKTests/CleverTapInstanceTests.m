@@ -659,6 +659,55 @@
     XCTAssertEqualObjects([self batchHeaderForTesting][@"af"][@"useIP"], @NO);
 }
 
+#pragma mark - Analytics app fields
+
+- (void)test_appFields_containDeviceFields {
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    NSArray *deviceTypes = @[@0, @1, @2, @3];
+    XCTAssertTrue([deviceTypes containsObject:appFields[@"dt"]]);
+    XCTAssertEqualObjects(appFields[@"lowPower"], @([[NSProcessInfo processInfo] isLowPowerModeEnabled]));
+    XCTAssertEqualObjects(appFields[@"thermal"], @([[NSProcessInfo processInfo] thermalState]));
+}
+
+- (void)test_appFields_omitDisplaySettings_whenNotRefreshed {
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo darkMode]).andReturn(nil);
+    OCMStub([mockDeviceInfo textSize]).andReturn(nil);
+    OCMStub([mockDeviceInfo reduceMotion]).andReturn(nil);
+
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    XCTAssertNil(appFields[@"darkMode"]);
+    XCTAssertNil(appFields[@"textSize"]);
+    XCTAssertNil(appFields[@"reduceMotion"]);
+    [mockDeviceInfo stopMocking];
+}
+
+- (void)test_appFields_containDisplaySettings_whenRefreshed {
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo darkMode]).andReturn(@YES);
+    OCMStub([mockDeviceInfo textSize]).andReturn(@"xl");
+    OCMStub([mockDeviceInfo reduceMotion]).andReturn(@NO);
+
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    XCTAssertEqualObjects(appFields[@"darkMode"], @YES);
+    XCTAssertEqualObjects(appFields[@"textSize"], @"xl");
+    XCTAssertEqualObjects(appFields[@"reduceMotion"], @NO);
+    [mockDeviceInfo stopMocking];
+}
+
+- (void)test_appFields_pushStatus_onlyWhenKnown {
+    // Stub the getter so the async status read started on foreground can't change it mid-test.
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo pushStatus]).andReturn(nil);
+    XCTAssertNil([self batchHeaderForTesting][@"af"][@"pushStatus"]);
+    [mockDeviceInfo stopMocking];
+
+    mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo pushStatus]).andReturn(@(UNAuthorizationStatusDenied));
+    XCTAssertEqualObjects([self batchHeaderForTesting][@"af"][@"pushStatus"], @(UNAuthorizationStatusDenied));
+    [mockDeviceInfo stopMocking];
+}
+
 #pragma mark - setCustomSdkVersion:version:
 
 - (void)test_setCustomSdkVersion_appearsInBatchHeaderAppFields {

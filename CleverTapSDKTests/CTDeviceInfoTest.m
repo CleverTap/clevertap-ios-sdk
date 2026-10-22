@@ -7,8 +7,19 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <CoreTelephony/CTTelephonyNetworkInfo.h>
+#import <UserNotifications/UserNotifications.h>
+#import <OCMock/OCMock.h>
 #import "CTDeviceInfo.h"
+#import "CTUIUtils.h"
 #import "CleverTapInstanceConfig.h"
+
+@interface CTDeviceInfo (Tests)
++ (NSString *)textSizeForContentSizeCategory:(UIContentSizeCategory)category;
++ (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style;
+- (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags;
+@end
 
 @interface CTDeviceInfoTest : XCTestCase
 @property (nonatomic, strong) CTDeviceInfo *classObject;
@@ -74,6 +85,129 @@
     
     XCTAssertNotNil([_classObject deviceId]);
     XCTAssertFalse([_classObject isErrorDeviceID]);
+}
+
+- (void)test_textSizeForContentSizeCategory{
+    XCTAssertEqualObjects([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryExtraSmall], @"xs");
+    XCTAssertEqualObjects([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryLarge], @"l");
+    XCTAssertEqualObjects([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryExtraExtraExtraLarge], @"xxxl");
+    XCTAssertEqualObjects([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryAccessibilityMedium], @"ax1");
+    XCTAssertEqualObjects([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryAccessibilityExtraExtraExtraLarge], @"ax5");
+    XCTAssertNil([CTDeviceInfo textSizeForContentSizeCategory:UIContentSizeCategoryUnspecified]);
+    XCTAssertNil([CTDeviceInfo textSizeForContentSizeCategory:nil]);
+}
+
+- (void)test_refreshDisplaySettings_fromBackgroundQueue_readsOnMainThread{
+    // Stub the key window so the test doesn't depend on the test host's window state.
+    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+    window.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
+    __block BOOL readOnMainThread = NO;
+    id mockUIUtils = OCMClassMock([CTUIUtils class]);
+    OCMStub([mockUIUtils getKeyWindow]).andDo(^(NSInvocation *invocation) {
+        readOnMainThread = [NSThread isMainThread];
+        __unsafe_unretained UIWindow *keyWindow = window;
+        [invocation setReturnValue:&keyWindow];
+    });
+
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+        [self.classObject refreshDisplaySettings];
+    });
+    NSPredicate *refreshed = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *deviceInfo, NSDictionary *bindings) {
+        return deviceInfo.reduceMotion != nil;
+    }];
+    [self waitForExpectations:@[[self expectationForPredicate:refreshed evaluatedWithObject:_classObject handler:nil]] timeout:2.0];
+
+    XCTAssertTrue(readOnMainThread);
+    XCTAssertEqualObjects([_classObject darkMode], @YES);
+    XCTAssertNotNil([_classObject textSize]);
+    [mockUIUtils stopMocking];
+}
+
+- (void)test_darkModeForInterfaceStyle{
+    NSNumber *dark = [CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleDark];
+    NSNumber *light = [CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleLight];
+    XCTAssertEqualObjects(dark, @YES);
+    XCTAssertEqualObjects(light, @NO);
+    XCTAssertNil([CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleUnspecified]);
+
+    // NSJSONSerialization writes only CFBoolean-backed numbers as true/false, the rest as 0/1.
+    XCTAssertEqual(CFGetTypeID((__bridge CFTypeRef)dark), CFBooleanGetTypeID());
+    XCTAssertEqual(CFGetTypeID((__bridge CFTypeRef)light), CFBooleanGetTypeID());
+}
+
+- (void)test_deviceType_matchesIdiom{
+    NSNumber *expected = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad ? @2 : @1;
+    XCTAssertEqualObjects([_classObject deviceType], expected);
+}
+
+- (void)test_handleReachabilityUpdate_setsWifiAndOnline{
+    [_classObject handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable];
+    XCTAssertTrue([_classObject wifi]);
+    XCTAssertTrue([_classObject isOnline]);
+
+    [_classObject handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsIsWWAN];
+    XCTAssertFalse([_classObject wifi]);
+    XCTAssertTrue([_classObject isOnline]);
+
+    [_classObject handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsConnectionRequired];
+    XCTAssertTrue([_classObject wifi]);
+    XCTAssertFalse([_classObject isOnline]);
+
+    [_classObject handleReachabilityUpdate:0];
+    XCTAssertFalse([_classObject wifi]);
+    XCTAssertFalse([_classObject isOnline]);
+}
+
+- (void)test_reachabilityState_isPerInstance{
+    CTDeviceInfo *other = [[CTDeviceInfo alloc] init];
+    [_classObject handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable];
+    [other handleReachabilityUpdate:0];
+
+    XCTAssertTrue([_classObject wifi]);
+    XCTAssertTrue([_classObject isOnline]);
+    XCTAssertFalse([other wifi]);
+    XCTAssertFalse([other isOnline]);
+}
+
+- (void)test_dealloc_withReachability_doesNotCrash{
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    @autoreleasepool {
+        CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+        XCTAssertNotNil(deviceInfo);
+    }
+    // A second instance after the first is freed still gets its own working reachability.
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+    [deviceInfo handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable];
+    XCTAssertTrue([deviceInfo isOnline]);
+}
+
+- (void)test_radio_updatesOnRadioAccessTechnologyChange{
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+    [deviceInfo setValue:@"stale" forKey:@"currentRadio"];
+    XCTAssertEqualObjects([deviceInfo radio], @"stale");
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:CTServiceRadioAccessTechnologyDidChangeNotification object:nil];
+    XCTAssertNotEqualObjects([deviceInfo radio], @"stale");
+}
+
+- (void)test_refreshPushStatus_matchesSystemStatus{
+    XCTAssertNil([_classObject pushStatus]);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"System push status read."];
+    __block UNAuthorizationStatus systemStatus;
+    [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
+        systemStatus = settings.authorizationStatus;
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:2.0 handler:nil];
+
+    [_classObject refreshPushStatus];
+    NSPredicate *cached = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *deviceInfo, NSDictionary *bindings) {
+        return deviceInfo.pushStatus != nil;
+    }];
+    [self waitForExpectations:@[[self expectationForPredicate:cached evaluatedWithObject:_classObject handler:nil]] timeout:2.0];
+    XCTAssertEqualObjects([_classObject pushStatus], @(systemStatus));
 }
 
 @end
