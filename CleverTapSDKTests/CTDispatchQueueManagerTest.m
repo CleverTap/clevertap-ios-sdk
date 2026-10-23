@@ -91,6 +91,63 @@
     [self waitForExpectations:exps timeout:5.0];
 }
 
+#pragma mark - Multiple instances
+
+// Builds a manager with an account id that is easy to recognise in a queue label.
+- (CTDispatchQueueManager *)managerForAccountId:(NSString *)accountId {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+                                       initWithAccountId:accountId
+                                       accountToken:@"testToken"];
+    return [[CTDispatchQueueManager alloc] initWithConfig:config];
+}
+
+- (void)test_runSerialAsync_twoManagers_eachRunsOnItsOwnQueue {
+    CTDispatchQueueManager *managerA = [self managerForAccountId:@"accountA"];
+    // The second manager is created after the first one.
+    // The first manager must keep its own queue.
+    CTDispatchQueueManager *managerB = [self managerForAccountId:@"accountB"];
+
+    XCTestExpectation *expA = [self expectationWithDescription:@"block A ran"];
+    XCTestExpectation *expB = [self expectationWithDescription:@"block B ran"];
+    __block NSString *labelA = nil;
+    __block NSString *labelB = nil;
+
+    [managerA runSerialAsync:^{
+        labelA = @(dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));
+        [expA fulfill];
+    }];
+    [managerB runSerialAsync:^{
+        labelB = @(dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));
+        [expB fulfill];
+    }];
+    [self waitForExpectations:@[expA, expB] timeout:2.0];
+
+    XCTAssertTrue([labelA containsString:@"accountA"],
+                  @"Manager A ran on the queue of another instance: %@", labelA);
+    XCTAssertTrue([labelB containsString:@"accountB"],
+                  @"Manager B ran on the queue of another instance: %@", labelB);
+    XCTAssertNotEqualObjects(labelA, labelB, @"Both managers used a single shared queue.");
+}
+
+- (void)test_inSerialQueue_isTrueOnlyForTheManagerThatOwnsTheQueue {
+    CTDispatchQueueManager *managerA = [self managerForAccountId:@"accountA"];
+    CTDispatchQueueManager *managerB = [self managerForAccountId:@"accountB"];
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"block A ran"];
+    __block BOOL ownerSaysYes = NO;
+    __block BOOL otherSaysYes = NO;
+
+    [managerA runSerialAsync:^{
+        ownerSaysYes = [managerA inSerialQueue];
+        otherSaysYes = [managerB inSerialQueue];
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:2.0];
+
+    XCTAssertTrue(ownerSaysYes, @"Manager A did not recognise its own queue.");
+    XCTAssertFalse(otherSaysYes, @"Manager B claimed the queue of manager A.");
+}
+
 - (void)test_runSerialAsync_executesInOrder {
     NSMutableArray<NSNumber *> *order = [NSMutableArray array];
     XCTestExpectation *exp = [self expectationWithDescription:@"all blocks done"];

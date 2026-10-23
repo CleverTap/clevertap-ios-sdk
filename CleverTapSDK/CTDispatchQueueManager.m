@@ -14,12 +14,15 @@
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @end
 
-@implementation CTDispatchQueueManager
+@implementation CTDispatchQueueManager {
+    // Each manager owns its queues.
+    // A file scope variable would be shared by every CleverTap instance.
+    dispatch_queue_t _serialQueue;
+    dispatch_queue_t _notificationQueue;
+}
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
-dispatch_queue_t _notificationQueue;
-dispatch_queue_t _serialQueue;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     
@@ -46,8 +49,10 @@ dispatch_queue_t _serialQueue;
 }
 
 - (BOOL)inSerialQueue {
-    CTDispatchQueueManager *currentQueue = (__bridge id) dispatch_get_specific(kQueueKey);
-    return currentQueue == self;
+    // The queue holds this pointer without retaining it.
+    // Reading it as an object would make ARC retain it.
+    // The pointer can be stale, so only compare the addresses.
+    return dispatch_get_specific(kQueueKey) == (__bridge void *)self;
 }
 
 - (void)runOnNotificationQueue:(void (^)(void))taskBlock {
@@ -59,8 +64,7 @@ dispatch_queue_t _serialQueue;
 }
 
 - (BOOL)inNotificationQueue {
-    CTDispatchQueueManager *currentQueue = (__bridge id) dispatch_get_specific(kNotificationQueueKey);
-    return currentQueue == self;
+    return dispatch_get_specific(kNotificationQueueKey) == (__bridge void *)self;
 }
 
 @end
