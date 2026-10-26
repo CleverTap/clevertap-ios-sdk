@@ -1043,6 +1043,64 @@ static BOOL sharedInstanceErrorLogged;
         evtData[@"wv_init"] = @(YES);
     }
     
+    evtData[@"dt"] = self.deviceInfo.deviceType;
+    evtData[@"lowPower"] = @(self.deviceInfo.lowPowerModeEnabled);
+    
+    NSNumber *thermalState = self.deviceInfo.thermalState;
+    if (thermalState != nil) {
+        evtData[@"thermal"] = thermalState;
+    }
+    
+    // Set on foreground, nil until then.
+    NSNumber *darkMode = self.deviceInfo.darkMode;
+    if (darkMode != nil) {
+        evtData[@"darkMode"] = darkMode;
+    }
+    NSString *textSize = self.deviceInfo.textSize;
+    if (textSize != nil) {
+        evtData[@"textSize"] = textSize;
+    }
+    NSNumber *reduceMotion = self.deviceInfo.reduceMotion;
+    if (reduceMotion != nil) {
+        evtData[@"reduceMotion"] = reduceMotion;
+    }
+    
+    // Read async on foreground, nil until it completes.
+    NSNumber *pushStatus = self.deviceInfo.pushStatus;
+    if (pushStatus != nil) {
+        evtData[@"pushStatus"] = pushStatus;
+    }
+
+    // Same keys as Android, left out while unknown.
+    NSNumber *batteryLevelBand = self.deviceInfo.batteryLevelBand;
+    if (batteryLevelBand != nil) {
+        evtData[@"batt"] = batteryLevelBand;
+    }
+    NSNumber *charging = self.deviceInfo.charging;
+    if (charging != nil) {
+        evtData[@"chg"] = charging;
+    }
+    NSNumber *ramTier = self.deviceInfo.ramTier;
+    if (ramTier != nil) {
+        evtData[@"ram"] = ramTier;
+    }
+    NSNumber *cpuCount = self.deviceInfo.cpuCount;
+    if (cpuCount != nil) {
+        evtData[@"cpu"] = cpuCount;
+    }
+    NSNumber *metered = self.deviceInfo.metered;
+    if (metered != nil) {
+        evtData[@"metered"] = metered;
+    }
+    NSNumber *lowData = self.deviceInfo.lowData;
+    if (lowData != nil) {
+        evtData[@"lowData"] = lowData;
+    }
+    NSNumber *boldText = self.deviceInfo.boldText;
+    if (boldText != nil) {
+        evtData[@"boldText"] = boldText;
+    }
+
     return evtData;
 }
 
@@ -1230,6 +1288,9 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_appEnteredForeground {
     if ([CTUIUtils runningInsideAppExtension]) return;
+    
+    [self.deviceInfo refreshDisplaySettings];
+    [self.deviceInfo refreshPushStatus];
     
     // Check application state
     UIApplication *application = [CTUIUtils getSharedApplication];

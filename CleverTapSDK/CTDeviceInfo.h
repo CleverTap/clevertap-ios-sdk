@@ -28,10 +28,33 @@
 @property (assign, readonly) BOOL enableFileProtection;
 @property (strong, readonly) NSMutableArray<CTValidationResult*>* validationErrors;
 @property (strong, readonly) NSLocale *systemLocale;
+@property (strong, readonly) NSNumber *deviceType;
+@property (assign, readonly) BOOL lowPowerModeEnabled;
+// NSProcessInfoThermalState raw value, nil below iOS/tvOS 11.
+@property (strong, readonly) NSNumber *thermalState;
+// Set by refreshDisplaySettings, nil until a key window exists.
+@property (atomic, strong, readonly) NSNumber *darkMode;
+@property (atomic, strong, readonly) NSString *textSize;
+@property (atomic, strong, readonly) NSNumber *reduceMotion;
+// Raw UNAuthorizationStatus (0 not asked, 1 denied, 2 allowed, 3 provisional, 4 ephemeral), nil until read.
+@property (atomic, strong, readonly) NSNumber *pushStatus;
+// Battery in 10% steps and charging state. nil unless the app has turned on battery monitoring.
+@property (atomic, strong, readonly) NSNumber *batteryLevelBand;
+@property (atomic, strong, readonly) NSNumber *charging;
+// Bold Text, set by refreshDisplaySettings.
+@property (atomic, strong, readonly) NSNumber *boldText;
+// RAM tier in GB (1, 2, 3, 4, 6, 8, 12 or 16 and up) and CPU core count.
+@property (strong, readonly) NSNumber *ramTier;
+@property (strong, readonly) NSNumber *cpuCount;
+// Cellular or hotspot, and Low Data Mode. nil while unknown.
+@property (strong, readonly) NSNumber *metered;
+@property (strong, readonly) NSNumber *lowData;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
 - (void)forceNewDeviceID;
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
 - (BOOL)isErrorDeviceID;
+- (void)refreshDisplaySettings;
+- (void)refreshPushStatus;
 @end
