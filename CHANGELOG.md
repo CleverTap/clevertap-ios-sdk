@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ### [Unreleased]
 #### Changed
-- Podspec and README now carry a CocoaPods sunset notice. CocoaPods trunk becomes read-only on December 2, 2026. Add `source 'https://github.com/CleverTap/podspecs.git'` and `source 'https://cdn.cocoapods.org/'` to your Podfile to keep receiving updates. Existing installs are unaffected.
+- Podspec and README now carry a CocoaPods sunset notice. CocoaPods trunk becomes read-only on December 2, 2026. Add `source 'https://github.com/CleverTap/podspecs.git'` and `source 'https://cdn.cocoapods.org/'` to the top of your Podfile to keep receiving updates. Existing installs are unaffected.
 
 ### [Version 7.9.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.9.0) (October 15, 2026)
 #### Added
