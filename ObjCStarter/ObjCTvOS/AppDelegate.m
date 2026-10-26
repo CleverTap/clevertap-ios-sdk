@@ -53,3 +53,27 @@
 
 
 @end
+
+#pragma mark - UIScene lifecycle
+
+// tvOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory, same as iOS. The scene
+// manifest in Info.plist points at this delegate, which creates the window so the app
+// launches on tvOS 26/27 instead of crashing.
+@interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
+@end
+
+@implementation SceneDelegate
+
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+    if (![scene isKindOfClass:[UIWindowScene class]]) {
+        return;
+    }
+    UIWindowScene *windowScene = (UIWindowScene *)scene;
+    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.window.rootViewController = [storyboard instantiateInitialViewController];
+    [self.window makeKeyAndVisible];
+}
+
+@end

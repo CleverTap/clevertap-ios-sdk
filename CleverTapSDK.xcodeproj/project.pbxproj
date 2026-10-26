@@ -773,8 +773,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				482FA38A308A2752006BB644 /* CleverTapSDK.framework in CopyFiles */,
-				D02AC2E527604E0F0031C1BE /* SDWebImage.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -785,6 +783,18 @@
 			dstSubfolderSpec = 10;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FFCC50A0AAAC410DBA655201 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				482FA38A308A2752006BB644 /* CleverTapSDK.framework in CopyFiles */,
+				D02AC2E527604E0F0031C1BE /* SDWebImage.framework in CopyFiles */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -2818,6 +2828,7 @@
 			buildPhases = (
 				0B1FCCFC2DB73E820039D424 /* Sources */,
 				0B1FCCFD2DB73E820039D424 /* Frameworks */,
+				FFCC50A0AAAC410DBA655201 /* Embed Frameworks */,
 				0B1FCCFE2DB73E820039D424 /* Resources */,
 				EEC7ADE3079451C1FBAA19CB /* Headers */,
 			);
