@@ -1,6 +1,6 @@
 # Xcode 27 / iOS 27 Support
 
-This release makes the CleverTap iOS SDK build with **Xcode 27** and run on **iOS 27 / tvOS 27 / watchOS 27**. Two things changed that may require action in your app:
+Starting from **iOS SDK v7.9.1**, the CleverTap iOS SDK builds with **Xcode 27** and runs on **iOS 27 / tvOS 27 / watchOS 27**. Two things changed that may require action in your app:
 
 1. The **minimum deployment targets** were raised (Xcode 27 no longer builds targets below its supported range).
 2. Apps must adopt the **UIScene lifecycle** (required by iOS/tvOS 26+ when built with the iOS 26/27 SDK).
