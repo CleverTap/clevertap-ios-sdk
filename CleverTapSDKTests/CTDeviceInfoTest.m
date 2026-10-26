@@ -18,6 +18,8 @@
 @interface CTDeviceInfo (Tests)
 + (NSString *)textSizeForContentSizeCategory:(UIContentSizeCategory)category;
 + (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style;
++ (NSNumber *)batteryBandForLevel:(float)level;
++ (NSNumber *)ramTierForBytes:(unsigned long long)bytes;
 - (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags;
 @end
 
@@ -98,11 +100,14 @@
 }
 
 - (void)test_refreshDisplaySettings_fromBackgroundQueue_readsOnMainThread{
-    // Stub the key window so the test doesn't depend on the test host's window state.
+    // Stub the key window so the test doesn't depend on the host's windows.
     UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     window.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
     __block BOOL readOnMainThread = NO;
     id mockUIUtils = OCMClassMock([CTUIUtils class]);
+    [self addTeardownBlock:^{
+        [mockUIUtils stopMocking];
+    }];
     OCMStub([mockUIUtils getKeyWindow]).andDo(^(NSInvocation *invocation) {
         readOnMainThread = [NSThread isMainThread];
         __unsafe_unretained UIWindow *keyWindow = window;
@@ -120,7 +125,72 @@
     XCTAssertTrue(readOnMainThread);
     XCTAssertEqualObjects([_classObject darkMode], @YES);
     XCTAssertNotNil([_classObject textSize]);
-    [mockUIUtils stopMocking];
+}
+
+- (void)test_batteryBandForLevel_roundsDownToTenPercentSteps{
+    XCTAssertEqualObjects([CTDeviceInfo batteryBandForLevel:0.47f], @40);
+    XCTAssertEqualObjects([CTDeviceInfo batteryBandForLevel:0.0f], @0);
+    XCTAssertEqualObjects([CTDeviceInfo batteryBandForLevel:0.09f], @0);
+    XCTAssertEqualObjects([CTDeviceInfo batteryBandForLevel:0.999f], @100);
+    XCTAssertEqualObjects([CTDeviceInfo batteryBandForLevel:1.0f], @100);
+    XCTAssertNil([CTDeviceInfo batteryBandForLevel:-1.0f]);
+}
+
+- (void)test_ramTierForBytes_roundsUpToTheNextTier{
+    unsigned long long gigabyte = 1024ULL * 1024ULL * 1024ULL;
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:gigabyte / 2], @1);
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:3 * gigabyte], @3);
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:(unsigned long long)(5.6 * gigabyte)], @6);
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:(unsigned long long)(7.5 * gigabyte)], @8);
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:(unsigned long long)(11.2 * gigabyte)], @12);
+    XCTAssertEqualObjects([CTDeviceInfo ramTierForBytes:24 * gigabyte], @16);
+}
+
+- (void)test_ramTierAndCpuCount_comeFromProcessInfo{
+    XCTAssertEqualObjects([_classObject cpuCount], @([NSProcessInfo processInfo].processorCount));
+    XCTAssertEqualObjects([_classObject ramTier], [CTDeviceInfo ramTierForBytes:[NSProcessInfo processInfo].physicalMemory]);
+}
+
+- (void)test_refreshDisplaySettings_readsBoldText{
+    [_classObject refreshDisplaySettings];
+
+    XCTAssertEqualObjects([_classObject boldText], @(UIAccessibilityIsBoldTextEnabled()));
+    XCTAssertEqual(CFGetTypeID((__bridge CFTypeRef)[_classObject boldText]), CFBooleanGetTypeID());
+}
+
+// The simulator's battery is always unknown, so these mock the device.
+- (void)test_refreshDisplaySettings_leavesBatteryOutAndNeverTurnsOnMonitoring{
+    id device = OCMClassMock([UIDevice class]);
+    id deviceClass = OCMClassMock([UIDevice class]);
+    [self addTeardownBlock:^{
+        [deviceClass stopMocking];
+    }];
+    OCMStub([deviceClass currentDevice]).andReturn(device);
+    OCMStub([device isBatteryMonitoringEnabled]).andReturn(NO);
+    OCMReject([device setBatteryMonitoringEnabled:YES]);
+
+    [_classObject refreshDisplaySettings];
+
+    XCTAssertNil([_classObject batteryLevelBand]);
+    XCTAssertNil([_classObject charging]);
+    OCMVerifyAll(device);
+}
+
+- (void)test_refreshDisplaySettings_readsBatteryWhenTheAppMonitorsIt{
+    id device = OCMClassMock([UIDevice class]);
+    id deviceClass = OCMClassMock([UIDevice class]);
+    [self addTeardownBlock:^{
+        [deviceClass stopMocking];
+    }];
+    OCMStub([deviceClass currentDevice]).andReturn(device);
+    OCMStub([device isBatteryMonitoringEnabled]).andReturn(YES);
+    OCMStub([device batteryLevel]).andReturn(0.47f);
+    OCMStub([device batteryState]).andReturn(UIDeviceBatteryStateCharging);
+
+    [_classObject refreshDisplaySettings];
+
+    XCTAssertEqualObjects([_classObject batteryLevelBand], @40);
+    XCTAssertEqualObjects([_classObject charging], @YES);
 }
 
 - (void)test_darkModeForInterfaceStyle{
@@ -130,7 +200,7 @@
     XCTAssertEqualObjects(light, @NO);
     XCTAssertNil([CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleUnspecified]);
 
-    // NSJSONSerialization writes only CFBoolean-backed numbers as true/false, the rest as 0/1.
+    // JSON writes only CFBoolean numbers as true/false.
     XCTAssertEqual(CFGetTypeID((__bridge CFTypeRef)dark), CFBooleanGetTypeID());
     XCTAssertEqual(CFGetTypeID((__bridge CFTypeRef)light), CFBooleanGetTypeID());
 }
@@ -175,10 +245,30 @@
         CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
         XCTAssertNotNil(deviceInfo);
     }
-    // A second instance after the first is freed still gets its own working reachability.
+    // A new instance after the first is freed still gets working reachability.
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
     [deviceInfo handleReachabilityUpdate:kSCNetworkReachabilityFlagsReachable];
     XCTAssertTrue([deviceInfo isOnline]);
+}
+
+- (void)test_initWithConfig_readsOnlineStateWithoutWaitingForAChange{
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+
+    NSPredicate *online = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *info, NSDictionary *bindings) {
+        return info.isOnline;
+    }];
+    [self waitForExpectations:@[[self expectationForPredicate:online evaluatedWithObject:deviceInfo handler:nil]] timeout:5.0];
+}
+
+- (void)test_initWithConfig_startsThePushStatusRead{
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+
+    NSPredicate *cached = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *info, NSDictionary *bindings) {
+        return info.pushStatus != nil;
+    }];
+    [self waitForExpectations:@[[self expectationForPredicate:cached evaluatedWithObject:deviceInfo handler:nil]] timeout:2.0];
 }
 
 - (void)test_radio_updatesOnRadioAccessTechnologyChange{

@@ -1051,7 +1051,7 @@ static BOOL sharedInstanceErrorLogged;
         evtData[@"thermal"] = thermalState;
     }
     
-    // Display settings are cached on the main thread when the app comes to foreground, nil until then.
+    // Set on foreground, nil until then.
     NSNumber *darkMode = self.deviceInfo.darkMode;
     if (darkMode != nil) {
         evtData[@"darkMode"] = darkMode;
@@ -1065,12 +1065,42 @@ static BOOL sharedInstanceErrorLogged;
         evtData[@"reduceMotion"] = reduceMotion;
     }
     
-    // Cached when the app comes to foreground, nil until the first read completes.
+    // Read async on foreground, nil until it completes.
     NSNumber *pushStatus = self.deviceInfo.pushStatus;
     if (pushStatus != nil) {
         evtData[@"pushStatus"] = pushStatus;
     }
-    
+
+    // Same keys as Android, left out while unknown.
+    NSNumber *batteryLevelBand = self.deviceInfo.batteryLevelBand;
+    if (batteryLevelBand != nil) {
+        evtData[@"batt"] = batteryLevelBand;
+    }
+    NSNumber *charging = self.deviceInfo.charging;
+    if (charging != nil) {
+        evtData[@"chg"] = charging;
+    }
+    NSNumber *ramTier = self.deviceInfo.ramTier;
+    if (ramTier != nil) {
+        evtData[@"ram"] = ramTier;
+    }
+    NSNumber *cpuCount = self.deviceInfo.cpuCount;
+    if (cpuCount != nil) {
+        evtData[@"cpu"] = cpuCount;
+    }
+    NSNumber *metered = self.deviceInfo.metered;
+    if (metered != nil) {
+        evtData[@"metered"] = metered;
+    }
+    NSNumber *lowData = self.deviceInfo.lowData;
+    if (lowData != nil) {
+        evtData[@"lowData"] = lowData;
+    }
+    NSNumber *boldText = self.deviceInfo.boldText;
+    if (boldText != nil) {
+        evtData[@"boldText"] = boldText;
+    }
+
     return evtData;
 }
 

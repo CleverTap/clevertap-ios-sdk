@@ -13,6 +13,11 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTUIUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -39,10 +44,11 @@ static NSString *_deviceWidth;
 static NSString *_deviceHeight;
 static NSLocale *_systemLocale;
 static NSNumber *_deviceType;
+static NSNumber *_ramTier;
+static NSNumber *_cpuCount;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-// Weak box handed to the reachability callback, so a callback already queued when the
-// device info is deallocated finds nil instead of a dangling pointer.
+// Weak box for the reachability callback, so a callback after dealloc finds nil.
 @interface CTReachabilityTarget : NSObject
 @property (nonatomic, weak) CTDeviceInfo *deviceInfo;
 @end
@@ -50,8 +56,7 @@ static NSNumber *_deviceType;
 @implementation CTReachabilityTarget
 @end
 
-// Shared by all instances, it only reads device-wide radio and carrier info. Each CTTelephonyNetworkInfo
-// posts its own radio change notification, so one per instance made every observer hear each change twice.
+// Shared, since one per instance made observers get each radio change twice.
 static CTTelephonyNetworkInfo *_networkInfo;
 #endif
 
@@ -72,10 +77,13 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @property (atomic, strong, readwrite) NSString *textSize;
 @property (atomic, strong, readwrite) NSNumber *reduceMotion;
 @property (atomic, strong, readwrite) NSNumber *pushStatus;
-// Written on the reachability queue and read from the SDK queues, so both are atomic.
+@property (atomic, strong, readwrite) NSNumber *batteryLevelBand;
+@property (atomic, strong, readwrite) NSNumber *charging;
+@property (atomic, strong, readwrite) NSNumber *boldText;
+// Written on the reachability queue, read from the SDK queues.
 @property (atomic, assign, readwrite) BOOL wifi;
 @property (atomic, assign, readwrite) BOOL isOnline;
-// Cached cellular radio technology, updated from the CoreTelephony change notification.
+// Updated when the radio technology changes.
 @property (atomic, copy) NSString *currentRadio;
 
 @end
@@ -144,11 +152,22 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         if (domainURL && (_reachability = SCNetworkReachabilityCreateWithName(NULL, domainURL)) != NULL) {
             CTReachabilityTarget *reachabilityTarget = [CTReachabilityTarget new];
             reachabilityTarget.deviceInfo = self;
-            // The reachability object retains the target through CFRetain and releases it when it is freed.
+            // The reachability object retains the target and releases it when freed.
             SCNetworkReachabilityContext context = {0, (__bridge void*)reachabilityTarget, CFRetain, CFRelease, NULL};
             if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
                 if (!SCNetworkReachabilitySetDispatchQueue(_reachability, _reachabilityQueue)) {
                     SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+                } else {
+                    // Read the current state now, so a new instance doesn't report offline until the first change.
+                    __weak CTDeviceInfo *weakSelf = self;
+                    SCNetworkReachabilityRef reachability = (SCNetworkReachabilityRef)CFRetain(_reachability);
+                    dispatch_async(_reachabilityQueue, ^{
+                        SCNetworkReachabilityFlags flags;
+                        if (SCNetworkReachabilityGetFlags(reachability, &flags)) {
+                            [weakSelf handleReachabilityUpdate:flags];
+                        }
+                        CFRelease(reachability);
+                    });
                 }
             }
         }
@@ -157,14 +176,21 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             _networkInfo = [CTTelephonyNetworkInfo new];
         });
         if (@available(iOS 12.0, *)) {
-            // Keep radio current when the cellular technology changes, e.g. LTE to 5G. Removed in dealloc.
+            // Keep radio current, e.g. LTE to 5G. Removed in dealloc.
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(radioAccessTechnologyDidChange:)
                                                          name:CTServiceRadioAccessTechnologyDidChangeNotification
                                                        object:nil];
         }
 #endif
+#if !CLEVERTAP_TVOS
+        [[CTNetworkCostMonitor shared] start];
+#endif
         [self initDeviceID:cleverTapID];
+        // Start early so it usually lands before the first App Launched.
+        if (![CTUIUtils runningInsideAppExtension]) {
+            [self refreshPushStatus];
+        }
     }
     return self;
 }
@@ -521,6 +547,12 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         return;
     }
 
+#if !CLEVERTAP_TVOS
+    // These don't need a key window.
+    self.boldText = @(UIAccessibilityIsBoldTextEnabled());
+    [self refreshBattery];
+#endif
+
     UIWindow *keyWindow = [CTUIUtils getKeyWindow];
     if (!keyWindow) return;
 
@@ -536,13 +568,77 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 + (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style API_AVAILABLE(ios(12.0), tvos(10.0)) {
     if (style == UIUserInterfaceStyleUnspecified) return nil;
-    // A C comparison is an int, so box it as a BOOL to serialize as true/false like the other flags.
+    // Box as BOOL so it serializes as true/false, not 0/1.
     return @((BOOL)(style == UIUserInterfaceStyleDark));
+}
+
+#if !CLEVERTAP_TVOS
+- (void)refreshBattery {
+    UIDevice *device = [UIDevice currentDevice];
+    // Monitoring is an app-wide switch, so only read when the app has turned it on.
+    if (!device.isBatteryMonitoringEnabled) {
+        self.batteryLevelBand = nil;
+        self.charging = nil;
+        return;
+    }
+    self.batteryLevelBand = [[self class] batteryBandForLevel:device.batteryLevel];
+    UIDeviceBatteryState state = device.batteryState;
+    self.charging = (state == UIDeviceBatteryStateUnknown) ? nil
+        : @((BOOL)(state == UIDeviceBatteryStateCharging || state == UIDeviceBatteryStateFull));
+}
+#endif
+
++ (NSNumber *)batteryBandForLevel:(float)level {
+    // 0 to 1, or -1 when unknown.
+    if (level < 0 || level > 1) return nil;
+    long percent = lroundf(level * 100);
+    return @((percent / 10) * 10);
+}
+
+- (NSNumber *)ramTier {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _ramTier = [[self class] ramTierForBytes:[NSProcessInfo processInfo].physicalMemory];
+    });
+    return _ramTier;
+}
+
++ (NSNumber *)ramTierForBytes:(unsigned long long)bytes {
+    // Rounds up, so 7.5 GB is the 8 GB tier. 16 means 16 or more.
+    double gigabytes = (double)bytes / (1024.0 * 1024.0 * 1024.0);
+    for (NSNumber *tier in @[@1, @2, @3, @4, @6, @8, @12]) {
+        if (gigabytes <= tier.doubleValue) return tier;
+    }
+    return @16;
+}
+
+- (NSNumber *)cpuCount {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _cpuCount = @([NSProcessInfo processInfo].processorCount);
+    });
+    return _cpuCount;
+}
+
+- (NSNumber *)metered {
+#if !CLEVERTAP_TVOS
+    return [CTNetworkCostMonitor shared].metered;
+#else
+    return nil;
+#endif
+}
+
+- (NSNumber *)lowData {
+#if !CLEVERTAP_TVOS
+    return [CTNetworkCostMonitor shared].lowData;
+#else
+    return nil;
+#endif
 }
 
 - (void)refreshPushStatus {
     if (@available(iOS 10.0, tvOS 10.0, *)) {
-        // The completion runs on a background queue chosen by the system, so pushStatus is atomic.
+        // Completes on a system background queue, so pushStatus is atomic.
         [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
             self.pushStatus = @(settings.authorizationStatus);
         }];

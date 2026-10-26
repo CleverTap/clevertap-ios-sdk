@@ -669,6 +669,45 @@
     XCTAssertEqualObjects(appFields[@"thermal"], @([[NSProcessInfo processInfo] thermalState]));
 }
 
+- (void)test_appFields_containDeviceSignals_whenKnown {
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo batteryLevelBand]).andReturn(@40);
+    OCMStub([mockDeviceInfo charging]).andReturn(@YES);
+    OCMStub([mockDeviceInfo ramTier]).andReturn(@8);
+    OCMStub([mockDeviceInfo cpuCount]).andReturn(@6);
+    OCMStub([mockDeviceInfo metered]).andReturn(@NO);
+    OCMStub([mockDeviceInfo lowData]).andReturn(@YES);
+    OCMStub([mockDeviceInfo boldText]).andReturn(@NO);
+
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    XCTAssertEqualObjects(appFields[@"batt"], @40);
+    XCTAssertEqualObjects(appFields[@"chg"], @YES);
+    XCTAssertEqualObjects(appFields[@"ram"], @8);
+    XCTAssertEqualObjects(appFields[@"cpu"], @6);
+    XCTAssertEqualObjects(appFields[@"metered"], @NO);
+    XCTAssertEqualObjects(appFields[@"lowData"], @YES);
+    XCTAssertEqualObjects(appFields[@"boldText"], @NO);
+    [mockDeviceInfo stopMocking];
+}
+
+- (void)test_appFields_omitDeviceSignals_whenUnknown {
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo batteryLevelBand]).andReturn(nil);
+    OCMStub([mockDeviceInfo charging]).andReturn(nil);
+    OCMStub([mockDeviceInfo metered]).andReturn(nil);
+    OCMStub([mockDeviceInfo lowData]).andReturn(nil);
+    OCMStub([mockDeviceInfo boldText]).andReturn(nil);
+
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    for (NSString *key in @[@"batt", @"chg", @"metered", @"lowData", @"boldText"]) {
+        XCTAssertNil(appFields[key], @"%@ should be left out", key);
+    }
+    // RAM tier and core count are always known.
+    XCTAssertNotNil(appFields[@"ram"]);
+    XCTAssertNotNil(appFields[@"cpu"]);
+    [mockDeviceInfo stopMocking];
+}
+
 - (void)test_appFields_omitDisplaySettings_whenNotRefreshed {
     id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
     OCMStub([mockDeviceInfo darkMode]).andReturn(nil);
@@ -696,7 +735,7 @@
 }
 
 - (void)test_appFields_pushStatus_onlyWhenKnown {
-    // Stub the getter so the async status read started on foreground can't change it mid-test.
+    // Stub it so the async read can't change it mid-test.
     id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
     OCMStub([mockDeviceInfo pushStatus]).andReturn(nil);
     XCTAssertNil([self batchHeaderForTesting][@"af"][@"pushStatus"]);
