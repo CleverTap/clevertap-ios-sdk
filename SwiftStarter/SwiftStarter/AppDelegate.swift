@@ -215,3 +215,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 }
 
+// MARK: - UIScene lifecycle
+//
+// iOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory. Without a scene manifest
+// + delegate the app crashes at launch, so the window is created here instead of relying
+// on the legacy app-delegate `window`. See Info.plist > UIApplicationSceneManifest.
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
+        self.window = window
+        window.makeKeyAndVisible()
+
+        // Cold-start deep link (e.g. tapping the Food Order Live Activity) arrives here now.
+        connectionOptions.urlContexts.forEach { forwardDeepLink($0.url) }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        // Warm deep links reach the scene delegate instead of application(_:open:options:).
+        URLContexts.forEach { forwardDeepLink($0.url) }
+    }
+
+    private func forwardDeepLink(_ url: URL) {
+        _ = (UIApplication.shared.delegate as? AppDelegate)?
+            .application(UIApplication.shared, open: url, options: [:])
+    }
+}
+
