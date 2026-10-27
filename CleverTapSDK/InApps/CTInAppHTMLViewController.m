@@ -182,7 +182,9 @@ typedef enum {
 
 - (void)updateWebView {
     boolean_t fixedWidth = false, fixedHeight = false;
-    
+    BOOL usesSafeAreaHeight = NO;
+    CGFloat safeAreaTopInset = 0.0f;
+
     CGSize size = CGSizeZero;
     if (self.notification.width > 0) {
         // Ignore Constants.INAPP_X_PERCENT
@@ -217,6 +219,8 @@ typedef enum {
 
             // Calculate percentage-based height
             size.height = (CGFloat) ceil(safeAreaHeight);
+            safeAreaTopInset = safeInsets.top;
+            usesSafeAreaHeight = YES;
         }
         else {
             size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
@@ -273,7 +277,11 @@ typedef enum {
             break;
         case CLTAP_INAPP_POSITION_CENTER:
             frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+            // The height already excludes both safe area insets, so centering would
+            // split them evenly and push the web view up under the status bar.
+            frame.origin.y = usesSafeAreaHeight
+                ? safeAreaTopInset
+                : (screenSize.height - size.height) / 2.0f;//+extra;
             break;
         default:
             CleverTapLogStaticInternal(@"Unknown position %c", pos);
