@@ -72,3 +72,20 @@ extension AppDelegate: WCSessionDelegate {
         }
     }
 }
+
+// MARK: - UIScene lifecycle
+//
+// iOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory; the window is created here
+// so the app launches on iOS 26/27 instead of crashing. See Info.plist > UIApplicationSceneManifest.
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
+        self.window = window
+        window.makeKeyAndVisible()
+    }
+}

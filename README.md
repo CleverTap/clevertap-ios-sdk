@@ -7,8 +7,8 @@
 [![Version](https://img.shields.io/cocoapods/v/CleverTap-iOS-SDK.svg?style=flat)](http://cocoapods.org/pods/CleverTap-iOS-SDK)
 [![License](https://img.shields.io/cocoapods/l/CleverTap-iOS-SDK.svg?style=flat)](http://cocoapods.org/pods/CleverTap-iOS-SDK)
 [![Platform](https://img.shields.io/cocoapods/p/CleverTap-iOS-SDK.svg?style=flat)](http://cocoapods.org/pods/CleverTap-iOS-SDK)
-![iOS 8.0+](https://img.shields.io/badge/iOS-9.0%2B-blue.svg)
-![tvOS 9.0+](https://img.shields.io/badge/tvOS-9.0%2B-blue.svg)
+![iOS 15.0+](https://img.shields.io/badge/iOS-15.0%2B-blue.svg)
+![tvOS 15.0+](https://img.shields.io/badge/tvOS-15.0%2B-blue.svg)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
@@ -22,11 +22,16 @@ For more information check out our  [website](https://clevertap.com/ "CleverTap"
 
 To get started, sign up [here](https://clevertap.com/live-product-demo/)
 
+## 📝 Note
+Starting from iOS SDK version **7.9.1**, the minimum supported deployment versions are **iOS 15.0**, **tvOS 15.0**, and **watchOS 9.0**.
+
 ## 📋 Requirements
 Following are required for using CleverTap iOS SDK -
-- iOS 9.0 or later
-- tvOS 9.0 or later
+- iOS 15.0 or later
+- tvOS 15.0 or later
 - Xcode 10.0 or later
+
+> ⚠️ **Upgrading to Xcode 27 / iOS 27?** See the [Xcode 27 / iOS 27 Support guide](/docs/iOS27Support.md) for the raised minimum deployment targets (iOS 15 / tvOS 15 / watchOS 9), the CocoaPods `post_install` snippet, and UIScene lifecycle adoption.
 
 ## 🎉 Installation
 
