@@ -2,6 +2,15 @@ Pod::Spec.new do |s|
 s.name                      = "CleverTap-iOS-SDK"
 s.version                   = `cat sdk-version.txt`
 s.summary                   = "The CleverTap iOS SDK for App Analytics and Engagement."
+s.description               = <<-DESC
+                              The CleverTap iOS SDK for App Analytics and Engagement.
+
+                              NOTICE: CocoaPods trunk becomes read-only on December 2, 2026. To keep
+                              receiving CleverTap updates through CocoaPods, add these lines to your Podfile:
+                                source 'https://github.com/CleverTap/podspecs.git'
+                                source 'https://cdn.cocoapods.org/'
+                              Existing installs are unaffected. See the README.
+                              DESC
 s.homepage                  = "https://github.com/CleverTap/clevertap-ios-sdk"
 s.license                   = { :type => "MIT" }
 s.author                    = { "CleverTap" => "http://www.clevertap.com" }
