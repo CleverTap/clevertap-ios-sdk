@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTTriggerCondition.h"
+@class CTTriggerCondition;
 
 @class CTTriggerRadius;
 

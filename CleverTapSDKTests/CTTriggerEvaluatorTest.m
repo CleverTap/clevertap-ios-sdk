@@ -12,7 +12,7 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTriggerCondition.h"
+#import "CTTriggerOperator.h"
 
 /// Helper to build CTTriggerValue concisely
 static inline CTTriggerValue *TV(id val) {

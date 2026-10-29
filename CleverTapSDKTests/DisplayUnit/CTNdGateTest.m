@@ -12,7 +12,7 @@
 #import "CTConstants.h"
 #import "CTDeviceInfo.h"
 #import "CTImpressionManager.h"
-#import "CTTriggerCondition.h"
+#import "CTTriggerOperator.h"
 // CTNdStore and CTNdFCManager are written in Swift. This is the generated header that declares them
 // to Objective-C. It also carries the members CTNdFCManager+Tests.h used to expose. An internal
 // member of an @objcMembers Swift class lands in that header, so the test can reach it without a
