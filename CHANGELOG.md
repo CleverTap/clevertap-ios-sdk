@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
     * Minimum deployment targets are now **iOS 15.0**, **tvOS 15.0** and **watchOS 9.0** (previously iOS 9.0, tvOS 9.0 and watchOS 2.0). Xcode 27 does not build targets below this range.
     * CocoaPods users may also need a `post_install` hook that raises every pod target to iOS 15, because dependencies such as `SDWebImage` carry their own lower minimums.
     * Apps built with the iOS 26 or 27 SDK must adopt the UIScene lifecycle. The sample apps (`ObjCStarter`, `SPMStarter`, `SwiftStarter`, `SwiftUIStarter`) now use it. The only CleverTap feature affected is deep link attribution through `openURL` swizzling. Push handling is unchanged.
-    * See [docs/iOS27Support.md](docs/iOS27Support.md) for the migration steps.
+    * See [the iOS 27 Support doc](docs/iOS27Support.md) for the migration steps.
 
 #### Changed
 - Podspec and README now carry a CocoaPods sunset notice. CocoaPods trunk becomes read-only on December 2, 2026. Add `source 'https://github.com/CleverTap/podspecs.git'` and `source 'https://cdn.cocoapods.org/'` to the top of your Podfile to keep receiving updates. Existing installs are unaffected.
