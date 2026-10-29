@@ -15,7 +15,6 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTriggerEvaluator.h"
 #import "CTTriggersMatcher+Tests.h"
 #import "CTConstants.h"
 

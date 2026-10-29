@@ -8,7 +8,6 @@
 
 #import "CTTriggersMatcher.h"
 #import "CTConstants.h"
-#import "CTTriggerEvaluator.h"
 #import "CTUtils.h"
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
