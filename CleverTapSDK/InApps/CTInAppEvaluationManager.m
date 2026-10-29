@@ -9,7 +9,6 @@
 #import <CoreLocation/CoreLocation.h>
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
-#import "CTEventAdapter.h"
 #import "CTInAppStore.h"
 #import "CTTriggersMatcher.h"
 #import "CTLimitsMatcher.h"

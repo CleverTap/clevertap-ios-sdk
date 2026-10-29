@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTEventAdapter.h"
+@class CTEventAdapter;
 #import "CTLocalDataStore.h"
 
 NS_ASSUME_NONNULL_BEGIN

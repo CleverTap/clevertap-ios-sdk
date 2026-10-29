@@ -10,7 +10,11 @@
 #import <XCTest/XCTest.h>
 #import <OCMock/OCMock.h>
 #import "CTTriggersMatcher.h"
-#import "CTEventAdapter.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTTriggerEvaluator.h"
 #import "CTTriggersMatcher+Tests.h"
 #import "CTConstants.h"
