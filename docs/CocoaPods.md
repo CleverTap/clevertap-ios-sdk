@@ -1,8 +1,16 @@
 # [CocoaPods](https://cocoapods.org) for CleverTap
 
-For your iOS, App Extension target(s) and tvOS app, add the following to your Podfile:
+> **NOTICE: CocoaPods trunk becomes read-only on December 2, 2026.** After that date new
+> CleverTap versions are published to our own specs repo, not to trunk. Add both source lines
+> below to the top of your Podfile to keep receiving updates. The `cdn.cocoapods.org` line is
+> still needed so other pods (for example SDWebImage) resolve. Existing installs are unaffected.
+
+For your iOS, App Extension target(s) and tvOS app, add the following to the top of your Podfile:
 
   ```
+  source 'https://github.com/CleverTap/podspecs.git'
+  source 'https://cdn.cocoapods.org/'
+
   target 'YOUR_TARGET_NAME' do  
       pod 'CleverTap-iOS-SDK'  
   end     
