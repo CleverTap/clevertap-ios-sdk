@@ -64,11 +64,13 @@ public final class CTEventAdapter: NSObject {
 
     @objc(initWithEventName:eventProperties:location:andItems:)
     public init(eventName: String,
-                eventProperties: NSDictionary,
+                eventProperties: NSDictionary?,
                 location: CLLocationCoordinate2D,
                 andItems items: [Any]?) {
         self.eventName = eventName
-        self.eventProperties = eventProperties
+        // ObjC callers pass nil here (a custom event's props, or appLaunchedProperties before the
+        // first App Launched event); coalesce so the non-optional stored property never holds nil.
+        self.eventProperties = eventProperties ?? NSDictionary()
         self.location = location
         self.items = items
         self.profileAttrName = nil
@@ -77,7 +79,7 @@ public final class CTEventAdapter: NSObject {
 
     @objc(initWithEventName:eventProperties:andLocation:)
     public convenience init(eventName: String,
-                            eventProperties: NSDictionary,
+                            eventProperties: NSDictionary?,
                             andLocation location: CLLocationCoordinate2D) {
         self.init(eventName: eventName, eventProperties: eventProperties, location: location, andItems: [])
     }
@@ -85,10 +87,10 @@ public final class CTEventAdapter: NSObject {
     @objc(initWithEventName:profileAttrName:eventProperties:andLocation:)
     public init(eventName: String,
                 profileAttrName: String?,
-                eventProperties: NSDictionary,
+                eventProperties: NSDictionary?,
                 andLocation location: CLLocationCoordinate2D) {
         self.eventName = eventName
-        self.eventProperties = eventProperties
+        self.eventProperties = eventProperties ?? NSDictionary()
         self.location = location
         self.items = []
         self.profileAttrName = profileAttrName

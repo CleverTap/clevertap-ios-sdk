@@ -29,7 +29,7 @@ Starting from iOS SDK version **7.9.1**, the minimum supported deployment versio
 Following are required for using CleverTap iOS SDK -
 - iOS 15.0 or later
 - tvOS 15.0 or later
-- Xcode 13.0 or later
+- Xcode 14.0 or later
 
 > ⚠️ **Upgrading to Xcode 27 / iOS 27?** See the [Xcode 27 / iOS 27 Support guide](/docs/iOS27Support.md) for the raised minimum deployment targets (iOS 15 / tvOS 15 / watchOS 9), the CocoaPods `post_install` snippet, and UIScene lifecycle adoption.
 
