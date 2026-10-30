@@ -6,20 +6,17 @@
 //  frequency-cap limit JSON dictionary (as delivered by the dashboard/server) that
 //  exposes the parsed limit type, limit, frequency, and an emptiness check.
 //
-//  Access control:
-//  - `@objcMembers public final class` + `@objc public enum` keep the type usable from
-//    Objective-C. CTLimitsMatcher.m constructs instances via init(json:), reads
-//    limitType()/limit()/frequency()/isEmpty(), and switches on CTLimitType. `public` is
-//    required so the in-pod ObjC caller sees it via the framework's CleverTapSDK-Swift.h.
-//  - Accessors are methods (not computed properties) to match the original ObjC method
-//    contract exactly (call sites use `limit.limit` / `[limit limitType]`).
+//  Internal to the (now all-Swift) Matchers cluster: CTLimitsMatcher (Swift) constructs it via
+//  init(json:) and reads limitType()/limit()/frequency()/isEmpty(). No ObjC consumer remains, so
+//  the @objc/@objcMembers interop scaffold has been removed. Accessors are kept as methods (not
+//  computed properties) to match the original ObjC method contract.
 //
 //  No collection returns (enum / Int / Bool only), so the mutable-return-bridging rule does
 //  not apply here.
 
 import Foundation
 
-@objc public enum CTLimitType: Int {
+public enum CTLimitType: Int {
     case ever
     case session
     case seconds
@@ -31,7 +28,6 @@ import Foundation
     case onExactly
 }
 
-@objcMembers
 public final class CTLimitAdapter: NSObject {
 
     private let limitJSON: [AnyHashable: Any]
@@ -41,7 +37,6 @@ public final class CTLimitAdapter: NSObject {
         fatalError("init() is unavailable; use init(json:)")
     }
 
-    @objc(initWithJSON:)
     public init(json limitJSON: [AnyHashable: Any]) {
         self.limitJSON = limitJSON
         super.init()

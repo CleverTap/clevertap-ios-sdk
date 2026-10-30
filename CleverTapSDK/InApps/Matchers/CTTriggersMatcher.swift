@@ -8,8 +8,9 @@
 //  first-time-only, geo-radius (and, for Charged events, item conditions) via CTTriggerEvaluator.
 //
 //  Access control:
-//  - `@objcMembers public final class` keeps it usable from CTInAppEvaluationManager and the ObjC
-//    test category via the framework's CleverTapSDK-Swift.h; the public selectors are pinned.
+//  - `@objcMembers public final class` keeps it usable from CTInAppEvaluationManager (still ObjC),
+//    which constructs it via initWithDataStore: and calls matchEventWhenTriggers:event:; both
+//    selectors are pinned. The rest of the cluster is Swift and reaches it directly.
 //
 //  Migration notes:
 //  - `dataStore` is optional: the class is constructed both with `init()` (no store — triggers that

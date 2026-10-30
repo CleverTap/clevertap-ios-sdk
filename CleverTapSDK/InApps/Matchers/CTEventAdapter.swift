@@ -8,9 +8,11 @@
 //  and read by CTTriggersMatcher during in-app trigger evaluation.
 //
 //  Access control:
-//  - `@objcMembers public final class` keeps the type usable from the ObjC matcher cluster via the
-//    framework's CleverTapSDK-Swift.h. Every selector is pinned with `@objc(...)` to stay
-//    byte-identical for the ObjC callers (CTInAppEvaluationManager / CTTriggersMatcher).
+//  - Usable from CTInAppEvaluationManager (still ObjC), which constructs it via the three pinned
+//    `initWithEventName:...` selectors and reads `eventName` / `eventProperties` / `profileAttrName`.
+//    Only those exact members carry `@objc` — the class is a bare NSObject subclass (no `@objcMembers`),
+//    so the resolver methods (propertyValueNamed / itemValueNamed, called only by the Swift
+//    CTTriggersMatcher) and the Swift-only `location` stay off the ObjC surface.
 //
 //  Migration notes:
 //  - `profileAttrName` is optional (nonnull-in-header but nil for 2 of 3 inits; consumers nil-check);
@@ -25,13 +27,12 @@
 import Foundation
 import CoreLocation
 
-@objcMembers
 public final class CTEventAdapter: NSObject {
 
-    public let eventName: String
+    @objc public let eventName: String
     public let location: CLLocationCoordinate2D
-    public let profileAttrName: String?
-    public var eventProperties: NSDictionary
+    @objc public let profileAttrName: String?
+    @objc public var eventProperties: NSDictionary
 
     private let items: [Any]?
 
@@ -89,13 +90,11 @@ public final class CTEventAdapter: NSObject {
         super.init()
     }
 
-    @objc(propertyValueNamed:)
     public func propertyValueNamed(_ name: String) -> CTTriggerValue? {
         guard let value = getActualPropertyValue(name) else { return nil }
         return CTTriggerValue(value: value)
     }
 
-    @objc(itemValueNamed:)
     public func itemValueNamed(_ name: String) -> CTTriggerValue? {
         guard let items = items else { return nil }
         var itemValues: [Any] = []

@@ -7,10 +7,8 @@
 //  plus the CTTriggerCondition and CTTriggerRadius views built from its eventProperties /
 //  itemProperties / geoRadius arrays. Built and read by CTTriggersMatcher.
 //
-//  Access control:
-//  - `@objcMembers public final class` keeps the type usable from the ObjC matcher cluster
-//    (CTTriggersMatcher) via the framework's CleverTapSDK-Swift.h. `init(json:)` pins the exact
-//    ObjC selector `initWithJSON:`.
+//  Internal to the (now all-Swift) Matchers cluster: built and read by CTTriggersMatcher (Swift).
+//  No ObjC consumer remains, so the @objc/@objcMembers interop scaffold has been removed.
 //
 //  Migration notes:
 //  - The ObjC header was NS_ASSUME_NONNULL, but `eventName` and `profileAttrName` are read
@@ -32,7 +30,6 @@
 
 import Foundation
 
-@objcMembers
 public final class CTTriggerAdapter: NSObject {
 
     public let eventName: String?
@@ -48,7 +45,6 @@ public final class CTTriggerAdapter: NSObject {
         fatalError("init() is unavailable; use init(json:)")
     }
 
-    @objc(initWithJSON:)
     public init(json triggerJSON: [AnyHashable: Any]) {
         self.eventName = triggerJSON["eventName"] as? String
         self.properties = triggerJSON["eventProperties"] as? [Any]
@@ -71,19 +67,16 @@ public final class CTTriggerAdapter: NSObject {
         return geoRadius?.count ?? 0
     }
 
-    @objc(propertyAtIndex:)
     public func property(at index: Int) -> CTTriggerCondition? {
         guard let properties = properties else { return nil }
         return triggerCondition(from: properties[index])
     }
 
-    @objc(itemAtIndex:)
     public func item(at index: Int) -> CTTriggerCondition? {
         guard let items = items else { return nil }
         return triggerCondition(from: items[index])
     }
 
-    @objc(geoRadiusAtIndex:)
     public func geoRadius(at index: Int) -> CTTriggerRadius? {
         guard let geoRadius = geoRadius else { return nil }
         let item = geoRadius[index] as? [AnyHashable: Any]

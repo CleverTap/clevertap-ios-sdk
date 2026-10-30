@@ -7,9 +7,8 @@
 //  under a given operator (equals / compare / between / contains / set-exists), plus a geo-distance
 //  check. Called by CTTriggersMatcher during in-app trigger evaluation.
 //
-//  Access control:
-//  - `@objcMembers public final class` keeps it callable from CTTriggersMatcher (still ObjC) via the
-//    framework's CleverTapSDK-Swift.h; the two public selectors are pinned with `@objc(...)`.
+//  Internal to the (now all-Swift) Matchers cluster: called by CTTriggersMatcher (Swift). No ObjC
+//  consumer remains, so the @objc/@objcMembers interop scaffold has been removed.
 //
 //  Migration notes:
 //  - `op` is a raw `UInt`, not the ObjC `CTTriggerOperator` enum. It arrives as `CTTriggerCondition.op`
@@ -23,7 +22,6 @@
 import Foundation
 import CoreLocation
 
-@objcMembers
 public final class CTTriggerEvaluator: NSObject {
 
     // CTTriggerOperator raw codes (mirror CTTriggerOperator.h).
@@ -42,7 +40,6 @@ public final class CTTriggerEvaluator: NSObject {
     private static let boolStringYes = "true"   // CLTAP_TRIGGER_BOOL_STRING_YES
     private static let boolStringNo = "false"   // CLTAP_TRIGGER_BOOL_STRING_NO
 
-    @objc(evaluate:expected:actual:)
     public static func evaluate(_ op: UInt, expected: CTTriggerValue, actual: CTTriggerValue?) -> Bool {
         if actual?.isArray() == true {
             for val in actual?.arrayValue ?? [] {
@@ -55,7 +52,6 @@ public final class CTTriggerEvaluator: NSObject {
         return evaluateBasic(op, expected: expected, actual: actual)
     }
 
-    @objc(evaluateDistance:expected:actual:)
     public static func evaluateDistance(_ radius: NSNumber, expected: CLLocationCoordinate2D, actual: CLLocationCoordinate2D) -> Bool {
         let distance = CTUtils.haversineDistance(expected, coordinateB: actual)
         return distance <= radius.doubleValue

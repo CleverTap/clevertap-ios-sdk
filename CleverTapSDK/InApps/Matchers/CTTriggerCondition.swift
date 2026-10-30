@@ -11,7 +11,6 @@ import Foundation
 /// A single property condition of a trigger: the property name, the comparison operator,
 /// and the expected value. Built from server JSON by `CTTriggerAdapter` and evaluated by
 /// `CTTriggerEvaluator`.
-@objcMembers
 public final class CTTriggerCondition: NSObject {
 
     /// The event-property name this condition tests.
@@ -33,10 +32,9 @@ public final class CTTriggerCondition: NSObject {
 
     @available(*, unavailable)
     public override init() {
-        fatalError("init() is unavailable; use initWithProperyName:andOperator:andValue:")
+        fatalError("init() is unavailable; use init(properyName:op:value:)")
     }
 
-    @objc(initWithProperyName:andOperator:andValue:)
     public init(properyName: String, op: UInt, value: CTTriggerValue) {
         self.propertyName = properyName
         self.op = op

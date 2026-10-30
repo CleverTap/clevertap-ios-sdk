@@ -7,9 +7,9 @@
 //  (string / number / array). Used by CTEventAdapter, CTTriggerCondition, CTTriggerAdapter
 //  and CTTriggerEvaluator.
 //
-//  Access control:
-//  - `@objcMembers public final class` keeps the type usable from the ObjC matcher cluster via
-//    the framework's CleverTapSDK-Swift.h. `init(value:)` pins the ObjC selector `initWithValue:`.
+//  Internal to the (now all-Swift) Matchers cluster: built and read by CTEventAdapter,
+//  CTTriggerCondition, CTTriggerAdapter and CTTriggerEvaluator (all Swift). No ObjC consumer
+//  remains, so the @objc/@objcMembers interop scaffold has been removed.
 //
 //  Migration notes:
 //  - The ObjC header was NS_ASSUME_NONNULL, but the typed accessors are nil when the stored
@@ -24,7 +24,6 @@
 
 import Foundation
 
-@objcMembers
 public final class CTTriggerValue: NSObject {
 
     public let value: Any?
@@ -37,7 +36,6 @@ public final class CTTriggerValue: NSObject {
         fatalError("init() is unavailable; use init(value:)")
     }
 
-    @objc(initWithValue:)
     public init(value: Any?) {
         self.value = value
         self.stringValue = value as? String
