@@ -30,22 +30,22 @@
 
 import Foundation
 
-public final class CTTriggerAdapter: NSObject {
+final class CTTriggerAdapter: NSObject {
 
-    public let eventName: String?
-    public let profileAttrName: String?
-    public var firstTimeOnly: Bool
+    let eventName: String?
+    let profileAttrName: String?
+    var firstTimeOnly: Bool
 
     private let properties: [Any]?
     private let items: [Any]?
     private let geoRadius: [Any]?
 
     @available(*, unavailable)
-    public override init() {
+    override init() {
         fatalError("init() is unavailable; use init(json:)")
     }
 
-    public init(json triggerJSON: [AnyHashable: Any]) {
+    init(json triggerJSON: [AnyHashable: Any]) {
         self.eventName = triggerJSON["eventName"] as? String
         self.properties = triggerJSON["eventProperties"] as? [Any]
         self.items = triggerJSON["itemProperties"] as? [Any]
@@ -55,29 +55,29 @@ public final class CTTriggerAdapter: NSObject {
         super.init()
     }
 
-    public var propertyCount: Int {
+    var propertyCount: Int {
         return properties?.count ?? 0
     }
 
-    public var itemsCount: Int {
+    var itemsCount: Int {
         return items?.count ?? 0
     }
 
-    public var geoRadiusCount: Int {
+    var geoRadiusCount: Int {
         return geoRadius?.count ?? 0
     }
 
-    public func property(at index: Int) -> CTTriggerCondition? {
+    func property(at index: Int) -> CTTriggerCondition? {
         guard let properties = properties else { return nil }
         return triggerCondition(from: properties[index])
     }
 
-    public func item(at index: Int) -> CTTriggerCondition? {
+    func item(at index: Int) -> CTTriggerCondition? {
         guard let items = items else { return nil }
         return triggerCondition(from: items[index])
     }
 
-    public func geoRadius(at index: Int) -> CTTriggerRadius? {
+    func geoRadius(at index: Int) -> CTTriggerRadius? {
         guard let geoRadius = geoRadius else { return nil }
         let item = geoRadius[index] as? [AnyHashable: Any]
         let triggerRadius = CTTriggerRadius()

@@ -8,11 +8,16 @@
 //  and read by CTTriggersMatcher during in-app trigger evaluation.
 //
 //  Access control:
-//  - Usable from CTInAppEvaluationManager (still ObjC), which constructs it via the three pinned
-//    `initWithEventName:...` selectors and reads `eventName` / `eventProperties` / `profileAttrName`.
-//    Only those exact members carry `@objc` — the class is a bare NSObject subclass (no `@objcMembers`),
-//    so the resolver methods (propertyValueNamed / itemValueNamed, called only by the Swift
-//    CTTriggersMatcher) and the Swift-only `location` stay off the ObjC surface.
+//  - The class stays `public` because an ObjC *test* (CTInAppEvaluationManagerTest.m) constructs it
+//    via the three pinned `initWithEventName:...` selectors through the framework's public
+//    CleverTapSDK-Swift.h; CTInAppEvaluationManager (still ObjC) also builds it and reads
+//    `eventName` / `eventProperties` / `profileAttrName`. Only those exact members carry `@objc` —
+//    the class is a bare NSObject subclass (no `@objcMembers`).
+//  - The resolver methods (propertyValueNamed / itemValueNamed) are `internal`, NOT public: they are
+//    called only by the Swift CTTriggersMatcher (and Swift tests via `@testable`), they are not
+//    `@objc`, and they return the now-internal `CTTriggerValue`. A `public` method returning an
+//    internal type would not compile, and exposing it would leak `CTTriggerValue` into the public
+//    .swiftinterface. `location` is likewise Swift-only.
 //
 //  Migration notes:
 //  - `profileAttrName` is optional (nonnull-in-header but nil for 2 of 3 inits; consumers nil-check);
@@ -90,12 +95,12 @@ public final class CTEventAdapter: NSObject {
         super.init()
     }
 
-    public func propertyValueNamed(_ name: String) -> CTTriggerValue? {
+    func propertyValueNamed(_ name: String) -> CTTriggerValue? {
         guard let value = getActualPropertyValue(name) else { return nil }
         return CTTriggerValue(value: value)
     }
 
-    public func itemValueNamed(_ name: String) -> CTTriggerValue? {
+    func itemValueNamed(_ name: String) -> CTTriggerValue? {
         guard let items = items else { return nil }
         var itemValues: [Any] = []
         for case let item as NSDictionary in items {

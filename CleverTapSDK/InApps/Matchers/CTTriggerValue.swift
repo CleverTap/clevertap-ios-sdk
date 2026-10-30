@@ -24,19 +24,19 @@
 
 import Foundation
 
-public final class CTTriggerValue: NSObject {
+final class CTTriggerValue: NSObject {
 
-    public let value: Any?
-    public let stringValue: String?
-    public let numberValue: NSNumber?
-    public let arrayValue: [Any]?
+    let value: Any?
+    let stringValue: String?
+    let numberValue: NSNumber?
+    let arrayValue: [Any]?
 
     @available(*, unavailable)
-    public override init() {
+    override init() {
         fatalError("init() is unavailable; use init(value:)")
     }
 
-    public init(value: Any?) {
+    init(value: Any?) {
         self.value = value
         self.stringValue = value as? String
         self.numberValue = value as? NSNumber
@@ -44,7 +44,7 @@ public final class CTTriggerValue: NSObject {
         super.init()
     }
 
-    public func isArray() -> Bool {
+    func isArray() -> Bool {
         arrayValue != nil
     }
 }

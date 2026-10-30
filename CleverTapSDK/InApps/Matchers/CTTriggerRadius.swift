@@ -18,8 +18,8 @@
 
 import Foundation
 
-public final class CTTriggerRadius: NSObject {
-    public var latitude: NSNumber?
-    public var longitude: NSNumber?
-    public var radius: NSNumber?
+final class CTTriggerRadius: NSObject {
+    var latitude: NSNumber?
+    var longitude: NSNumber?
+    var radius: NSNumber?
 }

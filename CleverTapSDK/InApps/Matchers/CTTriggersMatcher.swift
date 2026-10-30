@@ -8,9 +8,14 @@
 //  first-time-only, geo-radius (and, for Charged events, item conditions) via CTTriggerEvaluator.
 //
 //  Access control:
-//  - `@objcMembers public final class` keeps it usable from CTInAppEvaluationManager (still ObjC),
-//    which constructs it via initWithDataStore: and calls matchEventWhenTriggers:event:; both
-//    selectors are pinned. The rest of the cluster is Swift and reaches it directly.
+//  - `@objcMembers public final class`: it MUST be public. The CocoaPods `use_frameworks!` build only
+//    emits *public* @objc Swift into the pod's generated CleverTapSDK-Swift.h, so CTInAppEvaluationManager
+//    (still ObjC) can only construct it via initWithDataStore: and call matchEventWhenTriggers:event:
+//    (both selectors pinned) if it is public. The rest of the cluster is Swift and reaches it directly,
+//    and CTNdEvaluationManager holds it as a `private` property.
+//  - Unlike CTLimitsMatcher, its public signature exposes only public types (CTEventAdapter,
+//    CTLocalDataStore), so it does not leak anything into the distributed public .swiftinterface. See
+//    [[matchers-objc-pin-cleanup]].
 //
 //  Migration notes:
 //  - `dataStore` is optional: the class is constructed both with `init()` (no store — triggers that

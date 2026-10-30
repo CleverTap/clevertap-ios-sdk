@@ -16,7 +16,7 @@
 
 import Foundation
 
-public enum CTLimitType: Int {
+enum CTLimitType: Int {
     case ever
     case session
     case seconds
@@ -28,21 +28,21 @@ public enum CTLimitType: Int {
     case onExactly
 }
 
-public final class CTLimitAdapter: NSObject {
+final class CTLimitAdapter: NSObject {
 
     private let limitJSON: [AnyHashable: Any]
 
     @available(*, unavailable)
-    public override init() {
+    override init() {
         fatalError("init() is unavailable; use init(json:)")
     }
 
-    public init(json limitJSON: [AnyHashable: Any]) {
+    init(json limitJSON: [AnyHashable: Any]) {
         self.limitJSON = limitJSON
         super.init()
     }
 
-    public func limitType() -> CTLimitType {
+    func limitType() -> CTLimitType {
         guard let limitType = limitJSON["type"] as? String else {
             return .ever
         }
@@ -60,15 +60,15 @@ public final class CTLimitAdapter: NSObject {
         }
     }
 
-    public func limit() -> Int {
+    func limit() -> Int {
         (limitJSON["limit"] as? NSNumber)?.intValue ?? 0
     }
 
-    public func frequency() -> Int {
+    func frequency() -> Int {
         (limitJSON["frequency"] as? NSNumber)?.intValue ?? 0
     }
 
-    public func isEmpty() -> Bool {
+    func isEmpty() -> Bool {
         limitJSON.isEmpty
     }
 }

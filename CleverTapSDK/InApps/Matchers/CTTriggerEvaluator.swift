@@ -22,7 +22,7 @@
 import Foundation
 import CoreLocation
 
-public final class CTTriggerEvaluator: NSObject {
+final class CTTriggerEvaluator: NSObject {
 
     // CTTriggerOperator raw codes (mirror CTTriggerOperator.h).
     private enum Op {
@@ -40,7 +40,7 @@ public final class CTTriggerEvaluator: NSObject {
     private static let boolStringYes = "true"   // CLTAP_TRIGGER_BOOL_STRING_YES
     private static let boolStringNo = "false"   // CLTAP_TRIGGER_BOOL_STRING_NO
 
-    public static func evaluate(_ op: UInt, expected: CTTriggerValue, actual: CTTriggerValue?) -> Bool {
+    static func evaluate(_ op: UInt, expected: CTTriggerValue, actual: CTTriggerValue?) -> Bool {
         if actual?.isArray() == true {
             for val in actual?.arrayValue ?? [] {
                 if evaluateBasic(op, expected: expected, actual: CTTriggerValue(value: val)) {
@@ -52,7 +52,7 @@ public final class CTTriggerEvaluator: NSObject {
         return evaluateBasic(op, expected: expected, actual: actual)
     }
 
-    public static func evaluateDistance(_ radius: NSNumber, expected: CLLocationCoordinate2D, actual: CLLocationCoordinate2D) -> Bool {
+    static func evaluateDistance(_ radius: NSNumber, expected: CLLocationCoordinate2D, actual: CLLocationCoordinate2D) -> Bool {
         let distance = CTUtils.haversineDistance(expected, coordinateB: actual)
         return distance <= radius.doubleValue
     }
