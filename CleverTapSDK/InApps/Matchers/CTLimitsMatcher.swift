@@ -68,8 +68,12 @@ public final class CTLimitsMatcher: NSObject {
         case .ever:
             return impressionManager.getImpressions(campaignId).count < limit.limit()
         case .onEvery:
+            let frequency = limit.limit()
+            guard frequency > 0 else {
+                return false
+            }
             let triggerCount = Int(triggerManager.getTriggers(campaignId))
-            return triggerCount % limit.limit() == 0
+            return triggerCount % frequency == 0
         case .onExactly:
             let triggerCount = Int(triggerManager.getTriggers(campaignId))
             return triggerCount == limit.limit()

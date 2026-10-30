@@ -90,6 +90,15 @@ final class CTLimitsMatcherTests {
         #expect(!match([["type": "onEvery", "limit": 6]]))
     }
 
+    @Test("onEvery with a non-positive limit is unsatisfied, not a division-by-zero trap")
+    func matchOnEveryNonPositiveLimit() {
+        incrementTrigger(3)
+        // A malformed onEvery whose limit is 0 (explicit) or absent (-> limit() == 0) must not reach
+        // `triggerCount % 0`, which traps in Swift (release included). It is treated as unsatisfied.
+        #expect(!match([["type": "onEvery", "limit": 0]]))
+        #expect(!match([["type": "onEvery"]]))
+    }
+
     // MARK: - ever
 
     @Test("ever under the lifetime limit matches")
