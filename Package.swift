@@ -1,13 +1,13 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 
 import PackageDescription
 
 let package = Package(
     name: "CleverTapSDK",
     platforms: [
-        .iOS(.v9),
-        .tvOS(.v9),
-        .watchOS(.v2)
+        .iOS(.v15),
+        .tvOS(.v15),
+        .watchOS(.v9)
     ],
     products: [
         .library(
@@ -31,8 +31,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.9.0.xcframework.zip",
-            checksum: "d09d9c7810cd6144ac0d2954999919822dc67011d492272afe28ad15e47f278c"
+            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.9.1.xcframework.zip",
+            checksum: "2f4a5f1930deefa9fb693e837ea13dc05804f599d96fec8fc6acff696b131319"
         ),
         .target(
             name: "CleverTapLocation",

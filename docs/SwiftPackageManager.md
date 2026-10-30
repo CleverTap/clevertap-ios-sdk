@@ -4,7 +4,7 @@
 ## Introduction
 
 Starting with the 3.9.3 release, CleverTap supports installation via [Swift
-Package Manager](https://swift.org/package-manager/). Before starting the installation please ensure that you are using Xcode 12 or greater.
+Package Manager](https://swift.org/package-manager/). Before starting the installation please ensure that you are using Xcode 14.0 or greater.
 
 
 ## Setup

@@ -9,7 +9,6 @@
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
 #import "CTValidationConfig.h"
-#import "CTLimitAdapter.h"
 
 // Native Display. CTNdFCManagerTests.swift drives the managers through NdHelper, and calls the
 // evaluation manager's batch header method. That method takes a CTQueueType. CTQueueType.h comes in
@@ -18,3 +17,14 @@
 #import "CTInAppTriggerManager.h"
 #import "CTAttachToBatchHeaderDelegate.h"
 #import "NdHelper.h"
+
+// ObjC test helpers that CTLimitsMatcherTests.swift drives. CTLimitsMatcher / CTLimitAdapter are
+// Swift and come in via @testable import.
+#import "CTClockMock.h"
+#import "InAppHelper.h"
+
+// Types CTTriggersMatcherTests.swift builds its data store from. CTTriggersMatcher / CTEventAdapter
+// are Swift and come in via @testable import.
+#import "CTLocalDataStore.h"
+#import "CTDeviceInfo.h"
+#import "CTDispatchQueueManager.h"

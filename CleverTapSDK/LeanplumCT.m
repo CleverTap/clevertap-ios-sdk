@@ -9,7 +9,11 @@
 #import "LeanplumCT.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
-#import "NSDictionary+Extensions.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 NSString *const LP_PURCHASE_EVENT = @"Purchase";
 NSString *const LP_STATE_PREFIX = @"state_";

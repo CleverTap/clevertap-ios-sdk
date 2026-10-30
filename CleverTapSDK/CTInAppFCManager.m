@@ -6,10 +6,15 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTInAppFCManager+Legacy.h"
 #import "CTImpressionManager.h"
+#import "CTInAppTriggerManager.h"
 #import "CTInAppEvaluationManager.h"
 #import "CleverTapInternal.h"
 #import "CTMultiDelegateManager.h"
-#import "CTLimitsMatcher.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 // Per session
 //  1. Show only 10 inapps per session
