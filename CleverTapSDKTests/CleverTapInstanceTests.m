@@ -2559,6 +2559,14 @@
     // and reset it to NO, leaving subsequent custom events deferred forever.
     // Opening the session first prevents this reset.
     // Use a dedicated instance because _asyncSwitchUser changes the device ID.
+    // Stub all requests to respond immediately. Instance init / app-launch and the
+    // user switch enqueue network work on the serial queue; without a stub a real
+    // request could hang (SDK timeout is 10s) and block the queue past the 5s wait.
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
+        return [HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil];
+    }];
+
     CleverTapInstanceConfig *cfg = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testSwitchUser"
                                                                          accountToken:@"testSwitchUser"
                                                                         accountRegion:@"eu1"];
@@ -2578,6 +2586,7 @@
 
     XCTAssertTrue(instance.sessionManager.appLaunchProcessed,
                   @"appLaunchProcessed must stay YES after _asyncSwitchUser so events after onUserLogin are not deferred");
+    [HTTPStubs removeStub:stub];
 }
 
 #pragma mark - Profile Evaluation Input Shape

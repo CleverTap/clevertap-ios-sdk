@@ -3,7 +3,7 @@
 Starting from **iOS SDK v7.9.1**, the CleverTap iOS SDK builds with **Xcode 27** and runs on **iOS 27 / tvOS 27 / watchOS 27**. Two things changed that may require action in your app:
 
 1. The **minimum deployment targets** were raised (Xcode 27 no longer builds targets below its supported range).
-2. Apps must adopt the **UIScene lifecycle** (required by iOS/tvOS 26+ when built with the iOS 26/27 SDK).
+2. Apps must adopt the **UIScene lifecycle** — a launch requirement on **iOS/tvOS 27** for apps built with the latest SDK. (On iOS/tvOS 26 the legacy lifecycle only logs a deprecation warning; on iOS/tvOS 27 such apps fail to launch.)
 
 ---
 
@@ -56,7 +56,10 @@ end
 
 ## 3. Adopt the UIScene lifecycle
 
-Starting with iOS 26 / tvOS 26, apps built with the iOS 26/27 SDK **must** use the `UIScene` lifecycle. An app that still uses the legacy app-delegate, window-based lifecycle — an `AppDelegate` with a `window` property, a `UIMainStoryboardFile` in `Info.plist`, and no scene manifest — **crashes at launch** on iOS/tvOS 26 and later.
+Apps built with the latest SDK (iOS 26 / tvOS 26 SDK or later) **must** use the `UIScene` lifecycle. Consider an app that still uses the legacy app-delegate, window-based lifecycle — an `AppDelegate` with a `window` property, a `UIMainStoryboardFile` in `Info.plist`, and no scene manifest:
+
+- On **iOS/tvOS 26** it logs a **deprecation warning** but still launches.
+- On **iOS/tvOS 27** it **fails to launch** — the system terminates it at startup (`UIScene life cycle is required for apps built with this SDK`).
 
 This is an app-side requirement (not a CleverTap SDK change), but your app must adopt it for CleverTap to run on iOS/tvOS 27.
 
@@ -84,13 +87,17 @@ Add `UIApplicationSceneManifest` and **remove** the existing `UIMainStoryboardFi
                 <key>UISceneConfigurationName</key>
                 <string>Default Configuration</string>
                 <key>UISceneDelegateClassName</key>
-                <!-- Swift: $(PRODUCT_MODULE_NAME).SceneDelegate   ObjC: SceneDelegate -->
+                <!-- Replace with your scene delegate class (see note below). -->
                 <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
             </dict>
         </array>
     </dict>
 </dict>
 ```
+
+> **`UISceneDelegateClassName` differs by language — replace the value above:**
+> - **Swift:** use the module-qualified name — `$(PRODUCT_MODULE_NAME).SceneDelegate` (as shown).
+> - **Objective-C:** use the **bare** class name — e.g. `<string>SceneDelegate</string>` — matching the class you define in Step 2. (The repository's Objective-C samples use `SceneDelegate`.)
 
 #### Step 2 — Add a `SceneDelegate` that creates the window
 
@@ -114,13 +121,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.makeKeyAndVisible()
 
-        // Cold-start deep links arrive here now:
+        // Cold-start custom-scheme deep links arrive here:
         connectionOptions.urlContexts.forEach { handle($0.url) }
+
+        // Cold-start universal links (previously application(_:continue:restorationHandler:))
+        // arrive via userActivities — without this branch the initial link is dropped:
+        connectionOptions.userActivities.forEach { handle(activity: $0) }
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        // Warm deep links arrive here instead of application(_:open:options:)
+        // Warm custom-scheme links arrive here instead of application(_:open:options:)
         URLContexts.forEach { handle($0.url) }
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        // Warm universal links arrive here instead of application(_:continue:restorationHandler:)
+        handle(activity: userActivity)
+    }
+
+    private func handle(activity: NSUserActivity) {
+        guard activity.activityType == NSUserActivityTypeBrowsingWeb,
+              let url = activity.webpageURL else { return }
+        handle(url)
     }
 
     private func handle(_ url: URL) {
@@ -147,6 +169,36 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     self.window.rootViewController = [storyboard instantiateInitialViewController];
     [self.window makeKeyAndVisible];
+
+    // Cold-start custom-scheme deep links:
+    for (UIOpenURLContext *ctx in connectionOptions.URLContexts) {
+        [self handleURL:ctx.URL];
+    }
+    // Cold-start universal links (previously application:continueUserActivity:restorationHandler:)
+    // arrive via userActivities — without this branch the initial link is dropped:
+    for (NSUserActivity *activity in connectionOptions.userActivities) {
+        [self handleUserActivity:activity];
+    }
+}
+
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts {
+    // Warm custom-scheme links arrive here instead of application:openURL:options:
+    for (UIOpenURLContext *ctx in URLContexts) { [self handleURL:ctx.URL]; }
+}
+
+- (void)scene:(UIScene *)scene continueUserActivity:(NSUserActivity *)userActivity {
+    // Warm universal links arrive here instead of application:continueUserActivity:restorationHandler:
+    [self handleUserActivity:userActivity];
+}
+
+- (void)handleUserActivity:(NSUserActivity *)activity {
+    if ([activity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && activity.webpageURL) {
+        [self handleURL:activity.webpageURL];
+    }
+}
+
+- (void)handleURL:(NSURL *)url {
+    // Your existing deep-link handling.
 }
 
 @end
