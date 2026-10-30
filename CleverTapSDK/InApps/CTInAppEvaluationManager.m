@@ -10,7 +10,6 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTInAppStore.h"
-#import "CTTriggersMatcher.h"
 #import "CTInAppTriggerManager.h"
 #import "CTImpressionManager.h"
 #import "CTMultiDelegateManager.h"

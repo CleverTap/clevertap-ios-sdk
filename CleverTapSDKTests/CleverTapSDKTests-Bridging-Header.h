@@ -22,3 +22,9 @@
 // Swift and come in via @testable import.
 #import "CTClockMock.h"
 #import "InAppHelper.h"
+
+// Types CTTriggersMatcherTests.swift builds its data store from. CTTriggersMatcher / CTEventAdapter
+// are Swift and come in via @testable import.
+#import "CTLocalDataStore.h"
+#import "CTDeviceInfo.h"
+#import "CTDispatchQueueManager.h"
