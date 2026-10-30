@@ -44,16 +44,11 @@ s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTa
     'CleverTapSDK/CTMultiDelegateManager.h',
     'CleverTapSDK/InApps/CTImpressionManager.h',
     'CleverTapSDK/InApps/CTInAppTriggerManager.h',
-    'CleverTapSDK/InApps/Matchers/CTEventAdapter.h',
-    'CleverTapSDK/InApps/Matchers/CTTriggersMatcher.h',
-    'CleverTapSDK/InApps/Matchers/CTLimitsMatcher.h',
     'CleverTapSDK/CTUtils.h',
     'CleverTapSDK/CTLocalDataStore.h',
     'CleverTapSDK/CTDeviceInfo.h',
     'CleverTapSDK/CTDispatchQueueManager.h',
     'CleverTapSDK/Profile/CTProfileOperationType.h',
-    'CleverTapSDK/InApps/Matchers/CTLimitAdapter.h',
-    'CleverTapSDK/InApps/Matchers/CTTriggerValue.h',
     'CleverTapSDK/LiveActivities/CleverTap+LiveActivities.h',
     'CleverTapSDK/LiveActivities/CTLiveActivityDataQueue.h'
 s.tvos.deployment_target    = '15.0'

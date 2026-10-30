@@ -6,10 +6,9 @@
 //  trigger (latitude / longitude / radius), populated by CTTriggerAdapter.geoRadiusAtIndex:
 //  from the trigger JSON (lat / lng / rad) and read by CTTriggersMatcher.
 //
-//  Access control:
-//  - `@objcMembers public final class` preserves the API surface and keeps the type usable
-//    from Objective-C (CTTriggerAdapter.m creates instances and assigns the properties;
-//    CTTriggersMatcher.m / CTTriggerAdapterTest.m read them).
+//  Internal to the (now all-Swift) Matchers cluster: CTTriggerAdapter (Swift) creates instances
+//  and assigns the properties; CTTriggersMatcher (Swift) reads them. No ObjC consumer remains, so
+//  the @objcMembers interop scaffold has been removed.
 //
 //  Migration note: the original ObjC header was NS_ASSUME_NONNULL with three
 //  `strong NSNumber *` properties, but they are nil until assigned and CTTriggerAdapter
@@ -19,7 +18,6 @@
 
 import Foundation
 
-@objcMembers
 public final class CTTriggerRadius: NSObject {
     public var latitude: NSNumber?
     public var longitude: NSNumber?
