@@ -82,6 +82,8 @@
 // Discarded-events ARP processing — private methods in CleverTap.m, no header declaration
 - (void)processDiscardedEventsRequest:(NSDictionary *)arp;
 - (void)updateARP:(NSDictionary *)arp;
+// User switch - private method in CleverTap.m, no header declaration
+- (void)_asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString *)action;
 @property (nonatomic, strong) CTValidationConfig *validationConfig;
 @end
 
@@ -2546,6 +2548,45 @@
     OCMVerifyAll(mockInAction);
     [mockDelay stopMocking];
     [mockInAction stopMocking];
+}
+
+#pragma mark - Switch User App Launched State
+
+- (void)test_asyncSwitchUser_keepsAppLaunchProcessedSet {
+    // Regression guard for the onUserLogin event clobber
+    // _asyncSwitchUser resets appLaunchProcessed to NO.
+    // recordAppLaunched sets it to YES, then queueEvent may create a new session
+    // and reset it to NO, leaving subsequent custom events deferred forever.
+    // Opening the session first prevents this reset.
+    // Use a dedicated instance because _asyncSwitchUser changes the device ID.
+    // Stub all requests to respond immediately. Instance init / app-launch and the
+    // user switch enqueue network work on the serial queue; without a stub a real
+    // request could hang (SDK timeout is 10s) and block the queue past the 5s wait.
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
+        return [HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil];
+    }];
+
+    CleverTapInstanceConfig *cfg = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testSwitchUser"
+                                                                         accountToken:@"testSwitchUser"
+                                                                        accountRegion:@"eu1"];
+    CleverTap *instance = [CleverTap instanceWithConfig:cfg];
+
+    [instance _asyncSwitchUser:@{@"Identity": @"userB"}
+                withCachedGuid:nil
+                andCleverTapID:nil
+                     forAction:@"OnUserLogin"];
+
+    // The switch runs on the serial queue. This trailing block runs after it.
+    XCTestExpectation *drained = [self expectationWithDescription:@"switch user serial block drained"];
+    [instance.dispatchQueueManager runSerialAsync:^{
+        [drained fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+
+    XCTAssertTrue(instance.sessionManager.appLaunchProcessed,
+                  @"appLaunchProcessed must stay YES after _asyncSwitchUser so events after onUserLogin are not deferred");
+    [HTTPStubs removeStub:stub];
 }
 
 #pragma mark - Profile Evaluation Input Shape
