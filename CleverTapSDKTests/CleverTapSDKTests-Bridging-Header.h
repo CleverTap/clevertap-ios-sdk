@@ -17,3 +17,8 @@
 #import "CTInAppTriggerManager.h"
 #import "CTAttachToBatchHeaderDelegate.h"
 #import "NdHelper.h"
+
+// ObjC test helpers that CTLimitsMatcherTests.swift drives. CTLimitsMatcher / CTLimitAdapter are
+// Swift and come in via @testable import.
+#import "CTClockMock.h"
+#import "InAppHelper.h"

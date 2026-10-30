@@ -59,7 +59,6 @@ framework module CleverTapSDK {
         header "CTImpressionManager.h"
         header "CTInAppTriggerManager.h"
         header "CTTriggersMatcher.h"
-        header "CTLimitsMatcher.h"
         header "CTUtils.h"
         header "CTLocalDataStore.h"
 
