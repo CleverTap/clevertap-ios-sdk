@@ -11,11 +11,11 @@
 //  consumer remains, so the @objc/@objcMembers interop scaffold has been removed.
 //
 //  Migration notes:
-//  - `op` is a raw `UInt`, not the ObjC `CTTriggerOperator` enum. It arrives as `CTTriggerCondition.op`
+//  - `op` is a raw `UInt`, not the `CTTriggerOperator` enum. It arrives as `CTTriggerCondition.op`
 //    (also a raw UInt), so unknown, server-sent operator codes fall through the switch `default` to
-//    "no match" — the same forward-compat the ObjC `default: return NO` gave. Keeping it a UInt also
-//    avoids pulling the ObjC operator enum into the Swift scaffold (the enum stays in
-//    CTTriggerOperator.h for the remaining ObjC callers). Codes are named below for readability.
+//    "no match" — the same forward-compat the ObjC `default: return NO` gave. A sealed enum can't hold
+//    an out-of-range code, so `UInt` is the faithful type; `CTTriggerOperator` (now a Swift `@objc enum`)
+//    is kept only for the named constants. Codes are named below for readability.
 //  - `CLTAP_TRIGGER_BOOL_STRING_YES/NO` are `#define @"true"/@"false"` (Swift-invisible) → inlined.
 //  - `CTUtils.numberFromString` / `haversineDistance` are reached directly (already Swift-visible).
 
