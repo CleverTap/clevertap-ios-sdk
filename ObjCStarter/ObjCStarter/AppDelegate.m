@@ -86,9 +86,9 @@
 
 #pragma mark - UIScene lifecycle
 
-// iOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory. The scene manifest in
-// Info.plist points at this delegate, which creates the window so the app launches on
-// iOS 26/27 instead of crashing.
+// Built with the Xcode 27 SDK, the UIScene lifecycle is a launch requirement (a warning on
+// iOS 26, a hard launch failure on iOS 27). The scene manifest in Info.plist points at this
+// delegate, which creates the window so the app launches.
 @interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @end

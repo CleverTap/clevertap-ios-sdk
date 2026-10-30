@@ -11,7 +11,11 @@
 #import <XCTest/XCTest.h>
 #import "CTTemplatePresenterMock.h"
 #import "CTInAppEvaluationManager.h"
-#import "CTEventAdapter.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "BaseTestCase.h"
 #import "CleverTap+Tests.h"
 #import "CleverTapInternal.h"

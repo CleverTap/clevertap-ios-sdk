@@ -107,8 +107,6 @@ static NSArray *sslCertNames;
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
 
-#import "NSDictionary+Extensions.h"
-
 #import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>

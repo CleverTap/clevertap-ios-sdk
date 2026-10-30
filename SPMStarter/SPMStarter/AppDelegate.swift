@@ -75,8 +75,9 @@ extension AppDelegate: WCSessionDelegate {
 
 // MARK: - UIScene lifecycle
 //
-// iOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory; the window is created here
-// so the app launches on iOS 26/27 instead of crashing. See Info.plist > UIApplicationSceneManifest.
+// Built with the Xcode 27 SDK, the UIScene lifecycle is a launch requirement (a warning on
+// iOS 26, a hard launch failure on iOS 27); the window is created here so the app launches.
+// See Info.plist > UIApplicationSceneManifest.
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?

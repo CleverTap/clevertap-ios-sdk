@@ -217,9 +217,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 // MARK: - UIScene lifecycle
 //
-// iOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory. Without a scene manifest
-// + delegate the app crashes at launch, so the window is created here instead of relying
-// on the legacy app-delegate `window`. See Info.plist > UIApplicationSceneManifest.
+// Built with the Xcode 27 SDK, the UIScene lifecycle is a launch requirement: without a
+// scene manifest + delegate the app only warns on iOS 26 but fails to launch on iOS 27,
+// so the window is created here instead of relying on the legacy app-delegate `window`.
+// See Info.plist > UIApplicationSceneManifest.
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?

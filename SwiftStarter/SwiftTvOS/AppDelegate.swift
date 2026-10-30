@@ -50,9 +50,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 // MARK: - UIScene lifecycle
 //
-// tvOS 26 (Xcode 27 SDK) makes the UIScene lifecycle mandatory, same as iOS; without a scene
-// manifest + delegate the app crashes at launch. The window is created here instead of relying
-// on the legacy app-delegate `window`. See Info.plist > UIApplicationSceneManifest.
+// Built with the Xcode 27 SDK, the UIScene lifecycle is a launch requirement, same as iOS:
+// without a scene manifest + delegate the app only warns on tvOS 26 but fails to launch on
+// tvOS 27. The window is created here instead of relying on the legacy app-delegate `window`.
+// See Info.plist > UIApplicationSceneManifest.
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
