@@ -41,13 +41,14 @@
 
 + (NSString *)deviceTokenStringFromData:(NSData *)tokenData {
     if (!tokenData || tokenData.length == 0) return nil;
-    const unsigned *tokenBytes = [tokenData bytes];
-    NSString *hexToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
-                          ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
-                          ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
-                          ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
-    NSString *deviceTokenString = [NSString stringWithFormat:@"%@", hexToken];
-    return deviceTokenString;
+    // Apple does not promise a fixed token size. A device token is 32 bytes today.
+    // A Simulator token is longer. Encode every byte that was given to us.
+    const unsigned char *tokenBytes = [tokenData bytes];
+    NSMutableString *hexToken = [NSMutableString stringWithCapacity:tokenData.length * 2];
+    for (NSUInteger i = 0; i < tokenData.length; i++) {
+        [hexToken appendFormat:@"%02x", tokenBytes[i]];
+    }
+    return [hexToken copy];
 }
 
 + (double)toTwoPlaces:(double)x {

@@ -89,8 +89,34 @@
 - (void)test_deviceTokenStringFromData{
     NSData *data = [NSData dataWithBytes:"dummy token" length:11];
     NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
-    
+
     XCTAssertNotNil(tokenString);
+    XCTAssertEqualObjects(tokenString, @"64756d6d7920746f6b656e");
+}
+
+- (void)test_deviceTokenStringFromData_32Bytes {
+    unsigned char bytes[32];
+    for (NSUInteger i = 0; i < 32; i++) {
+        bytes[i] = (unsigned char)i;
+    }
+    NSData *data = [NSData dataWithBytes:bytes length:32];
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
+
+    XCTAssertEqualObjects(tokenString, @"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+}
+
+- (void)test_deviceTokenStringFromData_longerThan32Bytes {
+    NSUInteger length = 80;
+    NSMutableData *data = [NSMutableData dataWithLength:length];
+    unsigned char *bytes = [data mutableBytes];
+    for (NSUInteger i = 0; i < length; i++) {
+        bytes[i] = (unsigned char)(i + 1);
+    }
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
+
+    XCTAssertEqual(tokenString.length, length * 2);
+    XCTAssertTrue([tokenString hasPrefix:@"010203"]);
+    XCTAssertTrue([tokenString hasSuffix:@"4e4f50"]);
 }
 
 - (void)test_toTwoPlaces{
