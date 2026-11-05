@@ -38,4 +38,10 @@
 
 - (void)announceInAppShown;
 
+// Bounds of the area the in-app is presented in, taken from its window scene.
+// Use this instead of [UIScreen mainScreen].bounds, which on devices with more
+// than one display (for example a foldable) can describe a different display
+// than the one the app's scene is on.
+- (CGRect)inAppContainerBounds;
+
 @end

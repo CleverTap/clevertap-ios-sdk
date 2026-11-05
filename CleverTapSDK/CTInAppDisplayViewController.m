@@ -29,6 +29,8 @@
 
 @property (nonatomic, assign) BOOL waitingForSceneWindow;
 @property (nonatomic, assign) BOOL animated;
+// Size the view is moving to while a size transition (rotation, scene resize) is in progress.
+@property (nonatomic, assign) CGSize transitionSize;
 
 @end
 
@@ -86,10 +88,33 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        self.transitionSize = size;
         [self loadView];
         [self viewDidLoad];
+        self.transitionSize = CGSizeZero;
     } completion:nil];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
+- (CGRect)inAppContainerBounds {
+    if (self.transitionSize.width > 0 && self.transitionSize.height > 0) {
+        return CGRectMake(0, 0, self.transitionSize.width, self.transitionSize.height);
+    }
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        UIWindowScene *windowScene = self.window.windowScene;
+        if (!windowScene) {
+            for (UIScene *scene in [CTUIUtils getSharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                    windowScene = (UIWindowScene *)scene;
+                    break;
+                }
+            }
+        }
+        if (windowScene) {
+            return windowScene.coordinateSpace.bounds;
+        }
+    }
+    return [UIScreen mainScreen].bounds;
 }
 
 #if !(TARGET_OS_TV)
@@ -299,7 +324,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     
     if (animated) {
         CGRect windowFrame = self.window.frame;
-        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  [UIScreen mainScreen].bounds.size.width, windowFrame.size.height);
+        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  windowFrame.size.width, windowFrame.size.height);
         self.window.frame = transformWindowFrame;
         
         [UIView animateWithDuration:0.33 delay:0 usingSpringWithDamping:1.0 initialSpringVelocity:10 options:UIViewAnimationOptionTransitionFlipFromTop animations:^{

@@ -57,11 +57,15 @@ typedef enum {
 
 - (void)loadView {
     if (self.shouldPassThroughTouches) {
-        self.view = [[CTInAppPassThroughView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        self.view = [[CTInAppPassThroughView alloc] initWithFrame:[self inAppContainerBounds]];
         CTInAppPassThroughView *view = (CTInAppPassThroughView*)self.view;
         view.delegate = self;
     } else {
         [super loadView];
+        // The default view takes the main screen's size, which on multi-display devices
+        // (for example a foldable) can differ from the scene the in-app is shown in.
+        // Match the container so the web view frame is not stretched by autoresizing later.
+        self.view.frame = [self inAppContainerBounds];
     }
 }
 
@@ -181,6 +185,7 @@ typedef enum {
 }
 
 - (void)updateWebView {
+    CGSize containerSize = [self inAppContainerBounds].size;
     boolean_t fixedWidth = false, fixedHeight = false;
     
     CGSize size = CGSizeZero;
@@ -190,7 +195,7 @@ typedef enum {
         fixedWidth = true;
     } else {
         float percent = self.notification.widthPercent;
-        size.width = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
+        size.width = (CGFloat) ceil(containerSize.width * (percent / 100.0f));
     }
     
     if (self.notification.height > 0) {
@@ -213,13 +218,13 @@ typedef enum {
             }
 
             // Calculate safe area height
-            CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
+            CGFloat safeAreaHeight = containerSize.height - safeInsets.top - safeInsets.bottom;
 
             // Calculate percentage-based height
             size.height = (CGFloat) ceil(safeAreaHeight);
         }
         else {
-            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+            size.height = (CGFloat) ceil(containerSize.height * (percent / 100.0f));
         }
     }
     
@@ -236,7 +241,7 @@ typedef enum {
     frame.size = size;
     webView.autoresizingMask = UIViewAutoresizingNone;
     
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+    CGSize screenSize = containerSize;
     char pos = self.notification.position;
     CGFloat statusBarFrameHeight = 0.0;
     if (@available(iOS 13.0, *)) {
