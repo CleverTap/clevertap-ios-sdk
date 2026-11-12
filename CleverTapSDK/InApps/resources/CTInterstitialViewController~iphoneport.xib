@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -146,13 +146,21 @@
                     </connections>
                 </view>
             </subviews>
+            <viewLayoutGuide key="safeArea" id="wCP-pn-vZw"/>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="vwv-R3-76C" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="30" id="9ad-Dz-HGn"/>
+                <constraint firstItem="wCP-pn-vZw" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="BYu-Ic-41Y" secondAttribute="trailing" id="6yy-uN-WH6"/>
+                <constraint firstItem="vwv-R3-76C" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" priority="750" constant="30" id="9ad-Dz-HGn"/>
+                <constraint firstItem="vwv-R3-76C" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="iN0-l3-epB" secondAttribute="leading" constant="30" id="EA8-qi-Yb2"/>
+                <constraint firstItem="vwv-R3-76C" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="EYV-h7-IWr"/>
+                <constraint firstItem="BYu-Ic-41Y" firstAttribute="top" relation="greaterThanOrEqual" secondItem="wCP-pn-vZw" secondAttribute="top" id="NDb-Fa-OIb"/>
                 <constraint firstItem="BYu-Ic-41Y" firstAttribute="leading" secondItem="vwv-R3-76C" secondAttribute="trailing" constant="-15" id="PrR-ZA-uUC"/>
+                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="vwv-R3-76C" secondAttribute="bottom" constant="30" id="RRh-6Y-y6T"/>
                 <constraint firstItem="vwv-R3-76C" firstAttribute="top" secondItem="BYu-Ic-41Y" secondAttribute="bottom" constant="-15" id="VbI-by-Rik"/>
-                <constraint firstAttribute="trailing" secondItem="vwv-R3-76C" secondAttribute="trailing" constant="30" id="dKl-Tm-7KN"/>
+                <constraint firstAttribute="trailing" secondItem="vwv-R3-76C" secondAttribute="trailing" priority="750" constant="30" id="dKl-Tm-7KN"/>
+                <constraint firstItem="vwv-R3-76C" firstAttribute="top" relation="greaterThanOrEqual" secondItem="iN0-l3-epB" secondAttribute="top" constant="30" id="fnp-WQ-i31"/>
                 <constraint firstItem="vwv-R3-76C" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="hjH-qj-ky1"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="vwv-R3-76C" secondAttribute="trailing" constant="30" id="htT-CI-yMD"/>
             </constraints>
             <point key="canvasLocation" x="32.799999999999997" y="52.623688155922046"/>
         </view>
