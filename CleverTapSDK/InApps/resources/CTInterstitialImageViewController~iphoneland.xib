@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="landscape" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -67,13 +67,21 @@
                     </connections>
                 </view>
             </subviews>
+            <viewLayoutGuide key="safeArea" id="ugP-m0-E5S"/>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstAttribute="bottom" secondItem="O1a-cZ-Zdj" secondAttribute="bottom" constant="30" id="9Wx-Em-vnN"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="cdh-BK-Jkx" secondAttribute="leading" constant="30" id="8Jq-sx-bqH"/>
+                <constraint firstAttribute="bottom" secondItem="O1a-cZ-Zdj" secondAttribute="bottom" priority="750" constant="30" id="9Wx-Em-vnN"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="centerY" secondItem="cdh-BK-Jkx" secondAttribute="centerY" id="KIn-eI-8dI"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" relation="greaterThanOrEqual" secondItem="cdh-BK-Jkx" secondAttribute="top" constant="30" id="KuI-qx-SdS"/>
+                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="O1a-cZ-Zdj" secondAttribute="bottom" constant="30" id="LLI-7h-W6c"/>
                 <constraint firstItem="O1a-cZ-Zdj" firstAttribute="centerX" secondItem="cdh-BK-Jkx" secondAttribute="centerX" id="SzO-T0-cp1"/>
-                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" secondItem="cdh-BK-Jkx" secondAttribute="top" constant="30" id="dcL-Wz-b5p"/>
+                <constraint firstItem="ugP-m0-E5S" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Bf3-I0-wcw" secondAttribute="trailing" id="YSd-FD-yST"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="O1a-cZ-Zdj" secondAttribute="trailing" constant="30" id="cLn-IT-lG5"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" secondItem="cdh-BK-Jkx" secondAttribute="top" priority="750" constant="30" id="dcL-Wz-b5p"/>
                 <constraint firstItem="Bf3-I0-wcw" firstAttribute="leading" secondItem="O1a-cZ-Zdj" secondAttribute="trailing" constant="-15" id="lAx-yY-gI8"/>
                 <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" secondItem="Bf3-I0-wcw" secondAttribute="bottom" constant="-15" id="oCa-0o-YwY"/>
+                <constraint firstItem="Bf3-I0-wcw" firstAttribute="top" relation="greaterThanOrEqual" secondItem="ugP-m0-E5S" secondAttribute="top" id="qhv-5t-qB4"/>
             </constraints>
             <point key="canvasLocation" x="17" y="-28"/>
         </view>
