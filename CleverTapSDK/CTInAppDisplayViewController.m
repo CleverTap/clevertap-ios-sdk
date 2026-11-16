@@ -166,14 +166,18 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             float aspectRatio = self.notification.aspectRatio;
             float percent = self.notification.widthPercent;
             
-            float safeAreaTop = activeWindowScene.windows.firstObject.safeAreaInsets.top;
+            UIEdgeInsets hostInsets = [self hostWindowSafeAreaInsets];
             float inAppWidth = activeWindowScene.coordinateSpace.bounds.size.width;
             float inAppHeight = activeWindowScene.coordinateSpace.bounds.size.height;
             
             inAppWidth = ceil(inAppWidth * (percent / 100.0));
             
             if (aspectRatio > 0.0) {
-                inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
+                // A header reserves the top safe area so its content clears the status
+                // bar and Dynamic Island. A footer is drawn flush with the bottom edge,
+                // the same as custom HTML footers, so it reserves nothing.
+                float edgeInset = (self.notification.position == CLTAP_INAPP_POSITION_TOP) ? hostInsets.top : 0;
+                inAppHeight = edgeInset + (inAppWidth / aspectRatio);
                 float screenHeight = activeWindowScene.coordinateSpace.bounds.size.height;
                 if (inAppHeight > screenHeight) {
                     inAppHeight = screenHeight;
@@ -196,6 +200,23 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         }
     }
     return frame;
+}
+
+// Safe area insets of the app's own window. Header and footer in-app windows only
+// cover part of the screen, so their own safe area cannot be used to size them.
+- (UIEdgeInsets)hostWindowSafeAreaInsets {
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        for (UIScene *scene in [CTUIUtils getSharedApplication].connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive &&
+                [scene isKindOfClass:[UIWindowScene class]]) {
+                return ((UIWindowScene *)scene).windows.firstObject.safeAreaInsets;
+            }
+        }
+    }
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
+        return [CTUIUtils getKeyWindow].safeAreaInsets;
+    }
+    return UIEdgeInsetsZero;
 }
 
 - (CGRect)windowFrame {

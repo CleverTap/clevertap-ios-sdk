@@ -37,5 +37,6 @@
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;
 
 - (void)announceInAppShown;
+- (UIEdgeInsets)hostWindowSafeAreaInsets;
 
 @end
