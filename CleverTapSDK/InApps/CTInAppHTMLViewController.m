@@ -155,28 +155,23 @@ typedef enum {
         UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
         char pos = self.notification.position;
         if ([self isInAppAdvancedBuilder] && (pos == CLTAP_INAPP_POSITION_TOP || pos == CLTAP_INAPP_POSITION_BOTTOM)) {
-            // The window is sized as content plus the top inset for a header, and as
-            // content alone for a footer, which sits flush with the bottom edge. Pin to
-            // exactly that instead of the root view's safe area, which UIKit reports
-            // differently for a partial-height window on iOS 26 and iOS 27.
+            
             UIEdgeInsets hostInsets = [self hostWindowSafeAreaInsets];
-            // The web view overlaps the root view's safe area (the home indicator for a
-            // footer), so stop WKWebView from insetting its content by it.
+            
             webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-            // On iOS 26+ the scroll view would also blur the content under those insets
-            // (scroll edge effect). Looked up at runtime so the SDK still builds with
-            // pre-iOS 26 SDKs, such as the Xcode 16.4 used by the release workflow.
+            
             for (NSString *edge in @[@"topEdgeEffect", @"bottomEdgeEffect"]) {
                 if ([webView.scrollView respondsToSelector:NSSelectorFromString(edge)]) {
                     [[webView.scrollView valueForKey:edge] setValue:@YES forKey:@"hidden"];
                 }
             }
             CGFloat topInset = (pos == CLTAP_INAPP_POSITION_TOP) ? hostInsets.top : 0;
+            CGFloat bottomInset = (pos == CLTAP_INAPP_POSITION_BOTTOM) ? hostInsets.bottom : 0;
             [NSLayoutConstraint activateConstraints:@[
                 [webView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:topInset],
                 [webView.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor],
                 [webView.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor],
-                [webView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
+                [webView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:-bottomInset]
             ]];
             return;
         }

@@ -173,10 +173,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             inAppWidth = ceil(inAppWidth * (percent / 100.0));
             
             if (aspectRatio > 0.0) {
-                // A header reserves the top safe area so its content clears the status
-                // bar and Dynamic Island. A footer is drawn flush with the bottom edge,
-                // the same as custom HTML footers, so it reserves nothing.
-                float edgeInset = (self.notification.position == CLTAP_INAPP_POSITION_TOP) ? hostInsets.top : 0;
+                
+                float edgeInset = (self.notification.position == CLTAP_INAPP_POSITION_BOTTOM) ? hostInsets.bottom : hostInsets.top;
                 inAppHeight = edgeInset + (inAppWidth / aspectRatio);
                 float screenHeight = activeWindowScene.coordinateSpace.bounds.size.height;
                 if (inAppHeight > screenHeight) {
