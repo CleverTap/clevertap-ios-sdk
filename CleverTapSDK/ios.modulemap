@@ -58,9 +58,6 @@ framework module CleverTapSDK {
         header "CTMultiDelegateManager.h"
         header "CTImpressionManager.h"
         header "CTInAppTriggerManager.h"
-        header "CTEventAdapter.h"
-        header "CTTriggersMatcher.h"
-        header "CTLimitsMatcher.h"
         header "CTUtils.h"
         header "CTLocalDataStore.h"
 
@@ -69,8 +66,6 @@ framework module CleverTapSDK {
         header "CTDeviceInfo.h"
         header "CTDispatchQueueManager.h"
         header "CTProfileOperationType.h"
-        header "CTLimitAdapter.h"
-        header "CTTriggerValue.h"
         export *
     }
 

@@ -9,11 +9,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
-#import "CTEventAdapter.h"
 #import "CTInAppStore.h"
-#import "CTTriggersMatcher.h"
-#import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
+#import "CTImpressionManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
 #import "CTUtils.h"
