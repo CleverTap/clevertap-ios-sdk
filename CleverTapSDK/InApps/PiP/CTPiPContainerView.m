@@ -261,7 +261,9 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
     CGFloat right   = bounds.size.width  - insets.right  - hm - size.width;
     CGFloat top     = insets.top   + vm;
     CGFloat bottom  = bounds.size.height - insets.bottom - vm  - size.height;
-    CGFloat centerX = (bounds.size.width  - size.width)  / 2.0;
+    // Centre inside the side insets. A foldable's outer screen has a wide strip on one side,
+    // so the middle of the window sits almost on top of the right-hand position.
+    CGFloat centerX = insets.left + (bounds.size.width - insets.left - insets.right - size.width) / 2.0;
     CGFloat centerY = (bounds.size.height - size.height) / 2.0;
 
     switch (position) {

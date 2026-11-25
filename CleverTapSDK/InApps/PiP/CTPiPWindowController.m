@@ -72,6 +72,8 @@
 @property (nonatomic, assign) BOOL pendingAnimated;
 /// Last bounds size applied to the container — used to skip duplicate layout passes.
 @property (nonatomic, assign) CGSize lastKnownViewSize;
+/// Window size the PiP was last positioned for. Layout passes compare against it.
+@property (nonatomic, assign) CGSize lastPlacedViewSize;
 @end
 
 @implementation CTPiPWindowController
@@ -234,6 +236,7 @@
     // After rotation, safe area insets are recomputed with the new orientation values.
     // Use the current view bounds (already updated for iPad) and the new insets.
     self.lastKnownViewSize = self.view.bounds.size;
+    self.lastPlacedViewSize = self.view.bounds.size;
     [self.containerView updateBounds:self.view.bounds safeAreaInsets:self.view.safeAreaInsets];
 }
 
@@ -243,6 +246,34 @@
     // has proper bounds. Once layout completes with non-zero bounds, run initial setup.
     if (!self.hasPerformedInitialLayout && !CGSizeEqualToSize(self.view.bounds.size, CGSizeZero)) {
         [self performInitialLayoutAnimated:self.pendingAnimated];
+        return;
+    }
+    // Folding or unfolding a foldable resizes the window without the rotation callbacks
+    // the PiP relies on, so it kept the old screen's size, spot and drag limits.
+    if (self.hasPerformedInitialLayout && self.containerView &&
+        !CGSizeEqualToSize(self.view.bounds.size, CGSizeZero) &&
+        !CGSizeEqualToSize(self.view.bounds.size, self.lastPlacedViewSize)) {
+        [self repositionForCurrentBounds];
+    }
+}
+
+/// Places the PiP for the window's current size, for windows the system rotates itself.
+- (void)repositionForCurrentBounds {
+    CGRect windowBounds = self.view.bounds;
+    BOOL hasTransform = !CGAffineTransformIsIdentity(self.containerView.transform);
+    if (hasTransform && [self deviceOrientationAppliesToWindow]) {
+        // Rotated by hand on the main screen. deviceOrientationDidChange owns that case.
+        return;
+    }
+    self.lastKnownViewSize = windowBounds.size;
+    self.lastPlacedViewSize = windowBounds.size;
+    if (hasTransform) {
+        // Left over from the main screen, for example after unfolding. Portrait clears it.
+        [self.containerView applyDeviceOrientation:UIDeviceOrientationPortrait
+                                      windowBounds:windowBounds
+                                   safeAreaInsets:self.view.safeAreaInsets];
+    } else {
+        [self.containerView updateBounds:windowBounds safeAreaInsets:self.view.safeAreaInsets];
     }
 }
 
@@ -256,6 +287,7 @@
     }
 
     self.lastKnownViewSize = self.view.bounds.size;
+    self.lastPlacedViewSize = self.view.bounds.size;
     [self.containerView placeInitialPositionInBounds:self.view.bounds
                                      safeAreaInsets:self.view.safeAreaInsets];
 
@@ -265,7 +297,8 @@
     // Skip when the window has already rotated to match the device (iPad path),
     // since placeInitialPositionInBounds: has already placed the PiP correctly.
     UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
-    if (UIDeviceOrientationIsValidInterfaceOrientation(orientation) &&
+    if ([self deviceOrientationAppliesToWindow] &&
+        UIDeviceOrientationIsValidInterfaceOrientation(orientation) &&
         orientation != UIDeviceOrientationPortrait) {
         BOOL isDeviceLandscape = UIDeviceOrientationIsLandscape(orientation);
         BOOL isWindowLandscape = (self.view.bounds.size.width > self.view.bounds.size.height);
@@ -431,6 +464,16 @@
                                                   object:nil];
 }
 
+// UIDevice orientation describes the main screen. A foldable's inner screen is a separate
+// UIScreen that the system rotates on its own, so turning the PiP by hand there draws it sideways.
+- (BOOL)deviceOrientationAppliesToWindow {
+    if (@available(iOS 13, *)) {
+        UIScreen *screen = self.view.window.windowScene.screen;
+        return screen == nil || screen == [UIScreen mainScreen];
+    }
+    return YES;
+}
+
 - (void)deviceOrientationDidChange {
     UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
     if (!UIDeviceOrientationIsValidInterfaceOrientation(orientation)) { return; }
@@ -448,6 +491,11 @@
         BOOL isWindowLandscape = (strongSelf.lastKnownViewSize.width > strongSelf.lastKnownViewSize.height);
         BOOL hasTransform = !CGAffineTransformIsIdentity(strongSelf.containerView.transform);
 
+        if (![strongSelf deviceOrientationAppliesToWindow]) {
+            [strongSelf repositionForCurrentBounds];
+            return;
+        }
+
         // On iPad the window auto-rotates with the device, so lastKnownViewSize already
         // reflects the new orientation after viewWillTransitionToSize: fires.
         // Matching orientations with no stale transform → window already rotated (iPad).
@@ -455,6 +503,7 @@
         if (isDeviceLandscape == isWindowLandscape && !hasTransform) {
             CGRect windowBounds = CGRectMake(0, 0, strongSelf.lastKnownViewSize.width,
                                                     strongSelf.lastKnownViewSize.height);
+            strongSelf.lastPlacedViewSize = windowBounds.size;
             [strongSelf.containerView updateBounds:windowBounds
                                    safeAreaInsets:strongSelf.view.safeAreaInsets];
             return;
@@ -463,6 +512,7 @@
         // On iPhone the window stays portrait, so we apply a transform-based rotation.
         CGRect windowBounds = CGRectMake(0, 0, strongSelf.lastKnownViewSize.width,
                                                 strongSelf.lastKnownViewSize.height);
+        strongSelf.lastPlacedViewSize = windowBounds.size;
         [strongSelf.containerView applyDeviceOrientation:orientation
                                             windowBounds:windowBounds
                                          safeAreaInsets:strongSelf.view.safeAreaInsets];

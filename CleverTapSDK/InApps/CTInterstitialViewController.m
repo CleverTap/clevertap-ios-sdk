@@ -42,6 +42,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self layoutNotification];
+    [self keepContainerInsideSafeArea:self.containerView closeButton:self.closeButton];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {

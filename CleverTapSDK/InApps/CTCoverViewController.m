@@ -16,6 +16,8 @@
 @property (nonatomic, strong) IBOutlet UIButton *firstButton;
 @property (nonatomic, strong) IBOutlet UIButton *secondButton;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+@property (nonatomic, weak) NSLayoutConstraint *titleTopConstraint;
+@property (nonatomic, assign) CGFloat titleTopFromXib;
 
 @end
 
@@ -53,6 +55,30 @@
                                          toItem:self.containerView
                                       attribute:NSLayoutAttributeTop
                                      multiplier:1.0 constant:topLength] setActive:YES];
+        [self keepTitleBelowSafeAreaTop:topLength];
+    }
+}
+
+// The xib pins the title a fixed distance from the top of the screen. On a foldable the
+// status area is taller than that, so the title ended up under the clock.
+- (void)keepTitleBelowSafeAreaTop:(CGFloat)safeAreaTop {
+    NSLayoutConstraint *titleTop = self.titleTopConstraint;
+    // Rotation reloads the xib, so the saved constraint can belong to the old title label.
+    if (titleTop.firstItem != self.titleLabel) {
+        titleTop = nil;
+        for (NSLayoutConstraint *constraint in self.containerView.constraints) {
+            if (constraint.firstItem == self.titleLabel && constraint.firstAttribute == NSLayoutAttributeTop &&
+                constraint.secondItem == self.containerView && constraint.secondAttribute == NSLayoutAttributeTop) {
+                titleTop = constraint;
+                break;
+            }
+        }
+        self.titleTopConstraint = titleTop;
+        self.titleTopFromXib = titleTop.constant;
+    }
+    CGFloat top = MAX(self.titleTopFromXib, safeAreaTop);
+    if (titleTop && titleTop.constant != top) {
+        titleTop.constant = top;
     }
 }
 

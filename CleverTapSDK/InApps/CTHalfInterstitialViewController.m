@@ -33,6 +33,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self layoutNotification];
+    [self keepContainerInsideSafeArea:self.containerView closeButton:self.closeButton];
 }
 
 

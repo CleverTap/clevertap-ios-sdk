@@ -44,4 +44,12 @@
 // than the one the app's scene is on.
 - (CGRect)inAppContainerBounds;
 
+// Keeps an aspect-ratio container, and the close button on its corner, inside the
+// safe area on screens shorter or narrower than the xib expects.
+- (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton;
+
+// Returns the insets with left and right set to zero when the two are equal
+// (landscape notch), so only an inset on one side (foldable) is avoided.
++ (UIEdgeInsets)insetsIgnoringEvenSides:(UIEdgeInsets)insets;
+
 @end
