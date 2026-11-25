@@ -33,6 +33,11 @@
 @property (nonatomic, assign) CGSize transitionSize;
 // Scene picked before self.window exists. Kept so the window is created in the same one.
 @property (nonatomic, weak) UIWindowScene *selectedScene API_AVAILABLE(ios(13.0), tvos(13.0));
+// Edge pins that pinContentToHorizontalSafeArea swapped out, and their safe area
+// replacements. Kept so the swap can be undone when the side insets become equal.
+@property (nonatomic, strong) NSMutableArray<NSLayoutConstraint *> *edgePins;
+@property (nonatomic, strong) NSMutableArray<NSLayoutConstraint *> *safeAreaPins;
+@property (nonatomic, assign) BOOL contentPinnedToSafeArea;
 
 @end
 
@@ -69,7 +74,21 @@
         UIView *rootView = self.view;
         UIEdgeInsets sideInsets = [CTInAppDisplayViewController insetsIgnoringEvenSides:rootView.safeAreaInsets];
         if (sideInsets.left == 0 && sideInsets.right == 0) {
+            // The insets became equal on a view pinned earlier: go back to edge to edge.
+            if (self.contentPinnedToSafeArea) {
+                [self replacePins:self.safeAreaPins withPins:self.edgePins];
+                self.contentPinnedToSafeArea = NO;
+            }
             return;
+        }
+        if (!self.contentPinnedToSafeArea) {
+            // Redo an earlier swap first, so the loop below only handles pins it has not seen.
+            [self replacePins:self.edgePins withPins:self.safeAreaPins];
+            self.contentPinnedToSafeArea = YES;
+        }
+        if (!self.edgePins) {
+            self.edgePins = [NSMutableArray array];
+            self.safeAreaPins = [NSMutableArray array];
         }
         UILayoutGuide *safeArea = rootView.safeAreaLayoutGuide;
         for (NSLayoutConstraint *constraint in [rootView.constraints copy]) {
@@ -103,8 +122,27 @@
             safeAreaConstraint.priority = constraint.priority;
             constraint.active = NO;
             safeAreaConstraint.active = YES;
+            [self.edgePins addObject:constraint];
+            [self.safeAreaPins addObject:safeAreaConstraint];
         }
     }
+}
+
+- (void)replacePins:(NSArray<NSLayoutConstraint *> *)oldPins withPins:(NSArray<NSLayoutConstraint *> *)newPins {
+    if (oldPins.count > 0) {
+        [NSLayoutConstraint deactivateConstraints:oldPins];
+    }
+    for (NSLayoutConstraint *pin in newPins) {
+        // Activating a pin to a view that has left the hierarchy throws.
+        if ([self isItemInView:pin.firstItem] && [self isItemInView:pin.secondItem]) {
+            pin.active = YES;
+        }
+    }
+}
+
+- (BOOL)isItemInView:(id)item {
+    UIView *view = [item isKindOfClass:[UILayoutGuide class]] ? ((UILayoutGuide *)item).owningView : item;
+    return [view isKindOfClass:[UIView class]] && [view isDescendantOfView:self.view];
 }
 
 // The interstitial xibs size the container from the screen width (or height) and a fixed

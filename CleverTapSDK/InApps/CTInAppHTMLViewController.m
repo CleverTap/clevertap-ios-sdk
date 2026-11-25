@@ -184,13 +184,20 @@ typedef enum {
     | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
 }
 
-// The close button overhangs the web view's trailing edge. Keep the whole button out of an
-// inset on that side (the strip on a closed foldable). With no inset there it does not move.
-+ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth trailingInset:(CGFloat)trailingInset {
-    if (trailingInset <= 0) {
+// The close button overhangs the web view's trailing edge. With a strip on either side
+// (a closed foldable) keep the whole button on screen and out of the strip. With no side
+// inset (a regular iPhone) it does not move.
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth leadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset {
+    if (leadingInset <= 0 && trailingInset <= 0) {
         return x;
     }
-    return MIN(x, containerWidth - trailingInset - width);
+    return MIN(x, containerWidth - MAX(trailingInset, 0) - width);
+}
+
+// A fixed width wider than the space left beside a side inset would run off the screen
+// and take the close button with it. A width that already fits is not changed.
++ (CGFloat)fixedWidth:(CGFloat)width cappedToAvailableWidth:(CGFloat)availableWidth {
+    return availableWidth > 0 ? MIN(width, availableWidth) : width;
 }
 
 - (void)updateWebView {
@@ -209,7 +216,7 @@ typedef enum {
     CGSize size = CGSizeZero;
     if (self.notification.width > 0) {
         // Ignore Constants.INAPP_X_PERCENT
-        size.width = self.notification.width;
+        size.width = [CTInAppHTMLViewController fixedWidth:self.notification.width cappedToAvailableWidth:availableWidth];
         fixedWidth = true;
     } else {
         float percent = self.notification.widthPercent;
@@ -328,6 +335,7 @@ typedef enum {
         CGFloat closeButtonX = [CTInAppHTMLViewController closeButtonX:frame.origin.x + frame.size.width - extra
                                                                  width:CLTAP_INAPP_CLOSE_IV_WIDTH
                                                         containerWidth:containerSize.width
+                                                          leadingInset:safeAreaInsets.left
                                                          trailingInset:safeAreaInsets.right];
         _closeButton.frame = CGRectMake(closeButtonX, closeButtonY, CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;

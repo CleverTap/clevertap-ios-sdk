@@ -9,6 +9,8 @@
 #import <XCTest/XCTest.h>
 #import "CTInAppDisplayViewControllerMock.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
+#import <OCMock/OCMock.h>
+#import "CTUIUtils.h"
 #import "CTPiPContainerView.h"
 #import "CTPiPWindowController.h"
 #import "CTInAppHTMLViewController.h"
@@ -25,11 +27,17 @@
 // Declared in CTInAppDisplayViewControllerPrivate.h, which the test target does not import.
 @interface CTInAppDisplayViewController (SafeAreaTests)
 - (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton;
+- (UIWindowScene *)presentationScene;
+- (CGRect)inAppContainerBounds;
+- (UIEdgeInsets)inAppSafeAreaInsets;
+- (void)showFromWindow:(BOOL)animated;
+- (UIWindow *)window;
 + (UIEdgeInsets)insetsIgnoringEvenSides:(UIEdgeInsets)insets;
 @end
 
 @interface CTInAppHTMLViewController (CloseButtonTests)
-+ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth trailingInset:(CGFloat)trailingInset;
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth leadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset;
++ (CGFloat)fixedWidth:(CGFloat)width cappedToAvailableWidth:(CGFloat)availableWidth;
 @end
 
 // Stands in for a PiP window on a screen the system rotates itself (a foldable's inner screen).
@@ -264,6 +272,43 @@
     XCTAssertEqual(self.viewController.view.constraints.count, 0);
 }
 
+#pragma mark No active scene tests
+
+// An in-app can be asked to show while no scene is active. The scene lookup must come back
+// empty without sticking, sizes must fall back, and the in-app must show once a scene activates.
+- (void)testNoActiveSceneFallsBackThenShowsWhenASceneActivates {
+    UIWindowScene *realScene = nil;
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            realScene = (UIWindowScene *)scene;
+        }
+    }
+    XCTSkipIf(realScene == nil, @"The test host has no active scene to come back to.");
+
+    id utils = OCMClassMock([CTUIUtils class]);
+    id app = OCMClassMock([UIApplication class]);
+    OCMStub([app connectedScenes]).andReturn([NSSet set]);
+    OCMStub([utils getSharedApplication]).andReturn(app);
+    OCMStub([utils getKeyWindow]).andReturn(nil);
+
+    XCTAssertNil([self.viewController presentationScene]);
+    XCTAssertTrue(CGRectEqualToRect([self.viewController inAppContainerBounds], [UIScreen mainScreen].bounds));
+    XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets([self.viewController inAppSafeAreaInsets], UIEdgeInsetsZero));
+    [self.viewController showFromWindow:NO];
+    XCTAssertNil([self.viewController window], @"no window can be made without a scene");
+
+    [utils stopMocking];
+    [app stopMocking];
+
+    // The empty result was not remembered: the next lookup finds the scene.
+    XCTAssertEqual([self.viewController presentationScene], realScene);
+    [[NSNotificationCenter defaultCenter] postNotificationName:UISceneDidActivateNotification object:realScene];
+    XCTAssertNotNil([self.viewController window]);
+    XCTAssertEqual([self.viewController window].windowScene, realScene);
+    XCTAssertTrue(CGRectEqualToRect([self.viewController inAppContainerBounds], realScene.coordinateSpace.bounds));
+    [self.viewController window].hidden = YES;
+}
+
 #pragma mark Side safe area tests
 
 // Shows the view controller in a window with the given extra side insets and returns a
@@ -318,6 +363,32 @@
     window.hidden = YES;
 }
 
+// The side insets of a shown in-app can change (rotation, fold). Pins moved to the safe
+// area for uneven insets must go back to the view's edges once the insets are equal.
+- (void)testSidePinsReturnToEdgesWhenInsetsBecomeEven {
+    UIWindow *window = nil;
+    UIView *container = [self edgePinnedContainerWithLeftInset:0 rightInset:84 window:&window];
+    UIView *root = self.viewController.view;
+    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400 - 84, 0.5);
+    NSUInteger pinnedConstraintCount = root.constraints.count;
+
+    self.viewController.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 62, 0, 62);
+    [root setNeedsLayout];
+    [root layoutIfNeeded];
+    XCTAssertEqualWithAccuracy(root.safeAreaInsets.left, 62, 0.5, @"the test window did not apply the insets");
+    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400, 0.5);
+
+    // Uneven again: the same safe area pins are reused, not added a second time.
+    self.viewController.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 0, 0, 84);
+    [root setNeedsLayout];
+    [root layoutIfNeeded];
+    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400 - 84, 0.5);
+    XCTAssertEqual(root.constraints.count, pinnedConstraintCount);
+    window.hidden = YES;
+}
+
 - (void)testInsetsIgnoringEvenSides {
     UIEdgeInsets even = [CTInAppDisplayViewController insetsIgnoringEvenSides:UIEdgeInsetsMake(20, 62, 21, 62)];
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(even, UIEdgeInsetsMake(20, 0, 21, 0)), @"%@", NSStringFromUIEdgeInsets(even));
@@ -333,16 +404,41 @@
 // overhangs that edge by half its width. The whole button has to stay out of the strip.
 - (void)testHTMLCloseButtonStaysOutOfTrailingInset {
     // 678 wide, 84 strip: web view ends at 594, button would start at 594 - 20 = 574.
-    CGFloat x = [CTInAppHTMLViewController closeButtonX:574 width:40 containerWidth:678 trailingInset:84];
+    CGFloat x = [CTInAppHTMLViewController closeButtonX:574 width:40 containerWidth:678 leadingInset:0 trailingInset:84];
     XCTAssertEqualWithAccuracy(x, 554, 0.01);
 
     // Already clear of the strip: unchanged.
-    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 trailingInset:84];
+    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 leadingInset:0 trailingInset:84];
     XCTAssertEqualWithAccuracy(x, 500, 0.01);
 
     // No inset on that side (a regular iPhone): unchanged, as before.
-    x = [CTInAppHTMLViewController closeButtonX:854 width:40 containerWidth:874 trailingInset:0];
+    x = [CTInAppHTMLViewController closeButtonX:854 width:40 containerWidth:874 leadingInset:0 trailingInset:0];
     XCTAssertEqualWithAccuracy(x, 854, 0.01);
+}
+
+// With the strip on the left the web view ends at the screen edge, so the overhanging
+// close button would be half off screen. The whole button has to stay on screen.
+- (void)testHTMLCloseButtonStaysOnScreenWithLeadingInset {
+    // 678 wide, 84 strip on the left: web view ends at 678, button would start at 658.
+    CGFloat x = [CTInAppHTMLViewController closeButtonX:658 width:40 containerWidth:678 leadingInset:84 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 638, 0.01);
+
+    // Already on screen: unchanged.
+    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 leadingInset:84 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 500, 0.01);
+}
+
+// A fixed width wider than the space beside the strip must be cut to fit. Uncapped, a strip
+// on the left pushes the web view and its close button past the right screen edge.
+- (void)testHTMLFixedWidthIsCappedToAvailableWidth {
+    // Closed foldable in landscape: 678 wide, 84 strip on the left, 594 left.
+    CGFloat width = [CTInAppHTMLViewController fixedWidth:650 cappedToAvailableWidth:594];
+    XCTAssertEqualWithAccuracy(width, 594, 0.01);
+    // The web view then ends at the screen edge, not past it.
+    XCTAssertLessThanOrEqual(84 + width, 678);
+    // Already fits: unchanged.
+    XCTAssertEqualWithAccuracy([CTInAppHTMLViewController fixedWidth:300 cappedToAvailableWidth:594], 300, 0.01);
+    XCTAssertEqualWithAccuracy([CTInAppHTMLViewController fixedWidth:300 cappedToAvailableWidth:0], 300, 0.01);
 }
 
 #pragma mark PiP tests
