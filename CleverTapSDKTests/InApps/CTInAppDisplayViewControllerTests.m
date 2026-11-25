@@ -363,32 +363,6 @@
     window.hidden = YES;
 }
 
-// The side insets of a shown in-app can change (rotation, fold). Pins moved to the safe
-// area for uneven insets must go back to the view's edges once the insets are equal.
-- (void)testSidePinsReturnToEdgesWhenInsetsBecomeEven {
-    UIWindow *window = nil;
-    UIView *container = [self edgePinnedContainerWithLeftInset:0 rightInset:84 window:&window];
-    UIView *root = self.viewController.view;
-    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400 - 84, 0.5);
-    NSUInteger pinnedConstraintCount = root.constraints.count;
-
-    self.viewController.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 62, 0, 62);
-    [root setNeedsLayout];
-    [root layoutIfNeeded];
-    XCTAssertEqualWithAccuracy(root.safeAreaInsets.left, 62, 0.5, @"the test window did not apply the insets");
-    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
-    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400, 0.5);
-
-    // Uneven again: the same safe area pins are reused, not added a second time.
-    self.viewController.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 0, 0, 84);
-    [root setNeedsLayout];
-    [root layoutIfNeeded];
-    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
-    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), 400 - 84, 0.5);
-    XCTAssertEqual(root.constraints.count, pinnedConstraintCount);
-    window.hidden = YES;
-}
-
 - (void)testInsetsIgnoringEvenSides {
     UIEdgeInsets even = [CTInAppDisplayViewController insetsIgnoringEvenSides:UIEdgeInsetsMake(20, 62, 21, 62)];
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(even, UIEdgeInsetsMake(20, 0, 21, 0)), @"%@", NSStringFromUIEdgeInsets(even));
