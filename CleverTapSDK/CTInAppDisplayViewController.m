@@ -31,6 +31,8 @@
 @property (nonatomic, assign) BOOL animated;
 // Size the view is moving to while a size transition (rotation, scene resize) is in progress.
 @property (nonatomic, assign) CGSize transitionSize;
+// Scene picked before self.window exists. Kept so the window is created in the same one.
+@property (nonatomic, weak) UIWindowScene *selectedScene API_AVAILABLE(ios(13.0), tvos(13.0));
 
 @end
 
@@ -235,20 +237,63 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         return CGRectMake(0, 0, self.transitionSize.width, self.transitionSize.height);
     }
     if (@available(iOS 13, tvOS 13.0, *)) {
-        UIWindowScene *windowScene = self.window.windowScene;
-        if (!windowScene) {
-            for (UIScene *scene in [CTUIUtils getSharedApplication].connectedScenes) {
-                if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                    windowScene = (UIWindowScene *)scene;
-                    break;
-                }
-            }
-        }
+        UIWindowScene *windowScene = [self presentationScene];
         if (windowScene) {
             return windowScene.coordinateSpace.bounds;
         }
     }
     return [UIScreen mainScreen].bounds;
+}
+
+// The one scene used for the in-app window, its bounds and its safe area insets.
+// With more than one scene, mixing sources sizes the in-app for the wrong scene.
+- (UIWindowScene *)presentationScene {
+    if (self.window.windowScene) {
+        return self.window.windowScene;
+    }
+    // Explicit nil checks: UISceneActivationStateForegroundActive is 0, so nil would pass.
+    UIWindowScene *windowScene = self.selectedScene;
+    if (windowScene && windowScene.activationState == UISceneActivationStateForegroundActive) {
+        return windowScene;
+    }
+    windowScene = [CTUIUtils getKeyWindow].windowScene;
+    if (!windowScene || windowScene.activationState != UISceneActivationStateForegroundActive) {
+        windowScene = nil;
+        for (UIScene *scene in [CTUIUtils getSharedApplication].connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                windowScene = (UIWindowScene *)scene;
+                break;
+            }
+        }
+    }
+    self.selectedScene = windowScene;
+    return windowScene;
+}
+
+- (UIEdgeInsets)inAppSafeAreaInsets {
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        UIWindowScene *windowScene = [self presentationScene];
+        if (windowScene) {
+            // The app's own window, not self.window, which has no insets until it is shown.
+            UIWindow *sceneWindow = nil;
+            for (UIWindow *window in windowScene.windows) {
+                if (window == self.window) {
+                    continue;
+                }
+                if (window.isKeyWindow) {
+                    sceneWindow = window;
+                    break;
+                }
+                if (!sceneWindow) {
+                    sceneWindow = window;
+                }
+            }
+            if (sceneWindow) {
+                return sceneWindow.safeAreaInsets;
+            }
+        }
+    }
+    return [CTUIUtils getKeyWindow].safeAreaInsets;
 }
 
 #if !(TARGET_OS_TV)
@@ -388,20 +433,17 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
     if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                
-                if ([self isInAppAdvancedBuilder]) {
-                    CGRect windowFrame = [self windowSceneFrame:windowScene];
-                    self.window = [[windowClass alloc] initWithFrame:windowFrame];
-                    self.window.windowScene = windowScene;
-                } else {
-                    self.window = [[windowClass alloc] initWithFrame:
-                                                    windowScene.coordinateSpace.bounds];
-                    self.window.windowScene = windowScene;
-                }
+        // Same scene the layout was sized for, see presentationScene.
+        UIWindowScene *windowScene = [self presentationScene];
+        if (windowScene) {
+            if ([self isInAppAdvancedBuilder]) {
+                CGRect windowFrame = [self windowSceneFrame:windowScene];
+                self.window = [[windowClass alloc] initWithFrame:windowFrame];
+                self.window.windowScene = windowScene;
+            } else {
+                self.window = [[windowClass alloc] initWithFrame:
+                                                windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
             }
         }
     } else {

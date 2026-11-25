@@ -44,6 +44,12 @@
 // than the one the app's scene is on.
 - (CGRect)inAppContainerBounds;
 
+// Scene the in-app is (or will be) shown in. nil when no scene is active yet.
+- (UIWindowScene *)presentationScene API_AVAILABLE(ios(13.0), tvos(13.0));
+
+// Safe area insets of that same scene, so they match inAppContainerBounds.
+- (UIEdgeInsets)inAppSafeAreaInsets;
+
 // Keeps an aspect-ratio container, and the close button on its corner, inside the
 // safe area on screens shorter or narrower than the xib expects.
 - (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton;

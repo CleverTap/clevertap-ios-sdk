@@ -233,6 +233,14 @@
         return;
     }
 
+    // Off the main screen (a foldable's inner screen) a hand rotation may be left over.
+    // repositionForCurrentBounds clears it. Recording the size here first would make
+    // viewDidLayoutSubviews skip that call.
+    if (self.containerView && ![self deviceOrientationAppliesToWindow]) {
+        [self repositionForCurrentBounds];
+        return;
+    }
+
     // After rotation, safe area insets are recomputed with the new orientation values.
     // Use the current view bounds (already updated for iPad) and the new insets.
     self.lastKnownViewSize = self.view.bounds.size;

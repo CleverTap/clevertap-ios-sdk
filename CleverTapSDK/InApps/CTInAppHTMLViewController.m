@@ -184,13 +184,22 @@ typedef enum {
     | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
 }
 
+// The close button overhangs the web view's trailing edge. Keep the whole button out of an
+// inset on that side (the strip on a closed foldable). With no inset there it does not move.
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth trailingInset:(CGFloat)trailingInset {
+    if (trailingInset <= 0) {
+        return x;
+    }
+    return MIN(x, containerWidth - trailingInset - width);
+}
+
 - (void)updateWebView {
     CGSize containerSize = [self inAppContainerBounds].size;
     // Keep the web view and close button clear of an inset on one side (the status strip
     // on a closed foldable). Equal side insets (landscape notch) are ignored, as before.
     UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
     if (@available(iOS 11.0, *)) {
-        safeAreaInsets = [CTInAppDisplayViewController insetsIgnoringEvenSides:[CTUIUtils getKeyWindow].safeAreaInsets];
+        safeAreaInsets = [CTInAppDisplayViewController insetsIgnoringEvenSides:[self inAppSafeAreaInsets]];
     }
     CGFloat availableWidth = containerSize.width - safeAreaInsets.left - safeAreaInsets.right;
     boolean_t fixedWidth = false, fixedHeight = false;
@@ -217,7 +226,7 @@ typedef enum {
             // Get the safe area insets
             UIEdgeInsets safeInsets = UIEdgeInsetsZero;
             if (@available(iOS 11.0, *)) {
-                safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
+                safeInsets = [self inAppSafeAreaInsets];
             }
             else {
 #pragma clang diagnostic push
@@ -256,7 +265,8 @@ typedef enum {
     char pos = self.notification.position;
     CGFloat statusBarFrameHeight = 0.0;
     if (@available(iOS 13.0, *)) {
-        statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
+        UIWindowScene *windowScene = [self presentationScene] ?: [CTUIUtils getKeyWindow].windowScene;
+        statusBarFrameHeight = windowScene.statusBarManager.statusBarFrame.size.height;
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -315,7 +325,11 @@ typedef enum {
         // The top safe area can be taller than the status bar (for example on an unfolded
         // foldable), so keep the close button below it or system UI covers it.
         closeButtonY = MAX(closeButtonY, safeAreaInsets.top);
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, closeButtonY, CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+        CGFloat closeButtonX = [CTInAppHTMLViewController closeButtonX:frame.origin.x + frame.size.width - extra
+                                                                 width:CLTAP_INAPP_CLOSE_IV_WIDTH
+                                                        containerWidth:containerSize.width
+                                                         trailingInset:safeAreaInsets.right];
+        _closeButton.frame = CGRectMake(closeButtonX, closeButtonY, CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:_closeButton];
     }

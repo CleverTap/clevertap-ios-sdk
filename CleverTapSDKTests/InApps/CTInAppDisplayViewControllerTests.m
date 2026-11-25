@@ -10,6 +10,8 @@
 #import "CTInAppDisplayViewControllerMock.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
 #import "CTPiPContainerView.h"
+#import "CTPiPWindowController.h"
+#import "CTInAppHTMLViewController.h"
 
 // Implemented in CTPiPPayloadModel.m, not declared in its header.
 @interface CTPiPConfigModel (PiPTests)
@@ -24,6 +26,20 @@
 @interface CTInAppDisplayViewController (SafeAreaTests)
 - (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton;
 + (UIEdgeInsets)insetsIgnoringEvenSides:(UIEdgeInsets)insets;
+@end
+
+@interface CTInAppHTMLViewController (CloseButtonTests)
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth trailingInset:(CGFloat)trailingInset;
+@end
+
+// Stands in for a PiP window on a screen the system rotates itself (a foldable's inner screen).
+@interface CTPiPWindowControllerOffMainScreen : CTPiPWindowController
+@end
+
+@implementation CTPiPWindowControllerOffMainScreen
+- (BOOL)deviceOrientationAppliesToWindow {
+    return NO;
+}
 @end
 
 @interface CTInAppDisplayViewControllerTests : XCTestCase
@@ -203,8 +219,6 @@
     self.viewController.view = root;
 
     // Without the helper the container is 340 x 605 and runs off a 400pt tall view.
-    // This layout pass also runs viewWillLayoutSubviews, which moves the side pins to the
-    // safe area guide, so the helper is tested against pins it has to find there.
     [root layoutIfNeeded];
     XCTAssertFalse(CGRectContainsRect(root.bounds, container.frame));
 
@@ -315,6 +329,22 @@
     XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(none, UIEdgeInsetsMake(62, 0, 34, 0)), @"%@", NSStringFromUIEdgeInsets(none));
 }
 
+// A full-width HTML in-app ends at the strip on a closed foldable, and its close button
+// overhangs that edge by half its width. The whole button has to stay out of the strip.
+- (void)testHTMLCloseButtonStaysOutOfTrailingInset {
+    // 678 wide, 84 strip: web view ends at 594, button would start at 594 - 20 = 574.
+    CGFloat x = [CTInAppHTMLViewController closeButtonX:574 width:40 containerWidth:678 trailingInset:84];
+    XCTAssertEqualWithAccuracy(x, 554, 0.01);
+
+    // Already clear of the strip: unchanged.
+    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 trailingInset:84];
+    XCTAssertEqualWithAccuracy(x, 500, 0.01);
+
+    // No inset on that side (a regular iPhone): unchanged, as before.
+    x = [CTInAppHTMLViewController closeButtonX:854 width:40 containerWidth:874 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 854, 0.01);
+}
+
 #pragma mark PiP tests
 
 - (CTPiPContainerView *)pipContainerAtPosition:(NSString *)position {
@@ -339,6 +369,63 @@
     XCTAssertEqualWithAccuracy(CGRectGetMidX(center.frame), (466.0 - 84.0) / 2.0, 0.5);
     XCTAssertEqualWithAccuracy(CGRectGetMinX(center.frame) - CGRectGetMinX(left.frame),
                                CGRectGetMinX(right.frame) - CGRectGetMinX(center.frame), 0.5);
+}
+
+// Upside down the PiP is laid out in a frame turned half a turn and then mirrored back,
+// so the strip must still be avoided on the side of the window it is really on.
+- (void)testPiPUpsideDownKeepsClearOfUnevenSideInset {
+    CGRect bounds = CGRectMake(0, 0, 466, 678);
+    UIEdgeInsets insets = UIEdgeInsetsMake(0, 0, 0, 84);
+
+    for (NSString *position in @[@"center", @"center-left", @"center-right"]) {
+        CTPiPContainerView *pip = [self pipContainerAtPosition:position];
+        [pip placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+        [pip applyDeviceOrientation:UIDeviceOrientationPortraitUpsideDown windowBounds:bounds safeAreaInsets:insets];
+
+        XCTAssertGreaterThanOrEqual(CGRectGetMinX(pip.frame), -0.5, @"%@ %@", position, NSStringFromCGRect(pip.frame));
+        XCTAssertLessThanOrEqual(CGRectGetMaxX(pip.frame), 466.0 - 84.0 + 0.5, @"%@ %@", position, NSStringFromCGRect(pip.frame));
+        if ([position isEqualToString:@"center"]) {
+            XCTAssertEqualWithAccuracy(pip.center.x, (466.0 - 84.0) / 2.0, 0.5);
+        }
+    }
+}
+
+// Equal side insets: upside down is the plain mirror of portrait, as before.
+- (void)testPiPUpsideDownIsUnchangedWithEvenSideInsets {
+    CGRect bounds = CGRectMake(0, 0, 402, 874);
+    UIEdgeInsets insets = UIEdgeInsetsMake(62, 0, 34, 0);
+    CTPiPContainerView *portrait = [self pipContainerAtPosition:@"center-left"];
+    [portrait placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    CTPiPContainerView *flipped = [self pipContainerAtPosition:@"center-left"];
+    [flipped placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    [flipped applyDeviceOrientation:UIDeviceOrientationPortraitUpsideDown windowBounds:bounds safeAreaInsets:insets];
+
+    XCTAssertEqualWithAccuracy(flipped.center.x, 402.0 - portrait.center.x, 0.5);
+    XCTAssertEqualWithAccuracy(flipped.center.y, 874.0 - portrait.center.y, 0.5);
+}
+
+// Closed foldable held in landscape: the PiP is turned by hand. After unfolding, the safe
+// area callback can run before layout. It must clear that turn, not just record the new size.
+- (void)testPiPSafeAreaChangeClearsStaleTransformOffMainScreen {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:@{ @"ti": @1 }];
+    CTPiPWindowControllerOffMainScreen *controller = [[CTPiPWindowControllerOffMainScreen alloc] initWithNotification:notification];
+    CGRect closed = CGRectMake(0, 0, 466, 678);
+    CGRect open = CGRectMake(0, 0, 951, 669);
+    controller.view = [[UIView alloc] initWithFrame:closed];
+
+    CTPiPContainerView *pip = [self pipContainerAtPosition:@"center"];
+    [controller.view addSubview:pip];
+    [controller setValue:pip forKey:@"containerView"];
+    [controller setValue:@YES forKey:@"hasPerformedInitialLayout"];
+    [pip placeInitialPositionInBounds:closed safeAreaInsets:UIEdgeInsetsZero];
+    [pip applyDeviceOrientation:UIDeviceOrientationLandscapeLeft windowBounds:closed safeAreaInsets:UIEdgeInsetsZero];
+    XCTAssertFalse(CGAffineTransformIsIdentity(pip.transform));
+
+    controller.view.frame = open;
+    [controller viewSafeAreaInsetsDidChange];
+
+    XCTAssertTrue(CGAffineTransformIsIdentity(pip.transform));
+    XCTAssertTrue(CGRectContainsRect(open, pip.frame), @"%@", NSStringFromCGRect(pip.frame));
 }
 
 - (void)testPiPCenterPositionIsUnchangedWithEvenSideInsets {
