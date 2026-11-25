@@ -48,10 +48,12 @@ static const CGFloat kSpacingConstant = 160.f;
         case CTInAppTypeInterstitialImage:
             self.aspectMultiplier = 0.85;
             [self handleLayoutForIdiomPad];
+            [self keepContainerInsideSafeArea:self.containerView closeButton:self.closeButton];
             break;
         case CTInAppTypeHalfInterstitialImage:
             self.aspectMultiplier = 0.5;
             [self handleLayoutForIdiomPad];
+            [self keepContainerInsideSafeArea:self.containerView closeButton:self.closeButton];
             break;
         default:
             break;

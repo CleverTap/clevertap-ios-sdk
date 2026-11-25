@@ -250,6 +250,13 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
     return CGSizeMake(pipWidth, pipHeight);
 }
 
+// Upside down, the origin is worked out in a frame turned half a turn and then mirrored
+// back, so the window's left inset is that frame's right. Without the swap an uneven
+// inset (foldable strip) is avoided on the wrong side.
+static UIEdgeInsets CTPiPInsetsWithSidesSwapped(UIEdgeInsets insets) {
+    return UIEdgeInsetsMake(insets.top, insets.right, insets.bottom, insets.left);
+}
+
 - (CGPoint)originForPosition:(CTPiPPosition)position
                      pipSize:(CGSize)size
                       bounds:(CGRect)bounds
@@ -261,7 +268,9 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
     CGFloat right   = bounds.size.width  - insets.right  - hm - size.width;
     CGFloat top     = insets.top   + vm;
     CGFloat bottom  = bounds.size.height - insets.bottom - vm  - size.height;
-    CGFloat centerX = (bounds.size.width  - size.width)  / 2.0;
+    // Centre inside the side insets. A foldable's outer screen has a wide strip on one side,
+    // so the middle of the window sits almost on top of the right-hand position.
+    CGFloat centerX = insets.left + (bounds.size.width - insets.left - insets.right - size.width) / 2.0;
     CGFloat centerY = (bounds.size.height - size.height) / 2.0;
 
     switch (position) {
@@ -339,7 +348,8 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         }
     } else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
         CGSize pipSize = [self pipSizeForBounds:wb];
-        CGPoint origin = [self originForPosition:position pipSize:pipSize bounds:wb safeAreaInsets:pi];
+        CGPoint origin = [self originForPosition:position pipSize:pipSize bounds:wb
+                                  safeAreaInsets:CTPiPInsetsWithSidesSwapped(pi)];
         return CGPointMake(wW - (origin.x + pipSize.width  / 2.0),
                            wH - (origin.y + pipSize.height / 2.0));
     } else {
@@ -627,7 +637,7 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         CGPoint origin = [self originForPosition:self.currentPosition
                                          pipSize:pipSize
                                           bounds:windowBounds
-                                  safeAreaInsets:portraitInsets];
+                                  safeAreaInsets:CTPiPInsetsWithSidesSwapped(portraitInsets)];
         self.bounds = CGRectMake(0, 0, pipW, pipH);
         portraitCenter = CGPointMake(wW - (origin.x + pipW / 2.0),
                                      wH - (origin.y + pipH / 2.0));

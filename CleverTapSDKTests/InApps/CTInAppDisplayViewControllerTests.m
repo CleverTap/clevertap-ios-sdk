@@ -9,6 +9,46 @@
 #import <XCTest/XCTest.h>
 #import "CTInAppDisplayViewControllerMock.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
+#import <OCMock/OCMock.h>
+#import "CTUIUtils.h"
+#import "CTPiPContainerView.h"
+#import "CTPiPWindowController.h"
+#import "CTInAppHTMLViewController.h"
+
+// Implemented in CTPiPPayloadModel.m, not declared in its header.
+@interface CTPiPConfigModel (PiPTests)
++ (instancetype)modelFromJSON:(NSDictionary *)json;
+@end
+
+@interface CTPiPMediaModel (PiPTests)
++ (instancetype)modelFromJSON:(NSDictionary *)json;
+@end
+
+// Declared in CTInAppDisplayViewControllerPrivate.h, which the test target does not import.
+@interface CTInAppDisplayViewController (SafeAreaTests)
+- (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton;
+- (UIWindowScene *)presentationScene;
+- (CGRect)inAppContainerBounds;
+- (UIEdgeInsets)inAppSafeAreaInsets;
+- (void)showFromWindow:(BOOL)animated;
+- (UIWindow *)window;
++ (UIEdgeInsets)insetsIgnoringEvenSides:(UIEdgeInsets)insets;
+@end
+
+@interface CTInAppHTMLViewController (CloseButtonTests)
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth leadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset;
++ (CGFloat)fixedWidth:(CGFloat)width cappedToAvailableWidth:(CGFloat)availableWidth;
+@end
+
+// Stands in for a PiP window on a screen the system rotates itself (a foldable's inner screen).
+@interface CTPiPWindowControllerOffMainScreen : CTPiPWindowController
+@end
+
+@implementation CTPiPWindowControllerOffMainScreen
+- (BOOL)deviceOrientationAppliesToWindow {
+    return NO;
+}
+@end
 
 @interface CTInAppDisplayViewControllerTests : XCTestCase
 
@@ -149,6 +189,322 @@
     self.viewController.delegate = delegate;
     // Trigger the action
     [self.viewController triggerInAppAction:action callToAction:callToAction buttonId:buttonId];
+}
+
+#pragma mark keepContainerInsideSafeArea Tests
+
+// Builds the same layout as the portrait interstitial xib: a container pinned 30pt from the
+// sides, centered vertically, 1:1.78 wide to tall, with a 30pt close button that overhangs
+// its top trailing corner by 15pt.
+- (NSDictionary<NSString *, UIView *> *)interstitialLayoutInViewOfSize:(CGSize)size {
+    UIView *root = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+    UIView *container = [UIView new];
+    UIView *closeButton = [UIView new];
+    container.translatesAutoresizingMaskIntoConstraints = NO;
+    closeButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [root addSubview:container];
+    [root addSubview:closeButton];
+    [NSLayoutConstraint activateConstraints:@[
+        [container.leadingAnchor constraintEqualToAnchor:root.leadingAnchor constant:30],
+        [root.trailingAnchor constraintEqualToAnchor:container.trailingAnchor constant:30],
+        [container.centerYAnchor constraintEqualToAnchor:root.centerYAnchor],
+        [container.heightAnchor constraintEqualToAnchor:container.widthAnchor multiplier:1.78],
+        [closeButton.widthAnchor constraintEqualToConstant:30],
+        [closeButton.heightAnchor constraintEqualToConstant:30],
+        [closeButton.leadingAnchor constraintEqualToAnchor:container.trailingAnchor constant:-15],
+        [container.topAnchor constraintEqualToAnchor:closeButton.bottomAnchor constant:-15]
+    ]];
+    return @{ @"root": root, @"container": container, @"closeButton": closeButton };
+}
+
+- (void)testKeepContainerInsideSafeAreaShrinksContainerOnSquareScreen {
+    XCTSkipIf([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad,
+              @"The helper only applies to the phone layouts.");
+    NSDictionary<NSString *, UIView *> *views = [self interstitialLayoutInViewOfSize:CGSizeMake(400, 400)];
+    UIView *root = views[@"root"];
+    UIView *container = views[@"container"];
+    UIView *closeButton = views[@"closeButton"];
+    self.viewController.view = root;
+
+    // Without the helper the container is 340 x 605 and runs off a 400pt tall view.
+    [root layoutIfNeeded];
+    XCTAssertFalse(CGRectContainsRect(root.bounds, container.frame));
+
+    [self.viewController keepContainerInsideSafeArea:container closeButton:closeButton];
+    [root setNeedsLayout];
+    [root layoutIfNeeded];
+
+    XCTAssertTrue(CGRectContainsRect(root.bounds, container.frame), @"container %@", NSStringFromCGRect(container.frame));
+    XCTAssertTrue(CGRectContainsRect(root.bounds, closeButton.frame), @"close button %@", NSStringFromCGRect(closeButton.frame));
+    XCTAssertGreaterThan(container.frame.size.width, 0);
+    XCTAssertEqualWithAccuracy(container.frame.size.height, container.frame.size.width * 1.78, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMidX(container.frame), CGRectGetMidX(root.bounds), 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMidY(container.frame), CGRectGetMidY(root.bounds), 0.5);
+}
+
+- (void)testKeepContainerInsideSafeAreaLeavesFittingLayoutUnchanged {
+    XCTSkipIf([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad,
+              @"The helper only applies to the phone layouts.");
+    NSDictionary<NSString *, UIView *> *views = [self interstitialLayoutInViewOfSize:CGSizeMake(400, 900)];
+    UIView *root = views[@"root"];
+    UIView *container = views[@"container"];
+    UIView *closeButton = views[@"closeButton"];
+    self.viewController.view = root;
+
+    [root layoutIfNeeded];
+    CGRect containerFrameBefore = container.frame;
+    CGRect closeButtonFrameBefore = closeButton.frame;
+    XCTAssertTrue(CGRectContainsRect(root.bounds, containerFrameBefore));
+
+    [self.viewController keepContainerInsideSafeArea:container closeButton:closeButton];
+    [root setNeedsLayout];
+    [root layoutIfNeeded];
+
+    XCTAssertTrue(CGRectEqualToRect(container.frame, containerFrameBefore), @"container %@", NSStringFromCGRect(container.frame));
+    XCTAssertTrue(CGRectEqualToRect(closeButton.frame, closeButtonFrameBefore), @"close button %@", NSStringFromCGRect(closeButton.frame));
+}
+
+- (void)testKeepContainerInsideSafeAreaIgnoresViewsOutsideTheHierarchy {
+    self.viewController.view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 400)];
+    UIView *detached = [UIView new];
+    XCTAssertNoThrow([self.viewController keepContainerInsideSafeArea:detached closeButton:nil]);
+    XCTAssertNoThrow([self.viewController keepContainerInsideSafeArea:nil closeButton:nil]);
+    XCTAssertEqual(self.viewController.view.constraints.count, 0);
+}
+
+#pragma mark No active scene tests
+
+// An in-app can be asked to show while no scene is active. The scene lookup must come back
+// empty without sticking, sizes must fall back, and the in-app must show once a scene activates.
+- (void)testNoActiveSceneFallsBackThenShowsWhenASceneActivates {
+    UIWindowScene *realScene = nil;
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            realScene = (UIWindowScene *)scene;
+        }
+    }
+    XCTSkipIf(realScene == nil, @"The test host has no active scene to come back to.");
+
+    id utils = OCMClassMock([CTUIUtils class]);
+    id app = OCMClassMock([UIApplication class]);
+    OCMStub([app connectedScenes]).andReturn([NSSet set]);
+    OCMStub([utils getSharedApplication]).andReturn(app);
+    OCMStub([utils getKeyWindow]).andReturn(nil);
+
+    XCTAssertNil([self.viewController presentationScene]);
+    XCTAssertTrue(CGRectEqualToRect([self.viewController inAppContainerBounds], [UIScreen mainScreen].bounds));
+    XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets([self.viewController inAppSafeAreaInsets], UIEdgeInsetsZero));
+    [self.viewController showFromWindow:NO];
+    XCTAssertNil([self.viewController window], @"no window can be made without a scene");
+
+    [utils stopMocking];
+    [app stopMocking];
+
+    // The empty result was not remembered: the next lookup finds the scene.
+    XCTAssertEqual([self.viewController presentationScene], realScene);
+    [[NSNotificationCenter defaultCenter] postNotificationName:UISceneDidActivateNotification object:realScene];
+    XCTAssertNotNil([self.viewController window]);
+    XCTAssertEqual([self.viewController window].windowScene, realScene);
+    XCTAssertTrue(CGRectEqualToRect([self.viewController inAppContainerBounds], realScene.coordinateSpace.bounds));
+    [self.viewController window].hidden = YES;
+}
+
+#pragma mark Side safe area tests
+
+// Shows the view controller in a window with the given extra side insets and returns a
+// container pinned to both sides of the root view, the way the cover, header and footer xibs do.
+- (UIView *)edgePinnedContainerWithLeftInset:(CGFloat)left rightInset:(CGFloat)right window:(UIWindow **)windowOut {
+    UIView *root = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 400)];
+    UIView *container = [UIView new];
+    container.translatesAutoresizingMaskIntoConstraints = NO;
+    [root addSubview:container];
+    [NSLayoutConstraint activateConstraints:@[
+        [container.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],
+        [root.trailingAnchor constraintEqualToAnchor:container.trailingAnchor],
+        [container.topAnchor constraintEqualToAnchor:root.topAnchor],
+        [container.heightAnchor constraintEqualToConstant:100]
+    ]];
+    self.viewController.view = root;
+    self.viewController.additionalSafeAreaInsets = UIEdgeInsetsMake(0, left, 0, right);
+
+    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 400, 400)];
+    window.rootViewController = self.viewController;
+    window.hidden = NO;
+    [root setNeedsLayout];
+    [root layoutIfNeeded];
+    *windowOut = window;
+    return container;
+}
+
+// A notched iPhone in landscape has the same inset on both sides. In-apps have always
+// run edge to edge there, so the side pins must stay on the view's edges.
+- (void)testEvenSideInsetsKeepContentEdgeToEdge {
+    UIWindow *window = nil;
+    UIView *container = [self edgePinnedContainerWithLeftInset:62 rightInset:62 window:&window];
+    UIView *root = self.viewController.view;
+
+    XCTAssertEqualWithAccuracy(root.safeAreaInsets.left, 62, 0.5, @"the test window did not apply the insets");
+    XCTAssertEqualWithAccuracy(root.safeAreaInsets.right, 62, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), CGRectGetMaxX(root.bounds), 0.5);
+    window.hidden = YES;
+}
+
+// A foldable has an inset on one side only (the strip beside the closed screen).
+// Content must stop at it.
+- (void)testUnevenSideInsetsKeepContentInsideSafeArea {
+    UIWindow *window = nil;
+    UIView *container = [self edgePinnedContainerWithLeftInset:0 rightInset:84 window:&window];
+    UIView *root = self.viewController.view;
+
+    XCTAssertEqualWithAccuracy(root.safeAreaInsets.right, 84, 0.5, @"the test window did not apply the insets");
+    XCTAssertEqualWithAccuracy(CGRectGetMinX(container.frame), 0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMaxX(container.frame), CGRectGetMaxX(root.bounds) - 84, 0.5);
+    window.hidden = YES;
+}
+
+- (void)testInsetsIgnoringEvenSides {
+    UIEdgeInsets even = [CTInAppDisplayViewController insetsIgnoringEvenSides:UIEdgeInsetsMake(20, 62, 21, 62)];
+    XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(even, UIEdgeInsetsMake(20, 0, 21, 0)), @"%@", NSStringFromUIEdgeInsets(even));
+
+    UIEdgeInsets uneven = [CTInAppDisplayViewController insetsIgnoringEvenSides:UIEdgeInsetsMake(0, 0, 21, 84)];
+    XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(uneven, UIEdgeInsetsMake(0, 0, 21, 84)), @"%@", NSStringFromUIEdgeInsets(uneven));
+
+    UIEdgeInsets none = [CTInAppDisplayViewController insetsIgnoringEvenSides:UIEdgeInsetsMake(62, 0, 34, 0)];
+    XCTAssertTrue(UIEdgeInsetsEqualToEdgeInsets(none, UIEdgeInsetsMake(62, 0, 34, 0)), @"%@", NSStringFromUIEdgeInsets(none));
+}
+
+// A full-width HTML in-app ends at the strip on a closed foldable, and its close button
+// overhangs that edge by half its width. The whole button has to stay out of the strip.
+- (void)testHTMLCloseButtonStaysOutOfTrailingInset {
+    // 678 wide, 84 strip: web view ends at 594, button would start at 594 - 20 = 574.
+    CGFloat x = [CTInAppHTMLViewController closeButtonX:574 width:40 containerWidth:678 leadingInset:0 trailingInset:84];
+    XCTAssertEqualWithAccuracy(x, 554, 0.01);
+
+    // Already clear of the strip: unchanged.
+    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 leadingInset:0 trailingInset:84];
+    XCTAssertEqualWithAccuracy(x, 500, 0.01);
+
+    // No inset on that side (a regular iPhone): unchanged, as before.
+    x = [CTInAppHTMLViewController closeButtonX:854 width:40 containerWidth:874 leadingInset:0 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 854, 0.01);
+}
+
+// With the strip on the left the web view ends at the screen edge, so the overhanging
+// close button would be half off screen. The whole button has to stay on screen.
+- (void)testHTMLCloseButtonStaysOnScreenWithLeadingInset {
+    // 678 wide, 84 strip on the left: web view ends at 678, button would start at 658.
+    CGFloat x = [CTInAppHTMLViewController closeButtonX:658 width:40 containerWidth:678 leadingInset:84 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 638, 0.01);
+
+    // Already on screen: unchanged.
+    x = [CTInAppHTMLViewController closeButtonX:500 width:40 containerWidth:678 leadingInset:84 trailingInset:0];
+    XCTAssertEqualWithAccuracy(x, 500, 0.01);
+}
+
+// A fixed width wider than the space beside the strip must be cut to fit. Uncapped, a strip
+// on the left pushes the web view and its close button past the right screen edge.
+- (void)testHTMLFixedWidthIsCappedToAvailableWidth {
+    // Closed foldable in landscape: 678 wide, 84 strip on the left, 594 left.
+    CGFloat width = [CTInAppHTMLViewController fixedWidth:650 cappedToAvailableWidth:594];
+    XCTAssertEqualWithAccuracy(width, 594, 0.01);
+    // The web view then ends at the screen edge, not past it.
+    XCTAssertLessThanOrEqual(84 + width, 678);
+    // Already fits: unchanged.
+    XCTAssertEqualWithAccuracy([CTInAppHTMLViewController fixedWidth:300 cappedToAvailableWidth:594], 300, 0.01);
+    XCTAssertEqualWithAccuracy([CTInAppHTMLViewController fixedWidth:300 cappedToAvailableWidth:0], 300, 0.01);
+}
+
+#pragma mark PiP tests
+
+- (CTPiPContainerView *)pipContainerAtPosition:(NSString *)position {
+    CTPiPConfigModel *config = [CTPiPConfigModel modelFromJSON:@{ @"position": position, @"width": @40 }];
+    CTPiPMediaModel *media = [CTPiPMediaModel modelFromJSON:@{ @"url": @"https://example.com/a.png" }];
+    CTPiPMediaView *mediaView = [[CTPiPMediaView alloc] initWithMedia:media];
+    return [[CTPiPContainerView alloc] initWithConfig:config showClose:NO mediaView:mediaView];
+}
+
+// A foldable's outer screen has a wide strip on one side. Centre must be the middle of what is left.
+- (void)testPiPCenterPositionIsCentredBetweenUnevenSideInsets {
+    CGRect bounds = CGRectMake(0, 0, 466, 678);
+    UIEdgeInsets insets = UIEdgeInsetsMake(0, 0, 0, 84);
+
+    CTPiPContainerView *center = [self pipContainerAtPosition:@"center"];
+    [center placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    CTPiPContainerView *left = [self pipContainerAtPosition:@"center-left"];
+    [left placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    CTPiPContainerView *right = [self pipContainerAtPosition:@"center-right"];
+    [right placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+
+    XCTAssertEqualWithAccuracy(CGRectGetMidX(center.frame), (466.0 - 84.0) / 2.0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMinX(center.frame) - CGRectGetMinX(left.frame),
+                               CGRectGetMinX(right.frame) - CGRectGetMinX(center.frame), 0.5);
+}
+
+// Upside down the PiP is laid out in a frame turned half a turn and then mirrored back,
+// so the strip must still be avoided on the side of the window it is really on.
+- (void)testPiPUpsideDownKeepsClearOfUnevenSideInset {
+    CGRect bounds = CGRectMake(0, 0, 466, 678);
+    UIEdgeInsets insets = UIEdgeInsetsMake(0, 0, 0, 84);
+
+    for (NSString *position in @[@"center", @"center-left", @"center-right"]) {
+        CTPiPContainerView *pip = [self pipContainerAtPosition:position];
+        [pip placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+        [pip applyDeviceOrientation:UIDeviceOrientationPortraitUpsideDown windowBounds:bounds safeAreaInsets:insets];
+
+        XCTAssertGreaterThanOrEqual(CGRectGetMinX(pip.frame), -0.5, @"%@ %@", position, NSStringFromCGRect(pip.frame));
+        XCTAssertLessThanOrEqual(CGRectGetMaxX(pip.frame), 466.0 - 84.0 + 0.5, @"%@ %@", position, NSStringFromCGRect(pip.frame));
+        if ([position isEqualToString:@"center"]) {
+            XCTAssertEqualWithAccuracy(pip.center.x, (466.0 - 84.0) / 2.0, 0.5);
+        }
+    }
+}
+
+// Equal side insets: upside down is the plain mirror of portrait, as before.
+- (void)testPiPUpsideDownIsUnchangedWithEvenSideInsets {
+    CGRect bounds = CGRectMake(0, 0, 402, 874);
+    UIEdgeInsets insets = UIEdgeInsetsMake(62, 0, 34, 0);
+    CTPiPContainerView *portrait = [self pipContainerAtPosition:@"center-left"];
+    [portrait placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    CTPiPContainerView *flipped = [self pipContainerAtPosition:@"center-left"];
+    [flipped placeInitialPositionInBounds:bounds safeAreaInsets:insets];
+    [flipped applyDeviceOrientation:UIDeviceOrientationPortraitUpsideDown windowBounds:bounds safeAreaInsets:insets];
+
+    XCTAssertEqualWithAccuracy(flipped.center.x, 402.0 - portrait.center.x, 0.5);
+    XCTAssertEqualWithAccuracy(flipped.center.y, 874.0 - portrait.center.y, 0.5);
+}
+
+// Closed foldable held in landscape: the PiP is turned by hand. After unfolding, the safe
+// area callback can run before layout. It must clear that turn, not just record the new size.
+- (void)testPiPSafeAreaChangeClearsStaleTransformOffMainScreen {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:@{ @"ti": @1 }];
+    CTPiPWindowControllerOffMainScreen *controller = [[CTPiPWindowControllerOffMainScreen alloc] initWithNotification:notification];
+    CGRect closed = CGRectMake(0, 0, 466, 678);
+    CGRect open = CGRectMake(0, 0, 951, 669);
+    controller.view = [[UIView alloc] initWithFrame:closed];
+
+    CTPiPContainerView *pip = [self pipContainerAtPosition:@"center"];
+    [controller.view addSubview:pip];
+    [controller setValue:pip forKey:@"containerView"];
+    [controller setValue:@YES forKey:@"hasPerformedInitialLayout"];
+    [pip placeInitialPositionInBounds:closed safeAreaInsets:UIEdgeInsetsZero];
+    [pip applyDeviceOrientation:UIDeviceOrientationLandscapeLeft windowBounds:closed safeAreaInsets:UIEdgeInsetsZero];
+    XCTAssertFalse(CGAffineTransformIsIdentity(pip.transform));
+
+    controller.view.frame = open;
+    [controller viewSafeAreaInsetsDidChange];
+
+    XCTAssertTrue(CGAffineTransformIsIdentity(pip.transform));
+    XCTAssertTrue(CGRectContainsRect(open, pip.frame), @"%@", NSStringFromCGRect(pip.frame));
+}
+
+- (void)testPiPCenterPositionIsUnchangedWithEvenSideInsets {
+    CGRect bounds = CGRectMake(0, 0, 874, 402);
+    CTPiPContainerView *center = [self pipContainerAtPosition:@"center"];
+    [center placeInitialPositionInBounds:bounds safeAreaInsets:UIEdgeInsetsMake(0, 62, 21, 62)];
+
+    XCTAssertEqualWithAccuracy(CGRectGetMidX(center.frame), 437.0, 0.5);
+    XCTAssertEqualWithAccuracy(CGRectGetMidY(center.frame), 201.0, 0.5);
 }
 
 @end

@@ -57,11 +57,15 @@ typedef enum {
 
 - (void)loadView {
     if (self.shouldPassThroughTouches) {
-        self.view = [[CTInAppPassThroughView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        self.view = [[CTInAppPassThroughView alloc] initWithFrame:[self inAppContainerBounds]];
         CTInAppPassThroughView *view = (CTInAppPassThroughView*)self.view;
         view.delegate = self;
     } else {
         [super loadView];
+        // The default view takes the main screen's size, which on multi-display devices
+        // (for example a foldable) can differ from the scene the in-app is shown in.
+        // Match the container so the web view frame is not stretched by autoresizing later.
+        self.view.frame = [self inAppContainerBounds];
     }
 }
 
@@ -180,7 +184,31 @@ typedef enum {
     | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
 }
 
+// The close button overhangs the web view's trailing edge. With a strip on either side
+// (a closed foldable) keep the whole button on screen and out of the strip. With no side
+// inset (a regular iPhone) it does not move.
++ (CGFloat)closeButtonX:(CGFloat)x width:(CGFloat)width containerWidth:(CGFloat)containerWidth leadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset {
+    if (leadingInset <= 0 && trailingInset <= 0) {
+        return x;
+    }
+    return MIN(x, containerWidth - MAX(trailingInset, 0) - width);
+}
+
+// A fixed width wider than the space left beside a side inset would run off the screen
+// and take the close button with it. A width that already fits is not changed.
++ (CGFloat)fixedWidth:(CGFloat)width cappedToAvailableWidth:(CGFloat)availableWidth {
+    return availableWidth > 0 ? MIN(width, availableWidth) : width;
+}
+
 - (void)updateWebView {
+    CGSize containerSize = [self inAppContainerBounds].size;
+    // Keep the web view and close button clear of an inset on one side (the status strip
+    // on a closed foldable). Equal side insets (landscape notch) are ignored, as before.
+    UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
+    if (@available(iOS 11.0, *)) {
+        safeAreaInsets = [CTInAppDisplayViewController insetsIgnoringEvenSides:[self inAppSafeAreaInsets]];
+    }
+    CGFloat availableWidth = containerSize.width - safeAreaInsets.left - safeAreaInsets.right;
     boolean_t fixedWidth = false, fixedHeight = false;
     BOOL usesSafeAreaHeight = NO;
     CGFloat safeAreaTopInset = 0.0f;
@@ -188,11 +216,11 @@ typedef enum {
     CGSize size = CGSizeZero;
     if (self.notification.width > 0) {
         // Ignore Constants.INAPP_X_PERCENT
-        size.width = self.notification.width;
+        size.width = [CTInAppHTMLViewController fixedWidth:self.notification.width cappedToAvailableWidth:availableWidth];
         fixedWidth = true;
     } else {
         float percent = self.notification.widthPercent;
-        size.width = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
+        size.width = (CGFloat) ceil(availableWidth * (percent / 100.0f));
     }
     
     if (self.notification.height > 0) {
@@ -205,7 +233,7 @@ typedef enum {
             // Get the safe area insets
             UIEdgeInsets safeInsets = UIEdgeInsetsZero;
             if (@available(iOS 11.0, *)) {
-                safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
+                safeInsets = [self inAppSafeAreaInsets];
             }
             else {
 #pragma clang diagnostic push
@@ -215,7 +243,7 @@ typedef enum {
             }
 
             // Calculate safe area height
-            CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
+            CGFloat safeAreaHeight = containerSize.height - safeInsets.top - safeInsets.bottom;
 
             // Calculate percentage-based height
             size.height = (CGFloat) ceil(safeAreaHeight);
@@ -223,7 +251,7 @@ typedef enum {
             usesSafeAreaHeight = YES;
         }
         else {
-            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+            size.height = (CGFloat) ceil(containerSize.height * (percent / 100.0f));
         }
     }
     
@@ -240,11 +268,12 @@ typedef enum {
     frame.size = size;
     webView.autoresizingMask = UIViewAutoresizingNone;
     
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+    CGSize screenSize = containerSize;
     char pos = self.notification.position;
     CGFloat statusBarFrameHeight = 0.0;
     if (@available(iOS 13.0, *)) {
-        statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
+        UIWindowScene *windowScene = [self presentationScene] ?: [CTUIUtils getKeyWindow].windowScene;
+        statusBarFrameHeight = windowScene.statusBarManager.statusBarFrame.size.height;
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -256,27 +285,27 @@ typedef enum {
     int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
         case CLTAP_INAPP_POSITION_TOP:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.x = safeAreaInsets.left + (availableWidth - size.width) / 2.0f;//-extra;
             frame.origin.y = 0.0f + extra + 20.0f;
             webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
             break;
         case CLTAP_INAPP_POSITION_LEFT:
-            frame.origin.x = 0.0f;
+            frame.origin.x = safeAreaInsets.left;
             frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
             webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
             break;
         case CLTAP_INAPP_POSITION_BOTTOM:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.x = safeAreaInsets.left + (availableWidth - size.width) / 2.0f;//-extra;
             frame.origin.y = screenSize.height - size.height;
             webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleTopMargin;
             break;
         case CLTAP_INAPP_POSITION_RIGHT:
-            frame.origin.x = screenSize.width - size.width - extra;
+            frame.origin.x = safeAreaInsets.left + availableWidth - size.width - extra;
             frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
             webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
             break;
         case CLTAP_INAPP_POSITION_CENTER:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.x = safeAreaInsets.left + (availableWidth - size.width) / 2.0f;//-extra;
             // The height already excludes both safe area insets, so centering would
             // split them evenly and push the web view up under the status bar.
             frame.origin.y = usesSafeAreaHeight
@@ -287,7 +316,7 @@ typedef enum {
             CleverTapLogStaticInternal(@"Unknown position %c", pos);
             return;
     }
-    frame.origin.x = frame.origin.x < 0.0f ? 0.0f : frame.origin.x;
+    frame.origin.x = frame.origin.x < safeAreaInsets.left ? safeAreaInsets.left : frame.origin.x;
     frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
     webView.frame = frame;
     _originalCenter = frame.origin.x + frame.size.width / 2.0f;
@@ -299,7 +328,16 @@ typedef enum {
     if (self.notification.showClose) {
         _closeButton = [CTDismissButton new];
         [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+        CGFloat closeButtonY = self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra);
+        // The top safe area can be taller than the status bar (for example on an unfolded
+        // foldable), so keep the close button below it or system UI covers it.
+        closeButtonY = MAX(closeButtonY, safeAreaInsets.top);
+        CGFloat closeButtonX = [CTInAppHTMLViewController closeButtonX:frame.origin.x + frame.size.width - extra
+                                                                 width:CLTAP_INAPP_CLOSE_IV_WIDTH
+                                                        containerWidth:containerSize.width
+                                                          leadingInset:safeAreaInsets.left
+                                                         trailingInset:safeAreaInsets.right];
+        _closeButton.frame = CGRectMake(closeButtonX, closeButtonY, CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:_closeButton];
     }

@@ -29,6 +29,10 @@
 
 @property (nonatomic, assign) BOOL waitingForSceneWindow;
 @property (nonatomic, assign) BOOL animated;
+// Size the view is moving to while a size transition (rotation, scene resize) is in progress.
+@property (nonatomic, assign) CGSize transitionSize;
+// Scene picked before self.window exists. Kept so the window is created in the same one.
+@property (nonatomic, weak) UIWindowScene *selectedScene API_AVAILABLE(ios(13.0), tvos(13.0));
 
 @end
 
@@ -38,6 +42,140 @@
     [super viewDidLayoutSubviews];
     if ([self isInAppAdvancedBuilder]) {
         [self updateWindowFrame];
+    }
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    [self pinContentToHorizontalSafeArea];
+}
+
+// A notched iPhone in landscape has the same inset on both sides, and in-apps have always
+// run edge to edge there. Only an inset on one side (the strip or clock pill on a foldable)
+// has to be avoided, so equal side insets come back as zero.
++ (UIEdgeInsets)insetsIgnoringEvenSides:(UIEdgeInsets)insets {
+    if (fabs(insets.left - insets.right) < 1.0) {
+        insets.left = 0;
+        insets.right = 0;
+    }
+    return insets;
+}
+
+// The xib layouts pin content to the view's left and right edges. When one side has an
+// inset the other lacks (the status strip beside the screen on a closed foldable), move
+// those pins to the safe area, or content and the close button end up under it.
+- (void)pinContentToHorizontalSafeArea {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
+        UIView *rootView = self.view;
+        UIEdgeInsets sideInsets = [CTInAppDisplayViewController insetsIgnoringEvenSides:rootView.safeAreaInsets];
+        if (sideInsets.left == 0 && sideInsets.right == 0) {
+            return;
+        }
+        UILayoutGuide *safeArea = rootView.safeAreaLayoutGuide;
+        for (NSLayoutConstraint *constraint in [rootView.constraints copy]) {
+            // Skip system constraints (autoresizing mask, content size).
+            if (![constraint isMemberOfClass:[NSLayoutConstraint class]]) {
+                continue;
+            }
+            BOOL firstIsRoot = constraint.firstItem == rootView;
+            BOOL secondIsRoot = constraint.secondItem == rootView;
+            if (firstIsRoot == secondIsRoot) {
+                continue;
+            }
+            // Skip the constraints UIKit uses to position the safe area guide itself.
+            id otherItem = firstIsRoot ? constraint.secondItem : constraint.firstItem;
+            if ([otherItem isKindOfClass:[UILayoutGuide class]]) {
+                continue;
+            }
+            NSLayoutAttribute attribute = firstIsRoot ? constraint.firstAttribute : constraint.secondAttribute;
+            if (attribute != NSLayoutAttributeLeading && attribute != NSLayoutAttributeTrailing &&
+                attribute != NSLayoutAttributeLeft && attribute != NSLayoutAttributeRight &&
+                attribute != NSLayoutAttributeCenterX) {
+                continue;
+            }
+            NSLayoutConstraint *safeAreaConstraint = [NSLayoutConstraint constraintWithItem:firstIsRoot ? safeArea : constraint.firstItem
+                                                                                  attribute:constraint.firstAttribute
+                                                                                  relatedBy:constraint.relation
+                                                                                     toItem:secondIsRoot ? safeArea : constraint.secondItem
+                                                                                  attribute:constraint.secondAttribute
+                                                                                 multiplier:constraint.multiplier
+                                                                                   constant:constraint.constant];
+            safeAreaConstraint.priority = constraint.priority;
+            constraint.active = NO;
+            safeAreaConstraint.active = YES;
+        }
+    }
+}
+
+// The interstitial xibs size the container from the screen width (or height) and a fixed
+// aspect ratio, which assumes a tall phone. On a near-square screen (an unfolded foldable)
+// the container outgrows the screen and the close button on its corner is cut off.
+// Loosen the edge pins and bound the container by the safe area so it shrinks to fit.
+// Layouts that already fit (regular iPhones) come out the same as before.
+- (void)keepContainerInsideSafeArea:(UIView *)containerView closeButton:(UIView *)closeButton {
+    if (!containerView || [CTUIUtils isUserInterfaceIdiomPad]) {
+        return;
+    }
+    if (@available(iOS 11.0, *)) {
+        UIView *rootView = self.view;
+        // Constraints across unrelated view trees throw, so bail out if the xib did not load.
+        if (containerView == rootView || ![containerView isDescendantOfView:rootView]) {
+            return;
+        }
+        UILayoutGuide *safeArea = rootView.safeAreaLayoutGuide;
+        BOOL hasCenterX = NO;
+        BOOL hasCenterY = NO;
+        for (NSLayoutConstraint *constraint in [rootView.constraints copy]) {
+            if (![constraint isMemberOfClass:[NSLayoutConstraint class]]) {
+                continue;
+            }
+            // pinContentToHorizontalSafeArea may already have moved a pin to the safe area guide.
+            BOOL firstIsRoot = constraint.firstItem == rootView || constraint.firstItem == safeArea;
+            BOOL secondIsRoot = constraint.secondItem == rootView || constraint.secondItem == safeArea;
+            BOOL betweenContainerAndRoot = (constraint.firstItem == containerView && secondIsRoot) ||
+                                           (firstIsRoot && constraint.secondItem == containerView);
+            if (!betweenContainerAndRoot) {
+                continue;
+            }
+            NSLayoutAttribute attribute = constraint.firstAttribute;
+            if (attribute == NSLayoutAttributeCenterX) {
+                hasCenterX = YES;
+            } else if (attribute == NSLayoutAttributeCenterY) {
+                hasCenterY = YES;
+            } else if (constraint.priority == UILayoutPriorityRequired &&
+                       (attribute == NSLayoutAttributeLeading || attribute == NSLayoutAttributeTrailing ||
+                        attribute == NSLayoutAttributeLeft || attribute == NSLayoutAttributeRight ||
+                        attribute == NSLayoutAttributeTop || attribute == NSLayoutAttributeBottom)) {
+                // A required constraint cannot be made optional in place, so replace it.
+                NSLayoutConstraint *loosePin = [NSLayoutConstraint constraintWithItem:constraint.firstItem
+                                                                            attribute:constraint.firstAttribute
+                                                                            relatedBy:constraint.relation
+                                                                               toItem:constraint.secondItem
+                                                                            attribute:constraint.secondAttribute
+                                                                           multiplier:constraint.multiplier
+                                                                             constant:constraint.constant];
+                loosePin.priority = UILayoutPriorityRequired - 1;
+                constraint.active = NO;
+                loosePin.active = YES;
+            }
+        }
+        // The edge pins centered the container; keep that once they can give way.
+        if (!hasCenterX) {
+            [containerView.centerXAnchor constraintEqualToAnchor:rootView.centerXAnchor].active = YES;
+        }
+        if (!hasCenterY) {
+            [containerView.centerYAnchor constraintEqualToAnchor:rootView.centerYAnchor].active = YES;
+        }
+        // The close button overhangs the container's top trailing corner, so on those
+        // two sides it is the button that has to stay inside.
+        BOOL hasCloseButton = closeButton && closeButton != rootView && [closeButton isDescendantOfView:rootView];
+        UIView *topTrailingView = hasCloseButton ? closeButton : containerView;
+        [NSLayoutConstraint activateConstraints:@[
+            [topTrailingView.topAnchor constraintGreaterThanOrEqualToAnchor:safeArea.topAnchor],
+            [topTrailingView.trailingAnchor constraintLessThanOrEqualToAnchor:safeArea.trailingAnchor],
+            [containerView.bottomAnchor constraintLessThanOrEqualToAnchor:safeArea.bottomAnchor],
+            [containerView.leadingAnchor constraintGreaterThanOrEqualToAnchor:safeArea.leadingAnchor]
+        ]];
     }
 }
 
@@ -86,10 +224,76 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        self.transitionSize = size;
         [self loadView];
         [self viewDidLoad];
+        self.transitionSize = CGSizeZero;
     } completion:nil];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
+- (CGRect)inAppContainerBounds {
+    if (self.transitionSize.width > 0 && self.transitionSize.height > 0) {
+        return CGRectMake(0, 0, self.transitionSize.width, self.transitionSize.height);
+    }
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        UIWindowScene *windowScene = [self presentationScene];
+        if (windowScene) {
+            return windowScene.coordinateSpace.bounds;
+        }
+    }
+    return [UIScreen mainScreen].bounds;
+}
+
+// The one scene used for the in-app window, its bounds and its safe area insets.
+// With more than one scene, mixing sources sizes the in-app for the wrong scene.
+- (UIWindowScene *)presentationScene {
+    if (self.window.windowScene) {
+        return self.window.windowScene;
+    }
+    // Explicit nil checks: UISceneActivationStateForegroundActive is 0, so nil would pass.
+    UIWindowScene *windowScene = self.selectedScene;
+    if (windowScene && windowScene.activationState == UISceneActivationStateForegroundActive) {
+        return windowScene;
+    }
+    windowScene = [CTUIUtils getKeyWindow].windowScene;
+    if (!windowScene || windowScene.activationState != UISceneActivationStateForegroundActive) {
+        windowScene = nil;
+        for (UIScene *scene in [CTUIUtils getSharedApplication].connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                windowScene = (UIWindowScene *)scene;
+                break;
+            }
+        }
+    }
+    self.selectedScene = windowScene;
+    return windowScene;
+}
+
+- (UIEdgeInsets)inAppSafeAreaInsets {
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        UIWindowScene *windowScene = [self presentationScene];
+        if (windowScene) {
+            // The app's own window, not self.window, which has no insets until it is shown.
+            UIWindow *sceneWindow = nil;
+            for (UIWindow *window in windowScene.windows) {
+                if (window == self.window) {
+                    continue;
+                }
+                if (window.isKeyWindow) {
+                    sceneWindow = window;
+                    break;
+                }
+                if (!sceneWindow) {
+                    sceneWindow = window;
+                }
+            }
+            if (sceneWindow) {
+                return sceneWindow.safeAreaInsets;
+            }
+        }
+    }
+    return [CTUIUtils getKeyWindow].safeAreaInsets;
 }
 
 #if !(TARGET_OS_TV)
@@ -229,20 +433,17 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
     if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                
-                if ([self isInAppAdvancedBuilder]) {
-                    CGRect windowFrame = [self windowSceneFrame:windowScene];
-                    self.window = [[windowClass alloc] initWithFrame:windowFrame];
-                    self.window.windowScene = windowScene;
-                } else {
-                    self.window = [[windowClass alloc] initWithFrame:
-                                                    windowScene.coordinateSpace.bounds];
-                    self.window.windowScene = windowScene;
-                }
+        // Same scene the layout was sized for, see presentationScene.
+        UIWindowScene *windowScene = [self presentationScene];
+        if (windowScene) {
+            if ([self isInAppAdvancedBuilder]) {
+                CGRect windowFrame = [self windowSceneFrame:windowScene];
+                self.window = [[windowClass alloc] initWithFrame:windowFrame];
+                self.window.windowScene = windowScene;
+            } else {
+                self.window = [[windowClass alloc] initWithFrame:
+                                                windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
             }
         }
     } else {
@@ -299,7 +500,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     
     if (animated) {
         CGRect windowFrame = self.window.frame;
-        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  [UIScreen mainScreen].bounds.size.width, windowFrame.size.height);
+        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  windowFrame.size.width, windowFrame.size.height);
         self.window.frame = transformWindowFrame;
         
         [UIView animateWithDuration:0.33 delay:0 usingSpringWithDamping:1.0 initialSpringVelocity:10 options:UIViewAnimationOptionTransitionFlipFromTop animations:^{
