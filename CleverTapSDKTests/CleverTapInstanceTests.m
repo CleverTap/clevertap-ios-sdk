@@ -670,6 +670,7 @@
 }
 
 - (void)test_appFields_containDeviceSignals_whenKnown {
+    [self.cleverTapInstance enableDeviceNetworkInfoReporting:YES];
     id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
     OCMStub([mockDeviceInfo batteryLevelBand]).andReturn(@40);
     OCMStub([mockDeviceInfo charging]).andReturn(@YES);
@@ -687,6 +688,19 @@
     XCTAssertEqualObjects(appFields[@"metered"], @NO);
     XCTAssertEqualObjects(appFields[@"lowData"], @YES);
     XCTAssertEqualObjects(appFields[@"boldText"], @NO);
+    [mockDeviceInfo stopMocking];
+    [self.cleverTapInstance enableDeviceNetworkInfoReporting:NO];
+}
+
+- (void)test_appFields_omitNetworkCost_whenNetworkInfoReportingIsOff {
+    [self.cleverTapInstance enableDeviceNetworkInfoReporting:NO];
+    id mockDeviceInfo = OCMPartialMock(self.cleverTapInstance.deviceInfo);
+    OCMStub([mockDeviceInfo metered]).andReturn(@YES);
+    OCMStub([mockDeviceInfo lowData]).andReturn(@YES);
+
+    NSDictionary *appFields = [self batchHeaderForTesting][@"af"];
+    XCTAssertNil(appFields[@"metered"]);
+    XCTAssertNil(appFields[@"lowData"]);
     [mockDeviceInfo stopMocking];
 }
 

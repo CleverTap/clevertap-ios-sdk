@@ -183,9 +183,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
                                                        object:nil];
         }
 #endif
-#if !CLEVERTAP_TVOS
-        [[CTNetworkCostMonitor shared] start];
-#endif
         [self initDeviceID:cleverTapID];
         // Start early so it usually lands before the first App Launched.
         if (![CTUIUtils runningInsideAppExtension]) {
@@ -508,7 +505,8 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (NSNumber *)deviceType {
-    if (_deviceType == nil) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
             case UIUserInterfaceIdiomPhone:
                 _deviceType = @1;
@@ -523,7 +521,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
                 _deviceType = @0;
                 break;
         }
-    }
+    });
     return _deviceType;
 }
 
@@ -548,22 +546,21 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     }
 
 #if !CLEVERTAP_TVOS
-    // These don't need a key window.
     self.boldText = @(UIAccessibilityIsBoldTextEnabled());
     [self refreshBattery];
 #endif
+    self.reduceMotion = @(UIAccessibilityIsReduceMotionEnabled());
 
+    // The key window follows an app's own light or dark override. Without one yet, use the screen's traits,
+    // so the first App Launched still carries the values.
     UIWindow *keyWindow = [CTUIUtils getKeyWindow];
-    if (!keyWindow) return;
-
-    UITraitCollection *traits = keyWindow.traitCollection;
+    UITraitCollection *traits = keyWindow ? keyWindow.traitCollection : [UIScreen mainScreen].traitCollection;
     if (@available(iOS 12.0, tvOS 10.0, *)) {
         self.darkMode = [[self class] darkModeForInterfaceStyle:traits.userInterfaceStyle];
     }
     if (@available(iOS 10.0, tvOS 10.0, *)) {
         self.textSize = [[self class] textSizeForContentSizeCategory:traits.preferredContentSizeCategory];
     }
-    self.reduceMotion = @(UIAccessibilityIsReduceMotionEnabled());
 }
 
 + (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style API_AVAILABLE(ios(12.0), tvos(10.0)) {

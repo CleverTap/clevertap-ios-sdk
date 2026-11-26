@@ -32,7 +32,7 @@
 @property (assign, readonly) BOOL lowPowerModeEnabled;
 // NSProcessInfoThermalState raw value, nil below iOS/tvOS 11.
 @property (strong, readonly) NSNumber *thermalState;
-// Set by refreshDisplaySettings, nil until a key window exists.
+// Set by refreshDisplaySettings, nil until then.
 @property (atomic, strong, readonly) NSNumber *darkMode;
 @property (atomic, strong, readonly) NSString *textSize;
 @property (atomic, strong, readonly) NSNumber *reduceMotion;
@@ -46,7 +46,7 @@
 // RAM tier in GB (1, 2, 3, 4, 6, 8, 12 or 16 and up) and CPU core count.
 @property (strong, readonly) NSNumber *ramTier;
 @property (strong, readonly) NSNumber *cpuCount;
-// Cellular or hotspot, and Low Data Mode. nil while unknown.
+// Cellular or hotspot, and Low Data Mode. nil while unknown or while network info reporting is off.
 @property (strong, readonly) NSNumber *metered;
 @property (strong, readonly) NSNumber *lowData;
 

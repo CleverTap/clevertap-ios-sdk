@@ -12,6 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <OCMock/OCMock.h>
 #import "CTDeviceInfo.h"
+#import "CTConstants.h"
 #import "CTUIUtils.h"
 #import "CleverTapInstanceConfig.h"
 
@@ -20,6 +21,7 @@
 + (NSNumber *)darkModeForInterfaceStyle:(UIUserInterfaceStyle)style;
 + (NSNumber *)batteryBandForLevel:(float)level;
 + (NSNumber *)ramTierForBytes:(unsigned long long)bytes;
++ (BOOL)isOnlineForFlags:(SCNetworkReachabilityFlags)flags;
 - (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags;
 @end
 
@@ -124,6 +126,21 @@
 
     XCTAssertTrue(readOnMainThread);
     XCTAssertEqualObjects([_classObject darkMode], @YES);
+    XCTAssertNotNil([_classObject textSize]);
+}
+
+- (void)test_refreshDisplaySettings_withoutAKeyWindow_stillReadsDisplayValues{
+    id mockUIUtils = OCMClassMock([CTUIUtils class]);
+    [self addTeardownBlock:^{
+        [mockUIUtils stopMocking];
+    }];
+    OCMStub([mockUIUtils getKeyWindow]).andReturn(nil);
+
+    [_classObject refreshDisplaySettings];
+
+    // Reduce Motion needs no window, the other two fall back to the screen's traits.
+    XCTAssertEqualObjects([_classObject reduceMotion], @(UIAccessibilityIsReduceMotionEnabled()));
+    XCTAssertNotNil([_classObject darkMode]);
     XCTAssertNotNil([_classObject textSize]);
 }
 
@@ -252,13 +269,19 @@
 }
 
 - (void)test_initWithConfig_readsOnlineStateWithoutWaitingForAChange{
+    // Compare with the system's own answer, so the test also passes on an offline host.
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithName(NULL, [kCTApiDomain UTF8String]);
+    SCNetworkReachabilityFlags flags = 0;
+    BOOL expected = reachability && SCNetworkReachabilityGetFlags(reachability, &flags) && [CTDeviceInfo isOnlineForFlags:flags];
+    if (reachability) CFRelease(reachability);
+
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
 
-    NSPredicate *online = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *info, NSDictionary *bindings) {
-        return info.isOnline;
+    NSPredicate *matches = [NSPredicate predicateWithBlock:^BOOL(CTDeviceInfo *info, NSDictionary *bindings) {
+        return info.isOnline == expected;
     }];
-    [self waitForExpectations:@[[self expectationForPredicate:online evaluatedWithObject:deviceInfo handler:nil]] timeout:5.0];
+    [self waitForExpectations:@[[self expectationForPredicate:matches evaluatedWithObject:deviceInfo handler:nil]] timeout:5.0];
 }
 
 - (void)test_initWithConfig_startsThePushStatusRead{

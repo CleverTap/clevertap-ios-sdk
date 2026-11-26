@@ -986,6 +986,15 @@ static BOOL sharedInstanceErrorLogged;
             evtData[CLTAP_NETWORK_TYPE] = self.deviceInfo.radio;
         }
         evtData[CLTAP_CONNECTED_TO_WIFI] = @(self.deviceInfo.wifi);
+        // Same keys as Android, left out while unknown.
+        NSNumber *metered = self.deviceInfo.metered;
+        if (metered != nil) {
+            evtData[@"metered"] = metered;
+        }
+        NSNumber *lowData = self.deviceInfo.lowData;
+        if (lowData != nil) {
+            evtData[@"lowData"] = lowData;
+        }
     }
     
     evtData[@"ifaA"] = @NO;
@@ -1087,14 +1096,6 @@ static BOOL sharedInstanceErrorLogged;
     NSNumber *cpuCount = self.deviceInfo.cpuCount;
     if (cpuCount != nil) {
         evtData[@"cpu"] = cpuCount;
-    }
-    NSNumber *metered = self.deviceInfo.metered;
-    if (metered != nil) {
-        evtData[@"metered"] = metered;
-    }
-    NSNumber *lowData = self.deviceInfo.lowData;
-    if (lowData != nil) {
-        evtData[@"lowData"] = lowData;
     }
     NSNumber *boldText = self.deviceInfo.boldText;
     if (boldText != nil) {
@@ -3941,6 +3942,12 @@ static BOOL sharedInstanceErrorLogged;
 // public
 - (void)enableDeviceNetworkInfoReporting:(BOOL)enabled {
     self.enableNetworkInfoReporting = enabled;
+#if !defined(CLEVERTAP_TVOS)
+    // metered and lowData are only sent with reporting on, so the monitor isn't needed before that.
+    if (enabled) {
+        [[CTNetworkCostMonitor shared] start];
+    }
+#endif
     [CTPreferences putInt:enabled forKey:[CTPreferences storageKeyWithSuffix:kNetworkInfoReportingKey config: self.config]];
 }
 
