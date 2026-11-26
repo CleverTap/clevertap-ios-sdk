@@ -210,6 +210,26 @@
     XCTAssertEqualObjects([_classObject charging], @YES);
 }
 
+- (void)test_batteryChangeNotification_refreshesBatteryWithoutAForeground{
+    id device = OCMClassMock([UIDevice class]);
+    id deviceClass = OCMClassMock([UIDevice class]);
+    [self addTeardownBlock:^{
+        [deviceClass stopMocking];
+    }];
+    OCMStub([deviceClass currentDevice]).andReturn(device);
+    OCMStub([device isBatteryMonitoringEnabled]).andReturn(YES);
+    OCMStub([device batteryLevel]).andReturn(0.47f);
+    OCMStub([device batteryState]).andReturn(UIDeviceBatteryStateUnplugged);
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:nil];
+    XCTAssertNil([deviceInfo batteryLevelBand]);
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIDeviceBatteryLevelDidChangeNotification object:nil];
+
+    XCTAssertEqualObjects([deviceInfo batteryLevelBand], @40);
+    XCTAssertEqualObjects([deviceInfo charging], @NO);
+}
+
 - (void)test_darkModeForInterfaceStyle{
     NSNumber *dark = [CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleDark];
     NSNumber *light = [CTDeviceInfo darkModeForInterfaceStyle:UIUserInterfaceStyleLight];

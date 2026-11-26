@@ -184,6 +184,16 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         }
 #endif
         [self initDeviceID:cleverTapID];
+#if !CLEVERTAP_TVOS
+        // Posted only while the app has battery monitoring on, so batt and chg stay current between
+        // foregrounds. Removed in dealloc.
+        for (NSNotificationName name in @[UIDeviceBatteryLevelDidChangeNotification, UIDeviceBatteryStateDidChangeNotification]) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(batteryDidChange:)
+                                                         name:name
+                                                       object:nil];
+        }
+#endif
         // Start early so it usually lands before the first App Launched.
         if (![CTUIUtils runningInsideAppExtension]) {
             [self refreshPushStatus];
@@ -570,6 +580,18 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 #if !CLEVERTAP_TVOS
+- (void)batteryDidChange:(NSNotification *)notification {
+    // UIDevice is read on the main thread.
+    if ([NSThread isMainThread]) {
+        [self refreshBattery];
+        return;
+    }
+    __weak CTDeviceInfo *weakSelf = self;
+    [CTUtils runAsyncMainQueue:^{
+        [weakSelf refreshBattery];
+    }];
+}
+
 - (void)refreshBattery {
     UIDevice *device = [UIDevice currentDevice];
     // Monitoring is an app-wide switch, so only read when the app has turned it on.
