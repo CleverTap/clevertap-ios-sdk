@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.9.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.9.1) (October 30, 2026)
+#### Added
+- **Xcode 27 and iOS 27 support:** The SDK builds with Xcode 27 and runs on iOS 27, tvOS 27 and watchOS 27.
+    * Minimum deployment targets are now **iOS 15.0**, **tvOS 15.0** and **watchOS 9.0** (previously iOS 9.0, tvOS 9.0 and watchOS 2.0). Xcode 27 does not build targets below this range.
+    * CocoaPods users may also need a `post_install` hook that raises every pod target to iOS 15, because dependencies such as `SDWebImage` carry their own lower minimums.
+    * Apps built with the iOS 26 or 27 SDK must adopt the UIScene lifecycle. The sample apps (`ObjCStarter`, `SPMStarter`, `SwiftStarter`, `SwiftUIStarter`) now use it. The only CleverTap feature affected is deep link attribution through `openURL` swizzling. Push handling is unchanged.
+    * See [the iOS 27 Support doc](docs/iOS27Support.md) for the migration steps.
+
+#### Changed
+- Podspec and README now carry a CocoaPods sunset notice. CocoaPods trunk becomes read-only on December 2, 2026. Add `source 'https://github.com/CleverTap/podspecs.git'` and `source 'https://cdn.cocoapods.org/'` to the top of your Podfile to keep receiving updates. Existing installs are unaffected.
+
+#### Fixed
+- Fixes a bug where events raised after `onUserLogin` were queued again on every call and never sent.
+- Fixes a bug where a full screen HTML In-App was centered inside the safe area, which pushed the web view up under the status bar.
+
 ### [Version 7.9.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.9.0) (October 15, 2026)
 #### Added
 - **Live Activities (iOS 17.2+):** Adds support for CleverTap-driven Live Activities using Apple's Push-to-Start model, so your backend can start, update, and end an activity through push without the user opening the app.

@@ -157,7 +157,7 @@ public final class CTNdEvaluationManager: NSObject {
         }
 
         let event = CTEventAdapter(eventName: eventName,
-                                   eventProperties: properties ?? [:],
+                                   eventProperties: (properties ?? [:]) as NSDictionary,
                                    andLocation: location)
         evaluate([event])
     }
@@ -165,7 +165,7 @@ public final class CTNdEvaluationManager: NSObject {
     @objc(evaluateOnChargedEvent:andItems:)
     public func evaluate(onChargedEvent chargeDetails: [AnyHashable: Any], andItems items: [Any]?) {
         let event = CTEventAdapter(eventName: CLTAP_CHARGED_EVENT,
-                                   eventProperties: chargeDetails,
+                                   eventProperties: chargeDetails as NSDictionary,
                                    location: location,
                                    andItems: (items as? [[AnyHashable: Any]]) ?? [])
         evaluate([event])
@@ -185,7 +185,7 @@ public final class CTNdEvaluationManager: NSObject {
             eventProperties.merge(appFields) { _, new in new }
             let event = CTEventAdapter(eventName: eventName,
                                        profileAttrName: key,
-                                       eventProperties: eventProperties,
+                                       eventProperties: eventProperties as NSDictionary,
                                        andLocation: location)
             events.append(event)
         }
@@ -285,7 +285,7 @@ public final class CTNdEvaluationManager: NSObject {
         // The same event the in-app side builds for its App Launched pass. The properties were kept
         // when the App Launched event was recorded. See `evaluate(onEvent:withProps:)` above.
         let event = CTEventAdapter(eventName: CLTAP_APP_LAUNCHED_EVENT,
-                                   eventProperties: appLaunchedProperties,
+                                   eventProperties: appLaunchedProperties as NSDictionary,
                                    andLocation: location)
 
         return content.filter { entry in

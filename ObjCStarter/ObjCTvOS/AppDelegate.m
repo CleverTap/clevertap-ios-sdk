@@ -53,3 +53,27 @@
 
 
 @end
+
+#pragma mark - UIScene lifecycle
+
+// Built with the Xcode 27 SDK, the UIScene lifecycle is a launch requirement, same as iOS
+// (a warning on tvOS 26, a hard launch failure on tvOS 27). The scene manifest in Info.plist
+// points at this delegate, which creates the window so the app launches.
+@interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
+@end
+
+@implementation SceneDelegate
+
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+    if (![scene isKindOfClass:[UIWindowScene class]]) {
+        return;
+    }
+    UIWindowScene *windowScene = (UIWindowScene *)scene;
+    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.window.rootViewController = [storyboard instantiateInitialViewController];
+    [self.window makeKeyAndVisible];
+}
+
+@end

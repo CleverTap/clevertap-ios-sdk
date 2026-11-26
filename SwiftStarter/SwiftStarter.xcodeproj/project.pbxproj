@@ -29,8 +29,6 @@
 		079F550E20F34BB700343925 /* SwiftTvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079F550D20F34BB700343925 /* SwiftTvOSTests.swift */; };
 		079F551920F34BB700343925 /* SwiftTvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079F551820F34BB700343925 /* SwiftTvOSUITests.swift */; };
 		07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C50073228D57AE003E1404 /* CTWebviewVC.swift */; };
-		CC001ABE00010000000A0002 /* LiveActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */; };
-		CC002ABE00010000000A0002 /* LiveActivityImpressionObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */; };
 		07C50076228D5A45003E1404 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07C50075228D5A45003E1404 /* sampleHTMLCode.html */; };
 		12DD4895418CD56E4F49BCB7 /* Pods_SwiftTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C0DC3D543456DAC8D1B3223 /* Pods_SwiftTvOS.framework */; };
 		403F924D1CCFCC03A6805FF4 /* Pods_SwiftStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B81B510EDD3350F43A8655B6 /* Pods_SwiftStarterTests.framework */; };
@@ -61,14 +59,16 @@
 		6B68DA442DF34F4A00761CFE /* CTCustomInterstitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */; };
 		7B09715D168974AAC3C5C56B /* Pods_SwiftStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 090810E065851ED45B5D5004 /* Pods_SwiftStarterUITests.framework */; };
 		7C5C69902E81341A215A103A /* Pods_SwiftStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E8061C2A25A8A648173F9CC /* Pods_SwiftStarter.framework */; };
-		C66B8E9308F22ABC05C46A79 /* Pods_SwiftStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A43C222A65860786E6D3045 /* Pods_SwiftStarter_NotificationService.framework */; };
-		E0120D0A483B57ECE511A8EB /* Pods_SwiftWatchOS_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B1393F2E0A56851400AA7EC /* Pods_SwiftWatchOS_Extension.framework */; };
 		AA011000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift */; };
 		AA012000BB00001234CAFE01 /* FoodOrderLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA002000BB00001234CAFE01 /* FoodOrderLiveActivityWidget.swift */; };
 		AA013000BB00001234CAFE01 /* FoodOrderWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA003000BB00001234CAFE01 /* FoodOrderWidgetBundle.swift */; };
 		AA014000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift */; };
 		AA015000BB00001234CAFE01 /* FoodOrderWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA005000BB00001234CAFE01 /* FoodOrderWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AA016000BB00001234CAFE01 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA006000BB00001234CAFE01 /* WidgetKit.framework */; };
+		C66B8E9308F22ABC05C46A79 /* Pods_SwiftStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A43C222A65860786E6D3045 /* Pods_SwiftStarter_NotificationService.framework */; };
+		CC001ABE00010000000A0002 /* LiveActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */; };
+		CC002ABE00010000000A0002 /* LiveActivityImpressionObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */; };
+		E0120D0A483B57ECE511A8EB /* Pods_SwiftWatchOS_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B1393F2E0A56851400AA7EC /* Pods_SwiftWatchOS_Extension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -208,8 +208,6 @@
 		079F551A20F34BB700343925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftStarter.entitlements; sourceTree = "<group>"; };
 		07C50073228D57AE003E1404 /* CTWebviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTWebviewVC.swift; sourceTree = "<group>"; };
-		CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitiesViewController.swift; sourceTree = "<group>"; };
-		CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityImpressionObserver.swift; sourceTree = "<group>"; };
 		07C50075228D5A45003E1404 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		090810E065851ED45B5D5004 /* Pods_SwiftStarterUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarterUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E8061C2A25A8A648173F9CC /* Pods_SwiftStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -251,17 +249,19 @@
 		7003932D3B901F0EA587619B /* Pods-SwiftTvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftTvOS.debug.xcconfig"; path = "Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		9E3795D3B1FCB3ECFB990587 /* Pods-SwiftStarter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter.release.xcconfig"; path = "Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter.release.xcconfig"; sourceTree = "<group>"; };
 		A2875E5F44D5ED54F801299D /* Pods-SwiftStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
-		B81B510EDD3350F43A8655B6 /* Pods_SwiftStarterTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarterTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E4E04E92C41D4D385A781006 /* Pods-SwiftWatchOS Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftWatchOS Extension.release.xcconfig"; path = "Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension.release.xcconfig"; sourceTree = "<group>"; };
-		EA33B5E1DA424FABA5673F2D /* Pods-SwiftStarterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterUITests.release.xcconfig"; path = "Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests.release.xcconfig"; sourceTree = "<group>"; };
-		F97465722487D2DB00C6E2EC /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
-		F97465742487D2DB00C6E2EC /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
 		AA001000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodOrderActivityAttributes.swift; sourceTree = "<group>"; };
 		AA002000BB00001234CAFE01 /* FoodOrderLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodOrderLiveActivityWidget.swift; sourceTree = "<group>"; };
 		AA003000BB00001234CAFE01 /* FoodOrderWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodOrderWidgetBundle.swift; sourceTree = "<group>"; };
 		AA004000BB00001234CAFE01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA005000BB00001234CAFE01 /* FoodOrderWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FoodOrderWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA006000BB00001234CAFE01 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B81B510EDD3350F43A8655B6 /* Pods_SwiftStarterTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarterTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitiesViewController.swift; sourceTree = "<group>"; };
+		CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityImpressionObserver.swift; sourceTree = "<group>"; };
+		E4E04E92C41D4D385A781006 /* Pods-SwiftWatchOS Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftWatchOS Extension.release.xcconfig"; path = "Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension.release.xcconfig"; sourceTree = "<group>"; };
+		EA33B5E1DA424FABA5673F2D /* Pods-SwiftStarterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterUITests.release.xcconfig"; path = "Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests.release.xcconfig"; sourceTree = "<group>"; };
+		F97465722487D2DB00C6E2EC /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		F97465742487D2DB00C6E2EC /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -363,6 +363,7 @@
 				0740612620C1509E00D8F4C9 /* Products */,
 				1601882ACC5835F49EC79D5B /* Frameworks */,
 				E0DB6E43831792F6F889067E /* Pods */,
+				482FA38B308B3A17006BB644 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -491,6 +492,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		482FA38B308B3A17006BB644 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				AA006000BB00001234CAFE01 /* WidgetKit.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		49EA454620E36104005E0E54 /* NotificationService */ = {
 			isa = PBXGroup;
 			children = (
@@ -515,6 +524,16 @@
 				6B53F5A62DFC3771007BBEA3 /* UIViewController+Extensions.swift */,
 			);
 			path = CustomTemplates;
+			sourceTree = "<group>";
+		};
+		AA031000BB00001234CAFE01 /* FoodOrderWidget */ = {
+			isa = PBXGroup;
+			children = (
+				AA002000BB00001234CAFE01 /* FoodOrderLiveActivityWidget.swift */,
+				AA003000BB00001234CAFE01 /* FoodOrderWidgetBundle.swift */,
+				AA004000BB00001234CAFE01 /* Info.plist */,
+			);
+			path = FoodOrderWidget;
 			sourceTree = "<group>";
 		};
 		E0DB6E43831792F6F889067E /* Pods */ = {
@@ -554,16 +573,6 @@
 				0740613420C150A000D8F4C9 /* Info.plist */,
 			);
 			path = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		AA031000BB00001234CAFE01 /* FoodOrderWidget */ = {
-			isa = PBXGroup;
-			children = (
-				AA002000BB00001234CAFE01 /* FoodOrderLiveActivityWidget.swift */,
-				AA003000BB00001234CAFE01 /* FoodOrderWidgetBundle.swift */,
-				AA004000BB00001234CAFE01 /* Info.plist */,
-			);
-			path = FoodOrderWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1345,7 +1354,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1399,7 +1408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1424,7 +1433,7 @@
 					"COCOAPODS=1",
 				);
 				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1451,7 +1460,7 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1564,7 +1573,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.3;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -1584,7 +1593,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.3;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -1607,7 +1616,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.3;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -1630,7 +1639,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.3;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -1651,7 +1660,7 @@
 				SDKROOT = appletvos;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Debug;
 		};
@@ -1672,7 +1681,7 @@
 				SDKROOT = appletvos;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Release;
 		};
@@ -1694,7 +1703,7 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftTvOS.app/SwiftTvOS";
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Debug;
 		};
@@ -1716,7 +1725,7 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftTvOS.app/SwiftTvOS";
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Release;
 		};
@@ -1737,7 +1746,7 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TEST_TARGET_NAME = SwiftTvOS;
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Debug;
 		};
@@ -1758,7 +1767,7 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TEST_TARGET_NAME = SwiftTvOS;
-				TVOS_DEPLOYMENT_TARGET = 11.4;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Release;
 		};
@@ -1771,7 +1780,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = NotificationService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1794,7 +1803,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = NotificationService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1820,7 +1829,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.clevertap.demo.FoodOrderWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo.FoodOrderWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -1840,7 +1849,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.clevertap.demo.FoodOrderWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo.FoodOrderWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;

@@ -60,7 +60,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0772937220F601FF0032DC42"
             BuildableName = "SwiftWatchOS.app"
-            BlueprintName = "SwiftWatchOS"
             ReferencedContainer = "container:SwiftStarter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -77,7 +76,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0772937220F601FF0032DC42"
             BuildableName = "SwiftWatchOS.app"
-            BlueprintName = "SwiftWatchOS"
             ReferencedContainer = "container:SwiftStarter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
